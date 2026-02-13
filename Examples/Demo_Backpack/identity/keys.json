@@ -1,0 +1,33 @@
+{
+  "keys": [
+    {
+      "key_id": "bp1_ff437426309ae544",
+      "algorithm": "Ed25519",
+      "public_key_b64": "MwYNOLF+bKGP4f+4gIq1zFsDWPPaO1h2DKLy09pFo4A=",
+      "roles": [
+        "root",
+        "attestation"
+      ],
+      "scopes": [
+        "all"
+      ],
+      "status": "active",
+      "created_at_utc": "2026-02-13T01:23:41.837997+00:00"
+    },
+    {
+      "key_id": "bp1_1c529eaaf2e20df0",
+      "algorithm": "Ed25519",
+      "public_key_b64": "5adCtpkK8pc0bB8IEaLC8Vnz1WsijpLZ21UXwmdXR9s=",
+      "roles": [
+        "quorum",
+        "attestation"
+      ],
+      "scopes": [
+        "all"
+      ],
+      "status": "active",
+      "created_at_utc": "2026-02-13T01:23:41.838003+00:00"
+    }
+  ],
+  "revocations": []
+}
