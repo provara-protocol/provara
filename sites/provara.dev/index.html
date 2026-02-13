@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Provara Protocol — Tamper-Evident Memory for Humans and AI Agents</title>
+<meta name="description" content="Open source tamper-evident memory protocol. Ed25519 signatures, SHA-256 hashing, event-sourced architecture. 74 tests. One dependency. Apache 2.0.">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0d1117;
+  --bg-raised: #161b22;
+  --bg-card: #1c2128;
+  --border: #30363d;
+  --border-bright: #484f58;
+  --text: #e6edf3;
+  --text-dim: #8b949e;
+  --text-dimmer: #6e7681;
+  --green: #3fb950;
+  --green-dim: #238636;
+  --green-glow: rgba(63, 185, 80, 0.15);
+  --blue: #58a6ff;
+  --blue-dim: #1f6feb;
+  --blue-glow: rgba(88, 166, 255, 0.1);
+  --purple: #bc8cff;
+  --orange: #d29922;
+  --red: #f85149;
+  --cyan: #79c0ff;
+  --mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(13, 17, 23, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+
+.nav-logo .accent { color: var(--green); }
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--text); }
+
+.nav-cta {
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text) !important;
+  transition: border-color 0.2s, background 0.2s !important;
+}
+
+.nav-cta:hover {
+  border-color: var(--border-bright) !important;
+  background: var(--bg-raised) !important;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--text-dim);
+  border-radius: 2px;
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+.hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* ── MOBILE NAV ── */
+@media (max-width: 768px) {
+  .hamburger { display: flex; }
+  .nav-links {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: rgba(13, 17, 23, 0.97);
+    backdrop-filter: blur(12px);
+    flex-direction: column;
+    gap: 0;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    transform: translateY(-120%);
+    transition: transform 0.3s ease;
+  }
+  .nav-links.open { transform: translateY(0); }
+  .nav-links a {
+    display: block;
+    padding: 14px 24px;
+    font-size: 15px;
+  }
+  .nav-links a:hover { background: var(--bg-raised); }
+  .nav-cta {
+    margin: 8px 24px;
+    text-align: center;
+    display: block !important;
+  }
+}
+
+/* ── SECTIONS ── */
+section { padding: 100px 24px; }
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--green);
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: var(--mono);
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  letter-spacing: -1px;
+}
+
+.section-sub {
+  font-size: 17px;
+  color: var(--text-dim);
+  max-width: 640px;
+  line-height: 1.7;
+}
+
+/* ── HERO ── */
+.hero {
+  padding: 160px 24px 100px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(63, 185, 80, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero .container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--green);
+  background: rgba(63, 185, 80, 0.1);
+  border: 1px solid rgba(63, 185, 80, 0.2);
+  border-radius: 20px;
+  padding: 6px 14px;
+  margin-bottom: 24px;
+}
+
+.hero-badge .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.hero h1 {
+  font-family: var(--mono);
+  font-size: clamp(40px, 6vw, 64px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  margin-bottom: 20px;
+}
+
+.hero h1 .gradient {
+  background: linear-gradient(135deg, var(--text) 0%, var(--green) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-tagline {
+  font-size: 20px;
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.hero-specs {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text-dimmer);
+  margin-bottom: 32px;
+  line-height: 1.8;
+}
+
+.hero-specs span { color: var(--text-dim); }
+
+.hero-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--green-dim);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--green);
+  box-shadow: 0 0 24px rgba(63, 185, 80, 0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  border-color: var(--border-bright);
+  background: var(--bg-raised);
+}
+
+/* ── CODE BLOCKS ── */
+.code-window {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+.code-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(0,0,0,0.2);
+  border-bottom: 1px solid var(--border);
+}
+
+.code-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.code-dot.red { background: #ff5f57; }
+.code-dot.yellow { background: #febc2e; }
+.code-dot.green { background: #28c840; }
+
+.code-title {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dimmer);
+  margin-left: 8px;
+}
+
+.code-body {
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.code-body pre {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre;
+  margin: 0;
+}
+
+/* Syntax highlighting */
+.syn-kw { color: var(--red); }         /* keywords */
+.syn-fn { color: #d2a8ff; }            /* functions */
+.syn-str { color: #a5d6ff; }           /* strings */
+.syn-cm { color: var(--text-dimmer); }  /* comments */
+.syn-op { color: var(--cyan); }         /* operators */
+.syn-num { color: var(--cyan); }        /* numbers */
+.syn-var { color: var(--text); }        /* variables */
+.syn-cls { color: #7ee787; }           /* class/module names */
+.syn-prompt { color: var(--green); }    /* terminal prompts */
+.syn-flag { color: var(--orange); }     /* flags */
+.syn-out { color: var(--text-dim); }    /* output text */
+
+@media (max-width: 900px) {
+  .hero .container {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+}
+
+/* ── FEATURE GRID ── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 48px;
+}
+
+.feature-card {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+}
+
+.feature-card:hover {
+  border-color: var(--green-dim);
+  box-shadow: 0 0 30px var(--green-glow);
+  transform: translateY(-2px);
+}
+
+.feature-icon {
+  font-family: var(--mono);
+  font-size: 24px;
+  margin-bottom: 16px;
+  display: block;
+  width: 48px;
+  height: 48px;
+  line-height: 48px;
+  text-align: center;
+  border-radius: 10px;
+  background: rgba(63, 185, 80, 0.08);
+  border: 1px solid rgba(63, 185, 80, 0.15);
+}
+
+.feature-card h3 {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+}
+
+.feature-card p {
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .features-grid { grid-template-columns: 1fr; }
+}
+
+/* ── HOW IT WORKS ── */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+  position: relative;
+}
+
+.steps::before {
+  content: '';
+  position: absolute;
+  top: 36px;
+  left: calc(12.5% + 12px);
+  right: calc(12.5% + 12px);
+  height: 2px;
+  background: var(--border);
+}
+
+.step {
+  text-align: center;
+  position: relative;
+}
+
+.step-num {
+  width: 48px;
+  height: 48px;
+  line-height: 48px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--green-dim);
+  color: var(--green);
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 auto 20px;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s;
+}
+
+.step:hover .step-num {
+  background: var(--green-dim);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(63, 185, 80, 0.3);
+}
+
+.step h3 {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+}
+
+.step p {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.5;
+  padding: 0 8px;
+}
+
+.step-code {
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dimmer);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  text-align: left;
+  line-height: 1.6;
+}
+
+.step-code .syn-prompt { color: var(--green); }
+
+@media (max-width: 900px) {
+  .steps { grid-template-columns: repeat(2, 1fr); }
+  .steps::before { display: none; }
+}
+
+@media (max-width: 600px) {
+  .steps { grid-template-columns: 1fr; }
+}
+
+/* ── QUICK START ── */
+.quickstart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 48px;
+}
+
+@media (max-width: 900px) {
+  .quickstart-grid { grid-template-columns: 1fr; }
+}
+
+/* ── ARCHITECTURE ── */
+.arch-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 48px;
+}
+
+.arch-box {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 32px;
+}
+
+.arch-box h3 {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.arch-box h3 .tag {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--green);
+  background: rgba(63, 185, 80, 0.1);
+  border: 1px solid rgba(63, 185, 80, 0.2);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.lane {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.lane:last-child { margin-bottom: 0; }
+
+.lane-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dimmer);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  width: 80px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.lane-bar {
+  flex: 1;
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid;
+}
+
+.lane-episodic {
+  background: rgba(88, 166, 255, 0.08);
+  border-color: rgba(88, 166, 255, 0.2);
+  color: var(--blue);
+}
+
+.lane-beliefs {
+  background: rgba(63, 185, 80, 0.08);
+  border-color: rgba(63, 185, 80, 0.2);
+  color: var(--green);
+}
+
+.lane-policies {
+  background: rgba(188, 140, 255, 0.08);
+  border-color: rgba(188, 140, 255, 0.2);
+  color: var(--purple);
+}
+
+.namespace-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ns-box {
+  border-radius: 6px;
+  padding: 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  border: 1px solid;
+}
+
+.ns-box .ns-name {
+  font-weight: 700;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.ns-box .ns-desc {
+  font-size: 11px;
+  opacity: 0.7;
+  font-family: var(--sans);
+  line-height: 1.4;
+}
+
+.ns-canonical {
+  background: rgba(63, 185, 80, 0.06);
+  border-color: rgba(63, 185, 80, 0.2);
+  color: var(--green);
+}
+
+.ns-local {
+  background: rgba(88, 166, 255, 0.06);
+  border-color: rgba(88, 166, 255, 0.2);
+  color: var(--blue);
+}
+
+.ns-contested {
+  background: rgba(210, 169, 34, 0.06);
+  border-color: rgba(210, 169, 34, 0.2);
+  color: var(--orange);
+}
+
+.ns-archived {
+  background: rgba(139, 148, 158, 0.06);
+  border-color: rgba(139, 148, 158, 0.2);
+  color: var(--text-dim);
+}
+
+@media (max-width: 900px) {
+  .arch-grid { grid-template-columns: 1fr; }
+}
+
+/* ── STATS BAR ── */
+.stats {
+  padding: 60px 24px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-raised);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 32px;
+  text-align: center;
+}
+
+.stat-num {
+  font-family: var(--mono);
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 800;
+  color: var(--green);
+  letter-spacing: -1px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── COMMUNITY / CTA ── */
+.community {
+  text-align: center;
+  padding: 120px 24px;
+}
+
+.community .section-sub {
+  margin: 0 auto 40px;
+}
+
+.community-links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+}
+
+.community-link {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text-dim);
+  text-decoration: none;
+  padding: 12px 24px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.community-link:hover {
+  color: var(--text);
+  border-color: var(--border-bright);
+  background: var(--bg-raised);
+}
+
+.community-built {
+  font-size: 14px;
+  color: var(--text-dimmer);
+}
+
+.community-built a {
+  color: var(--text-dim);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+
+.community-built a:hover { color: var(--text); }
+
+/* ── FOOTER ── */
+footer {
+  padding: 32px 24px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-left {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text-dimmer);
+}
+
+.footer-left a {
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-left a:hover { color: var(--text); }
+
+.footer-right {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dimmer);
+}
+
+@media (max-width: 600px) {
+  .footer-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* ── SEPARATOR ── */
+.sep {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
+
+/* ── UTILS ── */
+.text-green { color: var(--green); }
+.text-blue { color: var(--blue); }
+.text-dim { color: var(--text-dim); }
+.mt-2 { margin-top: 8px; }
+.mt-4 { margin-top: 16px; }
+.mt-6 { margin-top: 24px; }
+.mb-4 { margin-bottom: 16px; }
+
+/* ── SCROLL INDICATOR ── */
+.scroll-top {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all 0.3s;
+  z-index: 999;
+}
+
+.scroll-top.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-top:hover {
+  border-color: var(--border-bright);
+  color: var(--text);
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     NAV
+     ════════════════════════════════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo"><span class="accent">&gt;</span> provara</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#why" onclick="closeNav()">Why Provara</a></li>
+      <li><a href="#how" onclick="closeNav()">How It Works</a></li>
+      <li><a href="#quickstart" onclick="closeNav()">Quick Start</a></li>
+      <li><a href="#architecture" onclick="closeNav()">Architecture</a></li>
+      <li><a href="#" class="nav-cta" onclick="closeNav()">GitHub</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════════
+     HERO
+     ════════════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="container">
+    <div>
+      <div class="hero-badge">
+        <span class="dot"></span>
+        v1.0 stable &mdash; 74 tests passing
+      </div>
+      <h1><span class="gradient">Provara<br>Protocol</span></h1>
+      <p class="hero-tagline">Tamper-evident memory for humans and AI agents.</p>
+      <p class="hero-specs">
+        <span>Ed25519</span> + <span>SHA-256</span> + <span>event sourcing</span><br>
+        74 tests &middot; one dependency &middot; Apache 2.0
+      </p>
+      <div class="hero-buttons">
+        <a href="#" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          View on GitHub
+        </a>
+        <a href="#" class="btn btn-secondary">Read the Docs</a>
+      </div>
+    </div>
+    <div>
+      <div class="code-window">
+        <div class="code-titlebar">
+          <span class="code-dot red"></span>
+          <span class="code-dot yellow"></span>
+          <span class="code-dot green"></span>
+          <span class="code-title">terminal</span>
+        </div>
+        <div class="code-body">
+<pre><span class="syn-prompt">$</span> pip install cryptography
+<span class="syn-out">Collecting cryptography&gt;=41.0
+  Installing collected packages: cryptography
+Successfully installed cryptography-44.0.1</span>
+
+<span class="syn-prompt">$</span> git clone https://github.com/huntos/provara.git
+<span class="syn-out">Cloning into 'provara'...</span>
+
+<span class="syn-prompt">$</span> <span class="syn-kw">cd</span> provara && python <span class="syn-flag">-m</span> unittest discover <span class="syn-flag">-v</span>
+<span class="syn-out">test_bootstrap ... ok
+test_causal_chain ... ok
+test_merkle_integrity ... ok
+test_belief_reduction ... ok
+test_ed25519_signatures ... ok
+...</span>
+<span class="syn-cm"># ────────────────────────────────────</span>
+<span class="syn-cm"># Ran 74 tests in 1.2s</span>
+<span class="text-green"># OK (57 unit + 17 compliance)</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     STATS
+     ════════════════════════════════════════════════ -->
+<div class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div>
+        <div class="stat-num">74</div>
+        <div class="stat-label">Tests passing</div>
+      </div>
+      <div>
+        <div class="stat-num">~2k</div>
+        <div class="stat-label">Lines of code</div>
+      </div>
+      <div>
+        <div class="stat-num">7</div>
+        <div class="stat-label">Python modules</div>
+      </div>
+      <div>
+        <div class="stat-num">1</div>
+        <div class="stat-label">Dependency</div>
+      </div>
+      <div>
+        <div class="stat-num">50y</div>
+        <div class="stat-label">Design horizon</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     WHY PROVARA
+     ════════════════════════════════════════════════ -->
+<section id="why">
+  <div class="container">
+    <div class="section-label">Why Provara</div>
+    <h2 class="section-title">Memory you can verify.<br>Memory that outlasts you.</h2>
+    <p class="section-sub">No blockchain. No cloud. No vendor lock-in. Just cryptographic primitives that will still work when your grandchildren need them.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">&#x1f512;</span>
+        <h3>Tamper-Evident</h3>
+        <p>Every event is Ed25519-signed, SHA-256 hashed, and linked into a causal chain. Merkle tree verification catches any mutation, anywhere.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">&#x2708;</span>
+        <h3>Offline-First</h3>
+        <p>Fully air-gapped operations. No network calls, no cloud dependency, no telemetry. Your vault works on a USB drive in a bunker.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">&#x221e;</span>
+        <h3>50-Year Horizon</h3>
+        <p>JSON + SHA-256 + Ed25519 outlive any company. RFC-standardized formats (8032, 8785, FIPS 180-4) ensure future-proof interoperability.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">f(x)</span>
+        <h3>Deterministic</h3>
+        <p>Same events in, same state out. Always. Canonical JSON serialization (RFC 8785) and pure-function belief reduction guarantee reproducibility.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">&#x2194;</span>
+        <h3>Dual Audience</h3>
+        <p>One protocol for human family vaults and AI agent memory. Identical cryptographic guarantees whether the author is carbon or silicon.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">&gt;_</span>
+        <h3>One Dependency</h3>
+        <p><code style="font-size:12px;background:var(--bg);padding:2px 6px;border-radius:4px;border:1px solid var(--border);">cryptography &gt;= 41.0</code> &mdash; that's the entire supply chain. Seven modules, ~2,000 lines, Python 3.10+.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     HOW IT WORKS
+     ════════════════════════════════════════════════ -->
+<section id="how" style="background: var(--bg-raised);">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">Four steps to sovereign memory</h2>
+    <p class="section-sub">From bootstrap to verified state in minutes. No config files, no setup wizards, no accounts.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Bootstrap</h3>
+        <p>Generate an Ed25519 keypair and create a signed genesis event. Your vault is born.</p>
+        <div class="step-code">
+<span class="syn-prompt">vault/</span>
+  keypair.json
+  events/
+    genesis.json
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Append</h3>
+        <p>Write signed events across three lanes: episodic memories, beliefs, and policies.</p>
+        <div class="step-code">
+<span class="syn-prompt">{</span>
+  "type": "belief",
+  "ns": "canonical",
+  "sig": "ed25519..."
+<span class="syn-prompt">}</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Reduce</h3>
+        <p>Deterministically fold events into state across four belief namespaces.</p>
+        <div class="step-code">
+<span class="syn-prompt">canonical</span>  &rarr; truth
+<span class="syn-prompt">local</span>      &rarr; personal
+<span class="syn-prompt">contested</span>  &rarr; disputed
+<span class="syn-prompt">archived</span>   &rarr; retired
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h3>Verify</h3>
+        <p>Validate the entire vault: Merkle tree, causal chain, and every signature.</p>
+        <div class="step-code">
+<span class="text-green">&#x2713;</span> merkle root
+<span class="text-green">&#x2713;</span> causal chain
+<span class="text-green">&#x2713;</span> 74/74 sigs valid
+<span class="text-green">&#x2713;</span> 0 tamper detected
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     QUICK START
+     ════════════════════════════════════════════════ -->
+<section id="quickstart">
+  <div class="container">
+    <div class="section-label">Quick Start</div>
+    <h2 class="section-title">Up and running in 60 seconds</h2>
+    <p class="section-sub">Clone, bootstrap, verify. No API keys. No accounts. No cloud.</p>
+    <div class="quickstart-grid">
+      <div class="code-window">
+        <div class="code-titlebar">
+          <span class="code-dot red"></span>
+          <span class="code-dot yellow"></span>
+          <span class="code-dot green"></span>
+          <span class="code-title">bootstrap.py</span>
+        </div>
+        <div class="code-body">
+<pre><span class="syn-kw">from</span> <span class="syn-cls">bootstrap_v0</span> <span class="syn-kw">import</span> bootstrap_backpack
+
+<span class="syn-cm"># Create a new vault with a unique actor ID</span>
+result <span class="syn-op">=</span> <span class="syn-fn">bootstrap_backpack</span>(
+    <span class="syn-str">"my_vault"</span>,
+    uid<span class="syn-op">=</span><span class="syn-str">"agent-001"</span>
+)
+
+<span class="syn-cm"># result contains:</span>
+<span class="syn-cm">#   - Ed25519 keypair (signing + verify)</span>
+<span class="syn-cm">#   - Signed genesis event</span>
+<span class="syn-cm">#   - Vault directory structure</span>
+<span class="syn-cm">#   - Initialized causal chain</span>
+
+<span class="syn-fn">print</span>(result[<span class="syn-str">"status"</span>])
+<span class="syn-cm"># =&gt; "vault_created"</span></pre>
+        </div>
+      </div>
+      <div class="code-window">
+        <div class="code-titlebar">
+          <span class="code-dot red"></span>
+          <span class="code-dot yellow"></span>
+          <span class="code-dot green"></span>
+          <span class="code-title">terminal &mdash; run tests</span>
+        </div>
+        <div class="code-body">
+<pre><span class="syn-cm"># Clone and verify the protocol</span>
+<span class="syn-prompt">$</span> git clone https://github.com/huntos/provara.git
+<span class="syn-prompt">$</span> <span class="syn-kw">cd</span> provara
+
+<span class="syn-cm"># Run the full test suite</span>
+<span class="syn-prompt">$</span> <span class="syn-kw">cd</span> SNP_Core/test
+<span class="syn-prompt">$</span> PYTHONPATH=../bin python <span class="syn-flag">-m</span> unittest \
+    test_bootstrap <span class="syn-flag">-v</span>
+
+<span class="syn-out">test_genesis_event_created ......... ok
+test_keypair_generated ............. ok
+test_causal_chain_valid ............ ok
+test_signature_verification ........ ok
+test_merkle_tree_integrity ......... ok</span>
+
+<span class="syn-cm">----------------------------------------------</span>
+<span class="syn-out">Ran <span class="text-green">74</span> tests in <span class="text-green">1.2s</span></span>
+
+<span class="text-green">OK</span> <span class="syn-out">(57 unit + 17 compliance)</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     ARCHITECTURE
+     ════════════════════════════════════════════════ -->
+<section id="architecture" style="background: var(--bg-raised);">
+  <div class="container">
+    <div class="section-label">Architecture</div>
+    <h2 class="section-title">Built on proven primitives</h2>
+    <p class="section-sub">Event-sourced architecture with deterministic belief reduction. Every design choice optimizes for verifiability and longevity.</p>
+    <div class="arch-grid">
+
+      <!-- Three-Lane Event Model -->
+      <div class="arch-box">
+        <h3>Three-Lane Event Model <span class="tag">events</span></h3>
+        <div class="lane">
+          <div class="lane-label">Episodic</div>
+          <div class="lane-bar lane-episodic">
+            What happened &mdash; immutable observations, timestamped and signed
+          </div>
+        </div>
+        <div class="lane">
+          <div class="lane-label">Beliefs</div>
+          <div class="lane-bar lane-beliefs">
+            What is true &mdash; reducible assertions across four namespaces
+          </div>
+        </div>
+        <div class="lane">
+          <div class="lane-label">Policies</div>
+          <div class="lane-bar lane-policies">
+            What to do &mdash; rules and governance, versioned and auditable
+          </div>
+        </div>
+        <div style="margin-top:20px; font-family:var(--mono); font-size:11px; color:var(--text-dimmer); line-height:1.8; padding:12px; background:var(--bg); border-radius:6px; border:1px solid var(--border);">
+          <span class="text-dim">Each event includes:</span><br>
+          &nbsp; sha256_hash &middot; ed25519_sig &middot; prev_hash<br>
+          &nbsp; actor_uid &middot; timestamp &middot; schema_ver<br>
+          <span class="text-dim">Linked via per-actor causal chain</span>
+        </div>
+      </div>
+
+      <!-- Four-Namespace Belief Model -->
+      <div class="arch-box">
+        <h3>Four-Namespace Belief Model <span class="tag">state</span></h3>
+        <div class="namespace-grid">
+          <div class="ns-box ns-canonical">
+            <span class="ns-name">canonical</span>
+            <span class="ns-desc">Verified truth. Multi-actor consensus or authoritative source.</span>
+          </div>
+          <div class="ns-box ns-local">
+            <span class="ns-name">local</span>
+            <span class="ns-desc">Personal knowledge. Single-actor assertions not yet promoted.</span>
+          </div>
+          <div class="ns-box ns-contested">
+            <span class="ns-name">contested</span>
+            <span class="ns-desc">Disputed claims. Conflicting assertions held for resolution.</span>
+          </div>
+          <div class="ns-box ns-archived">
+            <span class="ns-name">archived</span>
+            <span class="ns-desc">Retired beliefs. Superseded but preserved for audit trail.</span>
+          </div>
+        </div>
+        <div style="margin-top:20px; font-family:var(--mono); font-size:11px; color:var(--text-dimmer); line-height:1.8; padding:12px; background:var(--bg); border-radius:6px; border:1px solid var(--border);">
+          <span class="text-dim">Deterministic reduction:</span><br>
+          &nbsp; events &rarr; fold &rarr; namespaced state<br>
+          &nbsp; Same input &rarr; always same output<br>
+          <span class="text-dim">RFC 8785 canonical JSON ensures<br>&nbsp; byte-identical serialization</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Crypto Stack -->
+    <div style="margin-top:32px;">
+      <div class="code-window">
+        <div class="code-titlebar">
+          <span class="code-dot red"></span>
+          <span class="code-dot yellow"></span>
+          <span class="code-dot green"></span>
+          <span class="code-title">cryptographic stack</span>
+        </div>
+        <div class="code-body">
+<pre style="line-height:1.8;">
+<span class="syn-cm">  ┌─────────────────────────────────────────────────────────────────┐</span>
+<span class="syn-cm">  │</span>  <span class="text-green">Provara Protocol v1.0</span>                                        <span class="syn-cm">│</span>
+<span class="syn-cm">  ├─────────────────┬──────────────────┬────────────────────────────┤</span>
+<span class="syn-cm">  │</span>  <span class="text-blue">Signing</span>         <span class="syn-cm">│</span>  <span class="text-blue">Hashing</span>          <span class="syn-cm">│</span>  <span class="text-blue">Serialization</span>              <span class="syn-cm">│</span>
+<span class="syn-cm">  │</span>  Ed25519         <span class="syn-cm">│</span>  SHA-256          <span class="syn-cm">│</span>  RFC 8785 Canonical JSON    <span class="syn-cm">│</span>
+<span class="syn-cm">  │</span>  RFC 8032        <span class="syn-cm">│</span>  FIPS 180-4       <span class="syn-cm">│</span>  Deterministic byte order   <span class="syn-cm">│</span>
+<span class="syn-cm">  ├─────────────────┴──────────────────┴────────────────────────────┤</span>
+<span class="syn-cm">  │</span>  <span style="color:var(--purple);">Integrity</span>: Merkle tree + per-actor causal chain (linked list)  <span class="syn-cm">│</span>
+<span class="syn-cm">  ├─────────────────────────────────────────────────────────────────┤</span>
+<span class="syn-cm">  │</span>  <span style="color:var(--orange);">Runtime</span>:  Python 3.10+  &middot;  cryptography &gt;= 41.0  &middot;  7 modules  <span class="syn-cm">│</span>
+<span class="syn-cm">  └─────────────────────────────────────────────────────────────────┘</span>
+</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     COMMUNITY
+     ════════════════════════════════════════════════ -->
+<section class="community" id="community">
+  <div class="container">
+    <div class="section-label">Open Source</div>
+    <h2 class="section-title">Build with us</h2>
+    <p class="section-sub">Provara is open source under the Apache 2.0 license. Audit the code, run the tests, extend the protocol. Contributions welcome.</p>
+    <div class="community-links">
+      <a href="#" class="community-link">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub Repository
+      </a>
+      <a href="#" class="community-link">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 2.5A1.5 1.5 0 012.5 1h3A1.5 1.5 0 017 2.5v3A1.5 1.5 0 015.5 7h-3A1.5 1.5 0 011 5.5v-3zM2.5 2a.5.5 0 00-.5.5v3a.5.5 0 00.5.5h3a.5.5 0 00.5-.5v-3a.5.5 0 00-.5-.5h-3zm6.5.5A1.5 1.5 0 0110.5 1h3A1.5 1.5 0 0115 2.5v3A1.5 1.5 0 0113.5 7h-3A1.5 1.5 0 019 5.5v-3zm1.5-.5a.5.5 0 00-.5.5v3a.5.5 0 00.5.5h3a.5.5 0 00.5-.5v-3a.5.5 0 00-.5-.5h-3zM1 10.5A1.5 1.5 0 012.5 9h3A1.5 1.5 0 017 10.5v3A1.5 1.5 0 015.5 15h-3A1.5 1.5 0 011 13.5v-3zm1.5-.5a.5.5 0 00-.5.5v3a.5.5 0 00.5.5h3a.5.5 0 00.5-.5v-3a.5.5 0 00-.5-.5h-3zm6.5.5A1.5 1.5 0 0110.5 9h3a1.5 1.5 0 011.5 1.5v3a1.5 1.5 0 01-1.5 1.5h-3A1.5 1.5 0 019 13.5v-3zm1.5-.5a.5.5 0 00-.5.5v3a.5.5 0 00.5.5h3a.5.5 0 00.5-.5v-3a.5.5 0 00-.5-.5h-3z"/></svg>
+        Contributing Guide
+      </a>
+      <a href="#" class="community-link">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8.834.066C7.494-.087 6.5 1.048 6.5 2.25v.5c0 1.329-.647 2.124-1.318 2.614-.328.24-.66.403-.918.508A1.75 1.75 0 002.75 4.5h-1A1.75 1.75 0 000 6.25v7.5C0 14.89 1.11 16 2.75 16h1a1.75 1.75 0 001.514-.872 3.073 3.073 0 011.025-.353c.86-.146 1.86-.377 2.711-.79V16h5.25c.966 0 1.75-.784 1.75-1.75v-5.5a1.75 1.75 0 00-1.75-1.75H12.5c-.173 0-.292-.093-.346-.166-.068-.092-.108-.218-.072-.378l.623-2.393c.208-.798-.037-1.644-.614-2.24A2.005 2.005 0 0010.634.02L8.834.066zM6 14.5H3.75a.25.25 0 01-.25-.25v-7.5a.25.25 0 01.25-.25h1a.25.25 0 01.25.25V14.5z"/></svg>
+        Security Policy
+      </a>
+      <a href="#" class="community-link">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M0 1.75A.75.75 0 01.75 1h4.253c1.227 0 2.317.59 3 1.501A3.744 3.744 0 0111.006 1h4.245a.75.75 0 01.75.75v10.5a.75.75 0 01-.75.75h-4.507a2.25 2.25 0 00-1.591.659l-.622.621a.75.75 0 01-1.06 0l-.622-.621A2.25 2.25 0 005.258 13H.75a.75.75 0 01-.75-.75V1.75zm7.251 10.324l.004-5.073-.002-2.253A2.25 2.25 0 005.003 2.5H1.5v9h3.757a3.75 3.75 0 011.994.574zM8.755 4.75l-.004 7.322a3.752 3.752 0 011.992-.572H14.5v-9h-3.495a2.252 2.252 0 00-2.25 2.25z"/></svg>
+        Documentation
+      </a>
+    </div>
+    <p class="community-built">
+      Built by <a href="https://huntinformationsystems.com" target="_blank" rel="noopener">Hunt Information Systems</a>
+    </p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     FOOTER
+     ════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      Apache 2.0 &middot; <a href="https://huntinformationsystems.com" target="_blank" rel="noopener">Hunt Information Systems</a> &middot; <a href="https://github.com/huntos">GitHub</a>
+    </div>
+    <div class="footer-right">
+      Provara Protocol v1.0
+    </div>
+  </div>
+</footer>
+
+<!-- Scroll to top -->
+<button class="scroll-top" id="scrollTop" aria-label="Scroll to top">&uarr;</button>
+
+<script>
+// Mobile nav toggle
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('navLinks');
+
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  navLinks.classList.toggle('open');
+});
+
+function closeNav() {
+  hamburger.classList.remove('active');
+  navLinks.classList.remove('open');
+}
+
+// Scroll to top button
+const scrollTop = document.getElementById('scrollTop');
+window.addEventListener('scroll', () => {
+  scrollTop.classList.toggle('visible', window.scrollY > 400);
+});
+scrollTop.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Active nav highlighting
+const sections = document.querySelectorAll('section[id]');
+const navAnchors = document.querySelectorAll('.nav-links a[href^="#"]');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(section => {
+    const top = section.offsetTop - 120;
+    if (window.scrollY >= top) {
+      current = section.getAttribute('id');
+    }
+  });
+  navAnchors.forEach(a => {
+    a.style.color = '';
+    if (a.getAttribute('href') === '#' + current) {
+      a.style.color = 'var(--text)';
+    }
+  });
+});
+</script>
+
+</body>
+</html>

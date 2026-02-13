@@ -37,6 +37,9 @@ Backups/
 # Internal business documents
 HUNT_INFORMATION_SYSTEMS_BLUEPRINT.md
 
+# Screenshots and previews
+*.png
+
 # Temporary files
 *.tmp
 *.log
