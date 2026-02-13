@@ -1,0 +1,67 @@
+name: Provara CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: pip install "cryptography>=41.0"
+
+      - name: Run unit tests (Unix)
+        if: runner.os != 'Windows'
+        working-directory: SNP_Core/test
+        run: PYTHONPATH=../bin python -m unittest test_bootstrap test_reducer_v0 test_rekey -v
+
+      - name: Run unit tests (Windows)
+        if: runner.os == 'Windows'
+        working-directory: SNP_Core/test
+        run: |
+          $env:PYTHONPATH = "../bin"
+          python -m unittest test_bootstrap test_reducer_v0 test_rekey -v
+
+      - name: Run compliance tests (Unix)
+        if: runner.os != 'Windows'
+        working-directory: SNP_Core/test
+        run: PYTHONPATH=../bin python backpack_compliance_v1.py ../examples/reference_backpack -v
+
+      - name: Run compliance tests (Windows)
+        if: runner.os == 'Windows'
+        working-directory: SNP_Core/test
+        run: |
+          $env:PYTHONPATH = "../bin"
+          python backpack_compliance_v1.py ../examples/reference_backpack -v
+
+  integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install "cryptography>=41.0"
+
+      - name: Verify reference backpack integrity
+        working-directory: SNP_Core/test
+        run: PYTHONPATH=../bin python ../bin/backpack_integrity.py ../examples/reference_backpack
