@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+  <defs>
+    <!-- Subtle grid pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#21262d" stroke-width="0.5" opacity="0.4"/>
+    </pattern>
+
+    <!-- Green accent glow -->
+    <radialGradient id="glow" cx="50%" cy="45%" r="35%" fx="50%" fy="45%">
+      <stop offset="0%" stop-color="#3fb950" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#3fb950" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Top vignette -->
+    <linearGradient id="vignette-top" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d1117" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0d1117" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Bottom vignette -->
+    <linearGradient id="vignette-bottom" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d1117" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#0d1117" stop-opacity="0.8"/>
+    </linearGradient>
+
+    <!-- Green line glow filter -->
+    <filter id="line-glow" x="-50%" y="-200%" width="200%" height="500%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Soft text shadow -->
+    <filter id="text-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="shadow"/>
+      <feOffset dx="0" dy="1" result="offset"/>
+      <feMerge>
+        <feMergeNode in="offset"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="640" fill="#0d1117"/>
+
+  <!-- Grid pattern -->
+  <rect width="1280" height="640" fill="url(#grid)"/>
+
+  <!-- Vignettes to fade grid at edges -->
+  <rect width="1280" height="200" fill="url(#vignette-top)"/>
+  <rect width="1280" height="200" y="440" fill="url(#vignette-bottom)"/>
+
+  <!-- Radial green glow -->
+  <rect width="1280" height="640" fill="url(#glow)"/>
+
+  <!-- Horizontal accent line with glow -->
+  <line x1="340" y1="340" x2="940" y2="340" stroke="#3fb950" stroke-width="1.5" opacity="0.7" filter="url(#line-glow)"/>
+
+  <!-- Subtle border frame -->
+  <rect x="40" y="40" width="1200" height="560" rx="2" fill="none" stroke="#21262d" stroke-width="0.5" opacity="0.5"/>
+
+  <!-- Protocol icon mark — abstract chain/link shape -->
+  <g transform="translate(640, 190)" opacity="0.12">
+    <rect x="-120" y="-8" width="80" height="16" rx="8" fill="none" stroke="#3fb950" stroke-width="2"/>
+    <rect x="40" y="-8" width="80" height="16" rx="8" fill="none" stroke="#3fb950" stroke-width="2"/>
+    <line x1="-40" y1="0" x2="40" y2="0" stroke="#3fb950" stroke-width="2"/>
+  </g>
+
+  <!-- Title: Provara Protocol -->
+  <text
+    x="640" y="260"
+    text-anchor="middle"
+    font-family="'Segoe UI', system-ui, -apple-system, sans-serif"
+    font-size="72"
+    font-weight="700"
+    fill="#e6edf3"
+    letter-spacing="-1"
+    filter="url(#text-shadow)"
+  >Provara Protocol</text>
+
+  <!-- Subtitle -->
+  <text
+    x="640" y="390"
+    text-anchor="middle"
+    font-family="'Segoe UI', system-ui, -apple-system, sans-serif"
+    font-size="26"
+    font-weight="400"
+    fill="#8b949e"
+    letter-spacing="0.5"
+  >Tamper-evident memory for humans and AI agents</text>
+
+  <!-- Key specs in monospace -->
+  <text
+    x="640" y="480"
+    text-anchor="middle"
+    font-family="'Cascadia Code', 'SF Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace"
+    font-size="16"
+    fill="#6e7681"
+    letter-spacing="1"
+  >Ed25519 · SHA-256 · Event Sourcing · 74 Tests · Apache 2.0</text>
+
+  <!-- Dot separators for specs — decorative emphasis dots -->
+  <circle cx="468" cy="476" r="1.5" fill="#3fb950" opacity="0.5"/>
+  <circle cx="566" cy="476" r="1.5" fill="#3fb950" opacity="0.5"/>
+  <circle cx="704" cy="476" r="1.5" fill="#3fb950" opacity="0.5"/>
+  <circle cx="802" cy="476" r="1.5" fill="#3fb950" opacity="0.5"/>
+
+  <!-- Bottom-right: hunt-os org mark -->
+  <g transform="translate(1190, 580)">
+    <!-- Small terminal prompt icon -->
+    <rect x="-70" y="-14" width="28" height="20" rx="3" fill="none" stroke="#30363d" stroke-width="1.2"/>
+    <polyline points="-64,-8 -58,-4 -64,0" fill="none" stroke="#3fb950" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="-56" y1="0" x2="-50" y2="0" stroke="#3fb950" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
+    <text
+      x="0" y="3"
+      text-anchor="end"
+      font-family="'Cascadia Code', 'SF Mono', Consolas, monospace"
+      font-size="14"
+      fill="#484f58"
+      letter-spacing="0.5"
+    >hunt-os</text>
+  </g>
+
+  <!-- Bottom-left: version hint -->
+  <text
+    x="90" y="583"
+    text-anchor="start"
+    font-family="'Cascadia Code', 'SF Mono', Consolas, monospace"
+    font-size="12"
+    fill="#30363d"
+  >github.com/hunt-os/provara</text>
+</svg>
