@@ -163,7 +163,7 @@ cd SNP_Core/bin && python bootstrap_v0.py /path/to/backpack --quorum --self-test
 # Pipe private keys to a secure file
 python bootstrap_v0.py /path/to/backpack --quorum --private-keys /secure/keys.json --self-test
 
-# Run full unit test suite (57 tests)
+# Run full unit test suite (93 tests)
 cd SNP_Core/test && PYTHONPATH=../bin python -m unittest test_reducer_v0 test_rekey test_bootstrap test_sync_v0 -v
 
 # Run compliance tests (17 tests)
@@ -327,7 +327,7 @@ Sovereign birth. Creates a fully compliant, cryptographically signed backpack fr
 | `test_reducer_v0.py` | 23 | Reducer determinism, evidence handling, namespace transitions, conflict resolution, state hashing |
 | `test_rekey.py` | 18 | Key generation, event signing/verification, rotation protocol, trust boundary validation |
 | test_bootstrap.py | 16 | End-to-end bootstrap, directory structure, genesis validation, manifest generation, self-test |
-| 	est_sync_v0.py | 36 | Union merge, causal chain verification, deduplication, fork detection, fencing tokens, delta export/import, sync integration |
+| `test_sync_v0.py` | 36 | Union merge, causal chain verification, deduplication, fork detection, fencing tokens, delta export/import, sync integration |
 | `backpack_compliance_v1.py` | 17 | Full protocol compliance (see breakdown below) |
 | **Total** | **110** | |
 
@@ -408,7 +408,7 @@ Provara_Legacy_Kit/
 │
 ├── SNP_Core/                       # The reference implementation
 │   ├── bin/                        # 7 Python modules (~2,016 lines)
-│   ├── test/                       # 4 test suites, 74 tests (~2,037 lines)
+│   ├── test/                       # 4 test suites, 110 tests (~2,037 lines)
 │   ├── deploy/templates/           # Policy templates (safety, retention, sync)
 │   ├── examples/reference_backpack/# Known-good test fixture
 │   └── docs/README.md              # Technical architecture documentation
@@ -494,7 +494,7 @@ Yes. Events are stored as NDJSON (one JSON object per line). Open `events/events
 The data format is language-agnostic. JSON, SHA-256, and Ed25519 are industry standards implemented in every major programming language. The protocol profile is a complete specification for reimplementation. The data survives the tooling.
 
 **Can multiple devices share a vault?**
-`sync_v0.py` is on the roadmap. The event-sourced architecture makes merging fundamentally safe — you merge the raw events, then recompute beliefs. No conflict resolution heuristics. No last-write-wins.
+Yes. `sync_v0.py` implements union merge with causal chain verification, fork detection, and fencing tokens. The event-sourced architecture makes merging fundamentally safe — you merge the raw events, then recompute beliefs. No conflict resolution heuristics. No last-write-wins.
 
 **Is this a blockchain?**
 No. It is a Merkle tree over files combined with a causal event chain per actor. There is no consensus mechanism, no mining, no network, no tokens. It is closer to git than to Bitcoin.
