@@ -63,7 +63,7 @@ Currently shipping consulting engagements for AI memory architecture design — 
    The protocol's home page. Clean, authoritative, links to the spec and the repo. Positions Provara as infrastructure, not a product pitch.
 
 4. **Hunt Information Systems — Company Site**
-   https://huntinfosystems.com
+   https://huntinformationsystems.com
    Link to the consulting services page. This is where inbound leads from LinkedIn should land when they want to hire you for AI memory architecture work.
 
 ---

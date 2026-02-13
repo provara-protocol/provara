@@ -10,7 +10,7 @@
 
 If you discover a security vulnerability in the Provara Protocol or its reference implementation, **do not open a public issue.**
 
-Instead, email: **security@huntinfosystems.com**
+Instead, email: **security@huntinformationsystems.com**
 
 Include:
 - Description of the vulnerability
