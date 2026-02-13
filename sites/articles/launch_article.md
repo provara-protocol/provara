@@ -255,4 +255,4 @@ The repo is open. The protocol is frozen. The compliance tests are waiting.
 
 **[github.com/hunt-os/provara](https://github.com/hunt-os/provara)**
 
-*[Hunt Information Systems](https://huntinformationsystems.com) -- we build systems that remember.*
+*[Hunt Information Systems](https://huntinfosystems.com) -- we build systems that remember.*
