@@ -164,7 +164,7 @@ cd SNP_Core/bin && python bootstrap_v0.py /path/to/backpack --quorum --self-test
 python bootstrap_v0.py /path/to/backpack --quorum --private-keys /secure/keys.json --self-test
 
 # Run full unit test suite (57 tests)
-cd SNP_Core/test && PYTHONPATH=../bin python -m unittest test_reducer_v0 test_rekey test_bootstrap -v
+cd SNP_Core/test && PYTHONPATH=../bin python -m unittest test_reducer_v0 test_rekey test_bootstrap test_sync_v0 -v
 
 # Run compliance tests (17 tests)
 cd SNP_Core/test && PYTHONPATH=../bin python backpack_compliance_v1.py ../examples/reference_backpack -v
@@ -327,7 +327,7 @@ Sovereign birth. Creates a fully compliant, cryptographically signed backpack fr
 | `test_reducer_v0.py` | 23 | Reducer determinism, evidence handling, namespace transitions, conflict resolution, state hashing |
 | `test_rekey.py` | 18 | Key generation, event signing/verification, rotation protocol, trust boundary validation |
 | test_bootstrap.py | 16 | End-to-end bootstrap, directory structure, genesis validation, manifest generation, self-test |
-| test_sync_v0.py | 36 | Union merge, causal chain verification, deduplication, fork detection, fencing tokens |
+| 	est_sync_v0.py | 36 | Union merge, causal chain verification, deduplication, fork detection, fencing tokens, delta export/import, sync integration |
 | `backpack_compliance_v1.py` | 17 | Full protocol compliance (see breakdown below) |
 | **Total** | **110** | |
 
@@ -335,7 +335,7 @@ Sovereign birth. Creates a fully compliant, cryptographically signed backpack fr
 
 ```bash
 # All unit tests
-cd SNP_Core/test && PYTHONPATH=../bin python -m unittest test_reducer_v0 test_rekey test_bootstrap -v
+cd SNP_Core/test && PYTHONPATH=../bin python -m unittest test_reducer_v0 test_rekey test_bootstrap test_sync_v0 -v
 
 # Compliance tests against reference backpack
 cd SNP_Core/test && PYTHONPATH=../bin python backpack_compliance_v1.py ../examples/reference_backpack -v
@@ -426,7 +426,7 @@ Provara_Legacy_Kit/
 
 | Component | Purpose | Status |
 |-----------|---------|--------|
-| `sync_v0.py` | Union merge + chain verification + fencing tokens | Pending |
+| sync_v0.py | Union merge + chain verification + fencing tokens | **Complete** |
 | `BACKPACK_PROTOCOL_v1.0.md` | Formal canonical specification document | Pending |
 | Checkpoint system | Signed state materializations for fast replay | Designed, not coded |
 | Perception tiering | T0-T3 sensor data hierarchy | Designed, not coded |
@@ -523,7 +523,7 @@ Protocol            Provara v1.0
 Profile             PROVARA-1.0_PROFILE_A
 Implementation      1.0.0-rc1
 Kit Date            2026-02-13
-Tests Passing       74 (57 unit + 17 compliance)
+Tests Passing       110 (93 unit + 17 compliance)
 ```
 
 ---
@@ -537,4 +537,6 @@ See [`PROTOCOL_PROFILE.txt`](PROTOCOL_PROFILE.txt) for the normative specificati
 ---
 
 (c) 2026 Hunt Information Services
+
+
 
