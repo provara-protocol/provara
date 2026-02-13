@@ -8,7 +8,7 @@
          Provara Protocol v1.0 — Reference Implementation
 </pre>
 
-**Your memory belongs to you. Prove it.**
+**Sovereign Memory. Verifiable Continuity.**
 
 ![Protocol](https://img.shields.io/badge/Protocol-Provara_v1.0-blue)
 ![Tests](https://img.shields.io/badge/Tests-110_passing-brightgreen)
@@ -537,6 +537,7 @@ See [`PROTOCOL_PROFILE.txt`](PROTOCOL_PROFILE.txt) for the normative specificati
 ---
 
 (c) 2026 Hunt Information Services
+
 
 
 
