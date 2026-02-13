@@ -11,7 +11,7 @@
 **Your memory belongs to you. Prove it.**
 
 ![Protocol](https://img.shields.io/badge/Protocol-Provara_v1.0-blue)
-![Tests](https://img.shields.io/badge/Tests-74_passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-110_passing-brightgreen)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-yellow)
 ![Status](https://img.shields.io/badge/Status-Reference_Implementation-orange)
 ![License](https://img.shields.io/badge/License-Apache_2.0-blue)
@@ -81,7 +81,7 @@ This system is built for individuals preserving family records, AI agents mainta
 ```
 Operational Code    7 Python modules          ~2,016 lines
 Test Code           4 test suites             ~2,037 lines
-Tests Passing       74 total                  57 unit + 17 compliance
+Tests Passing       110 total                 93 unit + 17 compliance
 External Deps       1                         cryptography >= 41.0
 Crypto Stack        Ed25519 + SHA-256         RFC 8032 + FIPS 180-4
 Serialization       Canonical JSON            RFC 8785 (JCS)
@@ -326,9 +326,10 @@ Sovereign birth. Creates a fully compliant, cryptographically signed backpack fr
 |-------|------:|----------|
 | `test_reducer_v0.py` | 23 | Reducer determinism, evidence handling, namespace transitions, conflict resolution, state hashing |
 | `test_rekey.py` | 18 | Key generation, event signing/verification, rotation protocol, trust boundary validation |
-| `test_bootstrap.py` | 16 | End-to-end bootstrap, directory structure, genesis validation, manifest generation, self-test |
+| test_bootstrap.py | 16 | End-to-end bootstrap, directory structure, genesis validation, manifest generation, self-test |
+| test_sync_v0.py | 36 | Union merge, causal chain verification, deduplication, fork detection, fencing tokens |
 | `backpack_compliance_v1.py` | 17 | Full protocol compliance (see breakdown below) |
-| **Total** | **74** | |
+| **Total** | **110** | |
 
 ### Running Tests
 
@@ -536,3 +537,4 @@ See [`PROTOCOL_PROFILE.txt`](PROTOCOL_PROFILE.txt) for the normative specificati
 ---
 
 (c) 2026 Hunt Information Services
+

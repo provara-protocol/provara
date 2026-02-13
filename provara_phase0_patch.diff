@@ -1,0 +1,49 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 804b183..692fd30 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -28,14 +28,14 @@ jobs:
+       - name: Run unit tests (Unix)
+         if: runner.os != 'Windows'
+         working-directory: SNP_Core/test
+-        run: PYTHONPATH=../bin python -m unittest test_bootstrap test_reducer_v0 test_rekey -v
++        run: PYTHONPATH=../bin python -m unittest test_bootstrap test_reducer_v0 test_rekey test_sync_v0 -v
+ 
+       - name: Run unit tests (Windows)
+         if: runner.os == 'Windows'
+         working-directory: SNP_Core/test
+         run: |
+           $env:PYTHONPATH = "../bin"
+-          python -m unittest test_bootstrap test_reducer_v0 test_rekey -v
++          python -m unittest test_bootstrap test_reducer_v0 test_rekey test_sync_v0 -v
+ 
+       - name: Run compliance tests (Unix)
+         if: runner.os != 'Windows'
+diff --git a/.gitignore b/.gitignore
+index 97c566e..c159cbe 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -44,3 +44,7 @@ HUNT_INFORMATION_SYSTEMS_BLUEPRINT.md
+ *.tmp
+ *.log
+ hunt-logo.html
++
++# Session-specific operational files (not part of the kit)
++BOOTLOADER.md
++TODO.md
+diff --git a/SECURITY.md b/SECURITY.md
+index 66c4b65..f119406 100644
+--- a/SECURITY.md
++++ b/SECURITY.md
+@@ -10,7 +10,10 @@
+ 
+ If you discover a security vulnerability in the Provara Protocol or its reference implementation, **do not open a public issue.**
+ 
+-Instead, email: **security@huntinformationsystems.com**
++Instead, report via one of these channels:
++
++1. **GitHub Private Vulnerability Reporting** (preferred): Use the [Security Advisories](https://github.com/hunt-os/provara/security/advisories/new) feature on this repository to report privately.
++2. **Email**: **security@huntinformationsystems.com**
+ 
+ Include:
+ - Description of the vulnerability

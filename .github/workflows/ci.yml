@@ -28,14 +28,14 @@ jobs:
       - name: Run unit tests (Unix)
         if: runner.os != 'Windows'
         working-directory: SNP_Core/test
-        run: PYTHONPATH=../bin python -m unittest test_bootstrap test_reducer_v0 test_rekey -v
+        run: PYTHONPATH=../bin python -m unittest test_bootstrap test_reducer_v0 test_rekey test_sync_v0 -v
 
       - name: Run unit tests (Windows)
         if: runner.os == 'Windows'
         working-directory: SNP_Core/test
         run: |
           $env:PYTHONPATH = "../bin"
-          python -m unittest test_bootstrap test_reducer_v0 test_rekey -v
+          python -m unittest test_bootstrap test_reducer_v0 test_rekey test_sync_v0 -v
 
       - name: Run compliance tests (Unix)
         if: runner.os != 'Windows'

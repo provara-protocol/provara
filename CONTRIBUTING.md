@@ -52,8 +52,8 @@ Code improvements, bug fixes, documentation corrections, and new test cases are 
 1. **Clone the repository:**
 
    ```
-   git clone https://github.com/hunt-information-systems/provara-protocol.git
-   cd provara-protocol
+   git clone https://github.com/hunt-os/provara.git
+   cd provara
    ```
 
 2. **Create a virtual environment (recommended):**

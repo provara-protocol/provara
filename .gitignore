@@ -44,3 +44,7 @@ HUNT_INFORMATION_SYSTEMS_BLUEPRINT.md
 *.tmp
 *.log
 hunt-logo.html
+
+# Session-specific operational files (not part of the kit)
+BOOTLOADER.md
+TODO.md

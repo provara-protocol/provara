@@ -1,0 +1,87 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "provara-protocol"
+version = "1.0.0rc1"
+description = "Tamper-evident memory protocol for humans and AI agents. Ed25519 + SHA-256 + event sourcing."
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Hunt Information Services"},
+]
+keywords = [
+    "cryptography",
+    "ed25519",
+    "event-sourcing",
+    "memory-protocol",
+    "tamper-evident",
+    "merkle-tree",
+    "provara",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+dependencies = [
+    "cryptography>=41.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[project.urls]
+Homepage = "https://provara.dev"
+Documentation = "https://provara.dev"
+Repository = "https://github.com/hunt-os/provara"
+Issues = "https://github.com/hunt-os/provara/issues"
+Changelog = "https://github.com/hunt-os/provara/releases"
+
+# ---------------------------------------------------------------------------
+# Package discovery
+# ---------------------------------------------------------------------------
+# Current layout: modules live in SNP_Core/bin/ with flat imports
+# (e.g., `from canonical_json import canonical_dumps`).
+#
+# For local development, use PYTHONPATH:
+#   PYTHONPATH=SNP_Core/bin python -m pytest
+#   PYTHONPATH=SNP_Core/bin python -c "from canonical_json import canonical_dumps"
+#
+# Phase 5 (PyPI publish) will restructure to a proper package layout:
+#   src/provara_protocol/__init__.py
+#   src/provara_protocol/canonical_json.py
+#   ...
+# At that point, update this section for real package discovery.
+
+[tool.setuptools.packages.find]
+where = ["SNP_Core"]
+include = ["bin*"]
+
+# ---------------------------------------------------------------------------
+# Test configuration
+# ---------------------------------------------------------------------------
+
+[tool.pytest.ini_options]
+testpaths = ["SNP_Core/test"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+# PYTHONPATH must include SNP_Core/bin for imports to resolve.
+# Run with: PYTHONPATH=SNP_Core/bin python -m pytest
+# Or:       cd SNP_Core/test && PYTHONPATH=../bin python -m pytest
+addopts = "-v --tb=short"
