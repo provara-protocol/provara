@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Private keys — NEVER commit these
+my_private_keys.json
+*_private_keys.json
+*.key
+
+# User-created backpacks (generated, not part of the kit)
+My_Backpack/
+Backups/
+
+# Internal business documents
+HUNT_INFORMATION_SYSTEMS_BLUEPRINT.md
+
+# Temporary files
+*.tmp
+*.log

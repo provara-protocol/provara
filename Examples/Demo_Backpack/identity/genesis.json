@@ -1,0 +1,9 @@
+{
+  "uid": "demo-family-vault-001",
+  "birth_timestamp": "2026-02-13T01:23:41.837639+00:00",
+  "root_key_id": "bp1_ff437426309ae544",
+  "governance_model": "policies/sync_contract.json",
+  "initial_ontology_versions": {
+    "perception": "perception_ontology_v1.json"
+  }
+}
