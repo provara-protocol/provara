@@ -75,11 +75,21 @@ make test-comply   # 17 compliance tests only
 - **Avoid over-engineering** — no unnecessary abstractions, no speculative features.
 - **Evidence before assertions** — run the actual tests and show output before claiming something works.
 
+## Owner Profile
+
+The owner is a **visual-first operator** — thinks in dashboards, websites, and interfaces, not terminal output. Communicate results concisely. When presenting options, default to the highest-leverage choice rather than listing tradeoffs. The owner's time is spent on business, design, and deployment — not debugging Python.
+
+**What this means in practice:**
+- Do not ask for clarification on backend implementation details. Make the right call.
+- When something breaks, fix it and explain what happened after — don't present a menu of options.
+- Maximize autonomous progress on every invocation. Batch aggressively. Parallelize everything.
+- Treat every session as if it may be the only one for a while — leave the codebase in a clean, tested, committable state.
+
 ## Division of Labor
 
-The human owner handles: websites, dashboards, domains, business formation, marketing, and deployment.
+The owner handles: websites, dashboards, domains, business formation, marketing, and deployment.
 
-AI agents handle: backend code, test coverage, protocol implementation, documentation, CI/CD, and code quality.
+AI agents handle: backend code, test coverage, protocol implementation, documentation, CI/CD, and code quality. Agents should operate with maximum autonomy on backend work — the goal is an army of arms behind the scenes while the owner focuses on the product surface.
 
 ## Roadmap Priorities (for AI agents)
 
