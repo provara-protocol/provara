@@ -100,7 +100,7 @@
     font-size="16"
     fill="#6e7681"
     letter-spacing="1"
-  >Ed25519 · SHA-256 · Event Sourcing · 74 Tests · Apache 2.0</text>
+  >Ed25519 · SHA-256 · Event Sourcing · 110 Tests · Apache 2.0</text>
 
   <!-- Dot separators for specs — decorative emphasis dots -->
   <circle cx="468" cy="476" r="1.5" fill="#3fb950" opacity="0.5"/>
@@ -108,7 +108,7 @@
   <circle cx="704" cy="476" r="1.5" fill="#3fb950" opacity="0.5"/>
   <circle cx="802" cy="476" r="1.5" fill="#3fb950" opacity="0.5"/>
 
-  <!-- Bottom-right: hunt-os org mark -->
+  <!-- Bottom-right: huntinformationsystems org mark -->
   <g transform="translate(1190, 580)">
     <!-- Small terminal prompt icon -->
     <rect x="-70" y="-14" width="28" height="20" rx="3" fill="none" stroke="#30363d" stroke-width="1.2"/>
@@ -121,7 +121,7 @@
       font-size="14"
       fill="#484f58"
       letter-spacing="0.5"
-    >hunt-os</text>
+    >huntinformationsystems</text>
   </g>
 
   <!-- Bottom-left: version hint -->
@@ -131,5 +131,5 @@
     font-family="'Cascadia Code', 'SF Mono', Consolas, monospace"
     font-size="12"
     fill="#30363d"
-  >github.com/hunt-os/provara</text>
+  >github.com/huntinformationsystems/provara</text>
 </svg>

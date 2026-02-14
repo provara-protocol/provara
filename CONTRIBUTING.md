@@ -52,7 +52,7 @@ Code improvements, bug fixes, documentation corrections, and new test cases are 
 1. **Clone the repository:**
 
    ```
-   git clone https://github.com/hunt-os/provara.git
+   git clone https://github.com/huntinformationsystems/provara.git
    cd provara
    ```
 
@@ -82,7 +82,7 @@ Code improvements, bug fixes, documentation corrections, and new test cases are 
 
 ## Testing Requirements
 
-The project maintains a suite of 74 tests (57 unit tests and 17 compliance tests). All tests must pass before you submit a pull request.
+The project maintains a suite of 110 tests (93 unit tests and 17 compliance tests). All tests must pass before you submit a pull request.
 
 Run the full test suite:
 
@@ -107,7 +107,7 @@ If your change adds new functionality, include corresponding tests. If your chan
 1. **Fork the repository** and create a feature branch from `main`.
 2. **Keep changes focused.** One logical change per pull request.
 3. **Write clear commit messages** that explain what changed and why.
-4. **Ensure all 74 tests pass** with no failures or errors.
+4. **Ensure all 110 tests pass** with no failures or errors.
 5. **Update documentation** if your change affects usage or behavior.
 6. **Describe your PR clearly.** Include:
    - What the change does.

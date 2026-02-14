@@ -8,7 +8,7 @@ What problem does this solve or what feature does it add?
 
 ## Testing
 
-- [ ] All 57 unit tests pass
+- [ ] All 93 unit tests pass
 - [ ] All 17 compliance tests pass
 - [ ] New tests added for new functionality (if applicable)
 

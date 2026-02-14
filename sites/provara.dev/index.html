@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Provara Protocol — Tamper-Evident Memory for Humans and AI Agents</title>
-<meta name="description" content="Open source tamper-evident memory protocol. Ed25519 signatures, SHA-256 hashing, event-sourced architecture. 74 tests. One dependency. Apache 2.0.">
+<meta name="description" content="Open source tamper-evident memory protocol. Ed25519 signatures, SHA-256 hashing, event-sourced architecture. 110 tests. One dependency. Apache 2.0.">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -905,13 +905,13 @@ footer {
     <div>
       <div class="hero-badge">
         <span class="dot"></span>
-        v1.0 stable &mdash; 74 tests passing
+        v1.0 stable &mdash; 110 tests passing
       </div>
       <h1><span class="gradient">Provara<br>Protocol</span></h1>
       <p class="hero-tagline">Tamper-evident memory for humans and AI agents.</p>
       <p class="hero-specs">
         <span>Ed25519</span> + <span>SHA-256</span> + <span>event sourcing</span><br>
-        74 tests &middot; one dependency &middot; Apache 2.0
+        110 tests &middot; one dependency &middot; Apache 2.0
       </p>
       <div class="hero-buttons">
         <a href="#" class="btn btn-primary">
@@ -935,7 +935,7 @@ footer {
   Installing collected packages: cryptography
 Successfully installed cryptography-44.0.1</span>
 
-<span class="syn-prompt">$</span> git clone https://github.com/huntos/provara.git
+<span class="syn-prompt">$</span> git clone https://github.com/huntinformationsystems/provara.git
 <span class="syn-out">Cloning into 'provara'...</span>
 
 <span class="syn-prompt">$</span> <span class="syn-kw">cd</span> provara && python <span class="syn-flag">-m</span> unittest discover <span class="syn-flag">-v</span>
@@ -946,8 +946,8 @@ test_belief_reduction ... ok
 test_ed25519_signatures ... ok
 ...</span>
 <span class="syn-cm"># ────────────────────────────────────</span>
-<span class="syn-cm"># Ran 74 tests in 1.2s</span>
-<span class="text-green"># OK (57 unit + 17 compliance)</span></pre>
+<span class="syn-cm"># Ran 110 tests in 1.2s</span>
+<span class="text-green"># OK (93 unit + 17 compliance)</span></pre>
         </div>
       </div>
     </div>
@@ -961,7 +961,7 @@ test_ed25519_signatures ... ok
   <div class="container">
     <div class="stats-grid">
       <div>
-        <div class="stat-num">74</div>
+        <div class="stat-num">110</div>
         <div class="stat-label">Tests passing</div>
       </div>
       <div>
@@ -1077,7 +1077,7 @@ test_ed25519_signatures ... ok
         <div class="step-code">
 <span class="text-green">&#x2713;</span> merkle root
 <span class="text-green">&#x2713;</span> causal chain
-<span class="text-green">&#x2713;</span> 74/74 sigs valid
+<span class="text-green">&#x2713;</span> 110/110 sigs valid
 <span class="text-green">&#x2713;</span> 0 tamper detected
         </div>
       </div>
@@ -1129,7 +1129,7 @@ result <span class="syn-op">=</span> <span class="syn-fn">bootstrap_backpack</sp
         </div>
         <div class="code-body">
 <pre><span class="syn-cm"># Clone and verify the protocol</span>
-<span class="syn-prompt">$</span> git clone https://github.com/huntos/provara.git
+<span class="syn-prompt">$</span> git clone https://github.com/huntinformationsystems/provara.git
 <span class="syn-prompt">$</span> <span class="syn-kw">cd</span> provara
 
 <span class="syn-cm"># Run the full test suite</span>
@@ -1144,9 +1144,9 @@ test_signature_verification ........ ok
 test_merkle_tree_integrity ......... ok</span>
 
 <span class="syn-cm">----------------------------------------------</span>
-<span class="syn-out">Ran <span class="text-green">74</span> tests in <span class="text-green">1.2s</span></span>
+<span class="syn-out">Ran <span class="text-green">110</span> tests in <span class="text-green">1.2s</span></span>
 
-<span class="text-green">OK</span> <span class="syn-out">(57 unit + 17 compliance)</span></pre>
+<span class="text-green">OK</span> <span class="syn-out">(93 unit + 17 compliance)</span></pre>
         </div>
       </div>
     </div>
@@ -1290,7 +1290,7 @@ test_merkle_tree_integrity ......... ok</span>
 <footer>
   <div class="footer-inner">
     <div class="footer-left">
-      Apache 2.0 &middot; <a href="https://huntinformationsystems.com" target="_blank" rel="noopener">Hunt Information Systems</a> &middot; <a href="https://github.com/huntos">GitHub</a>
+      Apache 2.0 &middot; <a href="https://huntinformationsystems.com" target="_blank" rel="noopener">Hunt Information Systems</a> &middot; <a href="https://github.com/huntinformationsystems">GitHub</a>
     </div>
     <div class="footer-right">
       Provara Protocol v1.0

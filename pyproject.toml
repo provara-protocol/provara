@@ -48,9 +48,9 @@ dev = [
 [project.urls]
 Homepage = "https://provara.dev"
 Documentation = "https://provara.dev"
-Repository = "https://github.com/hunt-os/provara"
-Issues = "https://github.com/hunt-os/provara/issues"
-Changelog = "https://github.com/hunt-os/provara/releases"
+Repository = "https://github.com/huntinformationsystems/provara"
+Issues = "https://github.com/huntinformationsystems/provara/issues"
+Changelog = "https://github.com/huntinformationsystems/provara/releases"
 
 # ---------------------------------------------------------------------------
 # Package discovery

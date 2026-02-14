@@ -11,7 +11,7 @@ Every AI agent framework shipping today has a memory problem. Not a "we need mor
 
 Now zoom out. The same problem exists for humans. Your photos are on iCloud. Your documents are on Google Drive. Your notes are in Notion. Your family records are scattered across a dozen services, each with its own terms of service, its own export format, and zero cryptographic guarantees that the data hasn't been modified. Try inheriting someone's digital life. Try proving what was there before something was deleted. You can't.
 
-I spent the last several months building an open protocol to solve this. It's called **[Provara](https://provara.dev)**, and it's a sovereign, tamper-evident, offline-first memory system that works for both humans and AI agents using the same underlying architecture. Seven Python modules. Seventy-four tests. One dependency. Here's how it works.
+I spent the last several months building an open protocol to solve this. It's called **[Provara](https://provara.dev)**, and it's a sovereign, tamper-evident, offline-first memory system that works for both humans and AI agents using the same underlying architecture. Seven Python modules. 110 tests. One dependency. Here's how it works.
 
 ---
 
@@ -170,7 +170,7 @@ Here are the numbers:
 ```
 Operational Code    7 Python modules          ~2,016 lines
 Test Code           4 test suites             ~2,037 lines
-Tests Passing       74 total                  57 unit + 17 compliance
+Tests Passing       110 total                 93 unit + 17 compliance
 External Deps       1                         cryptography >= 41.0
 Python Version      3.10+
 Platforms           Windows, macOS, Linux
@@ -231,7 +231,7 @@ We use the math without the overhead.
 
 Provara is open source under **Apache 2.0**.
 
-The protocol spec is frozen at v1.0. The reference implementation passes 74 tests. The compliance suite is ready for any reimplementation to validate against.
+The protocol spec is frozen at v1.0. The reference implementation passes 110 tests. The compliance suite is ready for any reimplementation to validate against.
 
 What's coming:
 
@@ -240,10 +240,10 @@ What's coming:
 - **Formal specification document** -- the full normative protocol spec for cross-language implementation
 - **Consulting** -- if you're building autonomous agents and need verifiable cognitive continuity, I'd be glad to help design the memory architecture
 
-The repo is here: **[github.com/hunt-os/provara](https://github.com/hunt-os/provara)**
+The repo is here: **[github.com/huntinformationsystems/provara](https://github.com/huntinformationsystems/provara)**
 
 ```bash
-git clone https://github.com/hunt-os/provara.git
+git clone https://github.com/huntinformationsystems/provara.git
 cd provara
 python -m pytest
 ```
@@ -260,6 +260,6 @@ Provara is my answer to that. It's not the only answer, but it's an honest one: 
 
 The repo is open. The protocol is frozen. The compliance tests are waiting.
 
-**[github.com/hunt-os/provara](https://github.com/hunt-os/provara)**
+**[github.com/huntinformationsystems/provara](https://github.com/huntinformationsystems/provara)**
 
 *[Hunt Information Systems](https://huntinformationsystems.com) -- we build systems that remember.*
