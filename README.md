@@ -48,8 +48,6 @@
 - [Recovery](#recovery)
 - [FAQ](#faq)
 - [Version](#version)
-- [For AI Agents & CLI Assistants](#for-ai-agents--cli-assistants)
-  - [Highest-Leverage Contributions](#highest-leverage-contributions)
 - [License](#license)
 
 ---
@@ -183,35 +181,18 @@ cd SNP_Core/bin && python rekey_backpack.py verify /path/to/backpack
 
 ## Development Workflow
 
-This project is designed for human + AI collaboration. The owner handles business, marketing, and deployment. AI coding agents handle backend code, tests, and documentation.
+This project uses AI-assisted development. Automated coding tools handle backend implementation, test expansion, refactoring, and security audits. The maintainer retains final approval on all changes.
 
-### Human Responsibilities
+| Scope | Approach |
+|-------|----------|
+| Backend code (`SNP_Core/bin/`) | AI-assisted implementation and refactoring |
+| Test coverage (`SNP_Core/test/`) | AI-assisted expansion and edge-case generation |
+| Protocol compliance | Automated verification via 17-test compliance suite |
+| Documentation | AI-assisted drafting, human review |
+| Websites and deployment (`sites/`) | Manual |
+| Business operations | Manual |
 
-- Website content and design (`sites/`)
-- Domain management, DNS, and Cloudflare deployment
-- Business formation (LLC, EIN, bank accounts)
-- Marketing articles and social media
-- GitHub billing and org administration
-- Final approval on all commits and releases
-
-### AI Agent Responsibilities
-
-- Backend Python code in `SNP_Core/bin/`
-- Test coverage expansion in `SNP_Core/test/`
-- Protocol compliance and correctness
-- Documentation accuracy (README, inline docs)
-- CI/CD pipeline configuration
-- Code review, refactoring, and security hardening
-
-### Instruction Files for AI Agents
-
-| File | Target CLI |
-|------|-----------|
-| `CLAUDE.md` | Claude Code (Anthropic) |
-| `GEMINI.md` | Gemini CLI / Google AI Studio |
-| `CODEX.md` | OpenAI Codex / ChatGPT / GitHub Copilot |
-
-All three files contain identical project context, critical rules, module maps, and roadmap priorities. Any AI coding agent should read its respective file before starting work.
+Project context files (`CLAUDE.md`, `GEMINI.md`, `CODEX.md`) provide standing instructions for AI coding tools. These are analogous to `.editorconfig` or linter configs — tooling configuration, not documentation.
 
 ---
 
@@ -562,34 +543,6 @@ Implementation      1.0.0-rc1
 Kit Date            2026-02-13
 Tests Passing       110 (93 unit + 17 compliance)
 ```
-
----
-
-## For AI Agents & CLI Assistants
-
-If you are an AI agent, coding assistant, or CLI tool reading this README to understand the project:
-
-- **Batch and parallelize.** Run independent operations concurrently whenever possible — file reads, searches, test suites, linting. Do not serialize work that has no dependencies between steps.
-- **Read before writing.** Understand existing code, conventions, and test patterns before proposing changes.
-- **Run all 110 tests** before claiming any change is complete. Unit tests and compliance tests are independent and can run in parallel.
-- **Respect the protocol.** `PROTOCOL_PROFILE.txt` is frozen. Do not modify it. Code changes must conform to the spec, not the other way around.
-- **Minimize dependencies.** The project has one external dependency by design. Do not introduce new ones without explicit approval.
-
-### Highest-Leverage Contributions
-
-If you're looking for where to add the most value, prioritize these areas in order:
-
-| Priority | Area | Why It Matters |
-|----------|------|----------------|
-| 1 | **Test coverage gaps** | More edge-case tests for sync, reducer conflict paths, and key rotation hardening. Tests are the protocol's immune system. |
-| 2 | **Cross-language reimplementation** | A Rust, Go, or TypeScript implementation that passes the 17 compliance tests proves the protocol is truly language-agnostic. |
-| 3 | **Formal spec document** | `BACKPACK_PROTOCOL_v1.0.md` — a canonical, prose specification that any engineer can implement from without reading Python. Currently pending on the roadmap. |
-| 4 | **Checkpoint system** | Signed state materializations for fast replay. Designed but not coded. Reduces cold-start time for large vaults. |
-| 5 | **Perception tiering** | T0–T3 sensor data hierarchy for AI agent use cases. Designed but not coded. |
-| 6 | **CI pipeline fixes** | GitHub Actions billing is currently blocked. Unblocking CI unblocks contributor workflows. |
-| 7 | **Documentation** | Inline code documentation, architecture diagrams, and contributor onboarding improvements. |
-
-Avoid cosmetic refactors, unnecessary abstractions, or changes that don't improve correctness, security, or capability. Every change should make the system more trustworthy or more useful.
 
 ---
 
