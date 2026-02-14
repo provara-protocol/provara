@@ -29,6 +29,7 @@
   - [Verify Your Vault](#verify-your-vault)
   - [Back Up Your Vault](#back-up-your-vault)
 - [For Developers](#for-developers)
+- [Development Workflow](#development-workflow)
 - [Architecture](#architecture)
   - [Three-Lane Event Model](#three-lane-event-model)
   - [Four-Namespace Belief Model](#four-namespace-belief-model)
@@ -159,24 +160,58 @@ Creates a timestamped, integrity-verified ZIP with a SHA-256 hash file. Automati
 ## For Developers
 
 ```bash
-# Bootstrap with dual-key authority (root + quorum)
+# Using the Makefile (recommended)
+make test          # Run all 110 tests
+make test-unit     # Run 93 unit tests
+make test-comply   # Run 17 compliance tests
+make bootstrap     # Create a new vault with dual-key authority
+make verify        # Verify My_Backpack integrity
+make manifest      # Regenerate manifest
+make checksums     # Regenerate CHECKSUMS.txt
+make clean         # Remove caches
+make help          # Show all commands
+
+# Or run directly:
 cd SNP_Core/bin && python bootstrap_v0.py /path/to/backpack --quorum --self-test
-
-# Pipe private keys to a secure file
-python bootstrap_v0.py /path/to/backpack --quorum --private-keys /secure/keys.json --self-test
-
-# Run full unit test suite (93 tests)
 cd SNP_Core/test && PYTHONPATH=../bin python -m unittest test_reducer_v0 test_rekey test_bootstrap test_sync_v0 -v
-
-# Run compliance tests (17 tests)
 cd SNP_Core/test && PYTHONPATH=../bin python backpack_compliance_v1.py ../examples/reference_backpack -v
-
-# Generate / regenerate manifest
 cd SNP_Core/bin && python manifest_generator.py /path/to/backpack --write
-
-# Verify key rotation history
 cd SNP_Core/bin && python rekey_backpack.py verify /path/to/backpack
 ```
+
+---
+
+## Development Workflow
+
+This project is designed for human + AI collaboration. The owner handles business, marketing, and deployment. AI coding agents handle backend code, tests, and documentation.
+
+### Human Responsibilities
+
+- Website content and design (`sites/`)
+- Domain management, DNS, and Cloudflare deployment
+- Business formation (LLC, EIN, bank accounts)
+- Marketing articles and social media
+- GitHub billing and org administration
+- Final approval on all commits and releases
+
+### AI Agent Responsibilities
+
+- Backend Python code in `SNP_Core/bin/`
+- Test coverage expansion in `SNP_Core/test/`
+- Protocol compliance and correctness
+- Documentation accuracy (README, inline docs)
+- CI/CD pipeline configuration
+- Code review, refactoring, and security hardening
+
+### Instruction Files for AI Agents
+
+| File | Target CLI |
+|------|-----------|
+| `CLAUDE.md` | Claude Code (Anthropic) |
+| `GEMINI.md` | Gemini CLI / Google AI Studio |
+| `CODEX.md` | OpenAI Codex / ChatGPT / GitHub Copilot |
+
+All three files contain identical project context, critical rules, module maps, and roadmap priorities. Any AI coding agent should read its respective file before starting work.
 
 ---
 
