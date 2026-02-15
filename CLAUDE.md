@@ -10,4 +10,4 @@
 - When creating commits, always use the HEREDOC pattern for commit messages.
 - On Windows, this repo runs under Git Bash. Use `/c/huntinformationsystems` paths in Bash, `C:\huntinformationsystems` paths in Read/Write/Edit tools.
 - Persistent memory is at `C:\Users\c8324\.claude\projects\C--huntinformationsystems\memory\MEMORY.md` — update it when you learn something that should survive across sessions.
-- The old `C--HuntOS` memory directory is orphaned and can be ignored.
+- **Always check TODO.md** at the start of substantive work. If you spot gaps, missing items, or things the owner might have missed, add them to the appropriate phase in TODO.md. Don't wait to be asked.

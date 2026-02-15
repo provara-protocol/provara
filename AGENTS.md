@@ -77,6 +77,7 @@ make test-comply   # 17 compliance tests only
 - **Respect existing patterns** — match the code style already in the codebase.
 - **Avoid over-engineering** — no unnecessary abstractions, no speculative features.
 - **Evidence before assertions** — run the actual tests and show output before claiming something works.
+- **Maintain TODO.md** — `TODO.md` is the master task tracker. If you notice a gap, missing item, broken assumption, or something the owner might have missed, **add it to TODO.md** under the appropriate phase. Don't wait to be asked. This file is gitignored and local-only — treat it as a living scratchpad for the project.
 
 ## Owner Profile
 

@@ -48,3 +48,9 @@ hunt-logo.html
 # Session-specific operational files (not part of the kit)
 BOOTLOADER.md
 TODO.md
+
+# MCP server (separate repo: github.com/huntinformationsystems/hunt-protocol-mcp)
+hunt-mcp/
+
+# Claude Code local MCP config (machine-specific paths)
+.mcp.json
