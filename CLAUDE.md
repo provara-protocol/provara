@@ -11,3 +11,5 @@
 - On Windows, this repo runs under Git Bash. Use `/c/huntinformationsystems` paths in Bash, `C:\huntinformationsystems` paths in Read/Write/Edit tools.
 - Persistent memory is at `C:\Users\c8324\.claude\projects\C--huntinformationsystems\memory\MEMORY.md` — update it when you learn something that should survive across sessions.
 - **Always check TODO.md** at the start of substantive work. If you spot gaps, missing items, or things the owner might have missed, add them to the appropriate phase in TODO.md. Don't wait to be asked.
+- **OPSEC is non-negotiable.** Read the "OPSEC — Anonymity & Remote-First" section in AGENTS.md. Never output real names, personal emails, or location details. This applies to every commit, file, and generated content.
+- **Two-brand architecture:** "Provara" is the public brand. "Hunt Information Systems" is the private legal entity. All public-facing content uses "Provara" only. See AGENTS.md for details.

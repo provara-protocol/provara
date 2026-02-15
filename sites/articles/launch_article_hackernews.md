@@ -4,7 +4,7 @@ Every AI agent framework shipping today has a memory problem. Not a "we need mor
 
 Now zoom out. The same problem exists for humans. Your photos are on iCloud. Your documents are on Google Drive. Your notes are in Notion. Your family records are scattered across a dozen services, each with its own terms of service, its own export format, and zero cryptographic guarantees that the data hasn't been modified. Try inheriting someone's digital life. Try proving what was there before something was deleted. You can't.
 
-I spent the last several months building an open protocol to solve this. It's called **[Provara](https://provara.dev)**, and it's a sovereign, tamper-evident, offline-first memory system that works for both humans and AI agents using the same underlying architecture. Seven Python modules. 110 tests. One dependency. Here's how it works.
+We spent the last several months building an open protocol to solve this. It's called **[Provara](https://provara.dev)**, and it's a sovereign, tamper-evident, offline-first memory system that works for both humans and AI agents using the same underlying architecture. Seven Python modules. 110 tests. One dependency. Here's how it works.
 
 ---
 
@@ -22,7 +22,7 @@ What if your memory system outlasted the company that built it?
 
 ## Design Constraints
 
-Before writing any code, I locked down what the system had to guarantee:
+Before writing any code, we locked down what the system had to guarantee:
 
 - **Must work fully offline.** Air-gapped operations. No phone-home, no telemetry, no cloud dependency after initial setup.
 - **Must be tamper-evident.** Every event is cryptographically signed and hash-chained. Any modification -- even a single flipped bit -- is detectable.
@@ -156,7 +156,7 @@ The merge ratchet ensures safety constraints only tighten automatically during s
 
 ---
 
-## What I Built
+## What We Built
 
 Here are the numbers:
 
@@ -194,7 +194,7 @@ The compliance test suite is designed to be run against any implementation. If y
 
 ## The Dual-Audience Insight
 
-Here's the thing that surprised me most during the design process: the same protocol naturally serves two very different audiences.
+Here's the thing that surprised us most during the design process: the same protocol naturally serves two very different audiences.
 
 **For families**, Provara is a digital vault. Tamper-proof records that can be passed down for generations. No cloud accounts to expire. No services to sunset. No export formats to rot. Open the event log in a text editor in 2076 and it reads exactly the same as it does today. Key management supports a quorum model -- root and recovery keys stored in separate physical locations -- so that inheritance is a key handoff, not a password guessing game.
 
@@ -208,7 +208,7 @@ The best infrastructure serves multiple audiences without compromise.
 
 ## Why Not Blockchain?
 
-I know this will come up, so let me address it directly.
+We know this will come up, so let us address it directly.
 
 Provara provides the same guarantees people associate with blockchain: tamper evidence, hash chains, cryptographic signatures, append-only logs. But it does this without consensus mechanisms, without gas fees, without network dependency, and without requiring anyone to run a node.
 
@@ -231,7 +231,7 @@ What's coming:
 - **Sync layer** (`sync_v0.py`) -- multi-device event merging with fencing tokens and lease-based conflict prevention
 - **Family Vault desktop app** -- a GUI wrapper so non-technical users can create, browse, and back up vaults without touching a command line
 - **Formal specification document** -- the full normative protocol spec for cross-language implementation
-- **Consulting** -- if you're building autonomous agents and need verifiable cognitive continuity, I'd be glad to help design the memory architecture
+- **Consulting** -- if you're building autonomous agents and need verifiable cognitive continuity, we'd be glad to help design the memory architecture
 
 The repo is here: **[github.com/huntinformationsystems/provara](https://github.com/huntinformationsystems/provara)**
 
@@ -249,10 +249,10 @@ If you're building AI agents with long-term memory requirements, if you're think
 
 We're entering a period where both humans and AI agents will need memory systems that are sovereign, verifiable, and built to last. Not memory as a service. Not memory locked behind an API. Memory as infrastructure -- something you own, something you can prove, something that outlasts the tools that created it.
 
-Provara is my answer to that. It's not the only answer, but it's an honest one: real cryptography, real tests, real code you can read in an afternoon. No magic. No hand-waving. Just Ed25519, SHA-256, and the discipline to build something that works the same way on every machine, every time, for the next fifty years.
+Provara is our answer to that. It's not the only answer, but it's an honest one: real cryptography, real tests, real code you can read in an afternoon. No magic. No hand-waving. Just Ed25519, SHA-256, and the discipline to build something that works the same way on every machine, every time, for the next fifty years.
 
 The repo is open. The protocol is frozen. The compliance tests are waiting.
 
 **[github.com/huntinformationsystems/provara](https://github.com/huntinformationsystems/provara)**
 
-*[Hunt Information Systems](https://huntinformationsystems.com) -- we build systems that remember.*
+*Provara -- Sovereign Memory. Verifiable Continuity.*

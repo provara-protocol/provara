@@ -5,12 +5,29 @@
 
 ## Project Identity
 
-- **Company:** Hunt Information Systems LLC
-- **Product:** Provara Legacy Kit
+- **Public Brand:** Provara — the open-source protocol and everything the public sees
+- **Parent Entity:** Hunt Information Systems LLC — legal/private entity, NOT promoted publicly
 - **Protocol:** Provara Protocol v1.0 (formerly SNP)
 - **Motto:** Sovereign Memory. Verifiable Continuity.
 - **License:** Apache 2.0
 - **Repo:** https://github.com/huntinformationsystems/provara
+
+### Two-Brand Architecture
+
+```
+Hunt Information Systems LLC (private layer)
+├── Legal entity for contracts, taxes, filings
+├── Market intelligence, scanning, proprietary research
+├── NOT promoted in public-facing content
+│
+└── Provara (public layer)
+    ├── Open-source protocol, PyPI package, MCP server
+    ├── All social media, docs, community, marketing
+    ├── Future hosted services + enterprise sales
+    └── DBA filed under the LLC
+```
+
+**Rule:** All public-facing content (README, docs, social, blog posts, conference talks) uses "Provara" or "the Provara team" as the identity. "Hunt Information Systems" only appears in legal documents, contracts, and LICENSE files where a registered entity is required. AI agents must default to "Provara" in all generated content.
 
 ## Architecture
 
@@ -89,11 +106,30 @@ The owner is a **visual-first operator** — thinks in dashboards, websites, and
 - Maximize autonomous progress on every invocation. Batch aggressively. Parallelize everything.
 - Treat every session as if it may be the only one for a while — leave the codebase in a clean, tested, committable state.
 
+## OPSEC — Anonymity & Remote-First
+
+The owner operates **anonymously behind the LLC**. Hunt Information Systems LLC is the public identity. The founder is invisible.
+
+**Hard rules for all AI agents:**
+
+1. **NEVER output the owner's real name** in any code, commit message, documentation, article, social media draft, or public-facing content. If you encounter it in existing files, flag it — do not propagate it.
+2. **NEVER include personal email addresses, phone numbers, physical addresses, or location details** in any output. No city, state, country, or timezone references that could identify the owner.
+3. **ALWAYS use company voice** — write as "Hunt Information Systems," "the Provara team," or "the maintainers." Never first-person singular ("I built this"). Use "we" or passive voice for public content.
+4. **Git identity = company identity.** Commits must use the company name and brand email, never personal credentials.
+5. **All account registrations use brand email** (contact@huntinformationsystems.com or hello@huntinformationsystems.com). Never personal email.
+6. **The LLC is the author, seller, and maintainer** in all package metadata (pyproject.toml, package.json, Cargo.toml), LICENSE files, and platform registrations.
+7. **Domain WHOIS privacy enabled** on all domain registrations.
+8. **No identifying metadata** — strip EXIF data from images, avoid personal references in comments or changelogs.
+
+**Why this matters:** The owner works remotely and location-independently. The LLC is the shield between the project and the person. This is a permanent operational constraint, not a temporary preference. Every session, every commit, every public artifact must respect this boundary.
+
 ## Division of Labor
 
 The owner handles: websites, dashboards, domains, business formation, marketing, and deployment.
 
 AI agents handle: backend code, test coverage, protocol implementation, documentation, CI/CD, and code quality. Agents should operate with maximum autonomy on backend work — the goal is an army of arms behind the scenes while the owner focuses on the product surface.
+
+**Branding rule for agents:** When generating any public-facing content (README text, blog drafts, social posts, documentation, release notes), use "Provara" as the brand. Do NOT use "Hunt Information Systems" in public content. The LLC name is reserved for legal contexts only (LICENSE files, contract templates, legal notices).
 
 ## Roadmap Priorities (for AI agents)
 
