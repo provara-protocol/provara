@@ -31,7 +31,7 @@ Right now we're consulting on AI memory architecture for teams building autonomo
 
 If you're building autonomous agents and need verifiable cognitive continuity, let's talk.
 
-Protocol: https://github.com/huntinformationsystems/provara
+Protocol: https://github.com/provara-protocol/provara
 
 ---
 
@@ -52,7 +52,7 @@ Currently shipping consulting engagements for AI memory architecture design — 
 ## 4. Featured Section Suggestions
 
 1. **GitHub Repository — Provara Protocol**
-   https://github.com/huntinformationsystems/provara
+   https://github.com/provara-protocol/provara
    Pin this first. The repo is the credibility anchor: working code, 110 tests, Apache 2.0 license, full README. Anyone can clone it, run the compliance suite, and read the event log in a text editor.
 
 2. **Launch Article — "We Built a Cryptographic Memory Vault — Here's the Protocol"**

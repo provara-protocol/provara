@@ -108,7 +108,7 @@
   <circle cx="704" cy="476" r="1.5" fill="#3fb950" opacity="0.5"/>
   <circle cx="802" cy="476" r="1.5" fill="#3fb950" opacity="0.5"/>
 
-  <!-- Bottom-right: huntinformationsystems org mark -->
+  <!-- Bottom-right: provara-protocol org mark -->
   <g transform="translate(1190, 580)">
     <!-- Small terminal prompt icon -->
     <rect x="-70" y="-14" width="28" height="20" rx="3" fill="none" stroke="#30363d" stroke-width="1.2"/>
@@ -121,7 +121,7 @@
       font-size="14"
       fill="#484f58"
       letter-spacing="0.5"
-    >huntinformationsystems</text>
+    >provara-protocol</text>
   </g>
 
   <!-- Bottom-left: version hint -->
@@ -131,5 +131,5 @@
     font-family="'Cascadia Code', 'SF Mono', Consolas, monospace"
     font-size="12"
     fill="#30363d"
-  >github.com/huntinformationsystems/provara</text>
+  >github.com/provara-protocol/provara</text>
 </svg>

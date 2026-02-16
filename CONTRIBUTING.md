@@ -52,7 +52,7 @@ Code improvements, bug fixes, documentation corrections, and new test cases are 
 1. **Clone the repository:**
 
    ```
-   git clone https://github.com/huntinformationsystems/provara.git
+   git clone https://github.com/provara-protocol/provara.git
    cd provara
    ```
 

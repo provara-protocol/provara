@@ -233,10 +233,10 @@ What's coming:
 - **Formal specification document** -- the full normative protocol spec for cross-language implementation
 - **Consulting** -- if you're building autonomous agents and need verifiable cognitive continuity, we'd be glad to help design the memory architecture
 
-The repo is here: **[github.com/huntinformationsystems/provara](https://github.com/huntinformationsystems/provara)**
+The repo is here: **[github.com/provara-protocol/provara](https://github.com/provara-protocol/provara)**
 
 ```bash
-git clone https://github.com/huntinformationsystems/provara.git
+git clone https://github.com/provara-protocol/provara.git
 cd provara
 python -m pytest
 ```
@@ -253,6 +253,6 @@ Provara is our answer to that. It's not the only answer, but it's an honest one:
 
 The repo is open. The protocol is frozen. The compliance tests are waiting.
 
-**[github.com/huntinformationsystems/provara](https://github.com/huntinformationsystems/provara)**
+**[github.com/provara-protocol/provara](https://github.com/provara-protocol/provara)**
 
 *Provara -- Sovereign Memory. Verifiable Continuity.*

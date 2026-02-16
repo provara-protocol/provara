@@ -12,7 +12,7 @@ If you discover a security vulnerability in the Provara Protocol or its referenc
 
 Instead, report via one of these channels:
 
-1. **GitHub Private Vulnerability Reporting** (preferred): Use the [Security Advisories](https://github.com/huntinformationsystems/provara/security/advisories/new) feature on this repository to report privately.
+1. **GitHub Private Vulnerability Reporting** (preferred): Use the [Security Advisories](https://github.com/provara-protocol/provara/security/advisories/new) feature on this repository to report privately.
 2. **Email**: **security@huntinformationsystems.com**
 
 Include:

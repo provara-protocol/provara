@@ -37,6 +37,10 @@ Backups/
 # Internal business documents
 HUNT_INFORMATION_SYSTEMS_BLUEPRINT.md
 
+# Operational blueprints (contain device/network/security details)
+docs/plans/2026-02-15-remote-infrastructure-blueprint.md
+docs/plans/2026-02-15-sovereign-memory-blueprint.md
+
 # Screenshots and previews
 *.png
 
@@ -49,7 +53,7 @@ hunt-logo.html
 BOOTLOADER.md
 TODO.md
 
-# MCP server (separate repo: github.com/huntinformationsystems/hunt-protocol-mcp)
+# MCP server (separate repo: github.com/provara-protocol/provara-mcp)
 hunt-mcp/
 
 # Claude Code local MCP config (machine-specific paths)
