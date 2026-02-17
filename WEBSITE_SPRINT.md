@@ -18,10 +18,13 @@ Build three coordinated websites that establish Provara as the **default memory 
 | Domain | Purpose | Audience | Content |
 |--------|---------|----------|---------|
 | **provara.dev** | Primary site | Developers, adopters | Docs, quickstart, API reference, GitHub links |
-| **provara.ai** | Technical depth | AI researchers, enterprises | Whitepapers, EU AI Act compliance, architecture deep-dives |
-| **provara.com** | Consumer-facing | Individuals, families | "Preserve your memories for 50 years" narrative |
+| **provara.app** | Product/Consumer | Individuals, AI agents | Hosted vaults, pricing, "Preserve your memories" |
+| **huntinformationsystems.com** | Corporate/Legal | Enterprises, regulators | Company info, compliance, EU AI Act, contact |
 
-**Brand rule:** All sites use "Provara" (not "Hunt Information Systems"). Legal entity only appears in footer copyright.
+**Brand rule:** 
+- provara.dev/app → "Provara" brand (public-facing)
+- huntinformationsystems.com → "Hunt Information Systems LLC" (legal entity)
+- Legal entity only appears in footer copyright on Provara sites
 
 ---
 
@@ -79,44 +82,7 @@ Build three coordinated websites that establish Provara as the **default memory 
 
 ---
 
-## provara.ai (Priority #2)
-
-### Required Pages
-
-1. **Homepage** (`/`)
-   - "Cryptographic Truth Without Consensus"
-   - Technical audience positioning
-   - Links to spec, whitepapers, conformance tests
-
-2. **Protocol Spec** (`/spec/`)
-   - Embedded `BACKPACK_PROTOCOL_v1.0.html`
-   - Version selector (v1.0 only for now)
-   - PDF download option
-
-3. **Whitepapers** (`/papers/`)
-   - "EU AI Act Article 12 Compliance with Provara"
-   - "AI Agent Memory Requirements"
-   - "50-Year Readability: Design for Digital Longevity"
-
-4. **Conformance** (`/conformance/`)
-   - Test vector download
-   - Implementation checklist
-   - "Provara Conformant" certification info
-
-5. **Governance** (`/governance/`)
-   - Extension registry process
-   - IANA considerations
-   - RFC submission process
-
-### Tone
-
-- Academic but accessible
-- Cite the spec, not the implementation
-- Position as infrastructure, not product
-
----
-
-## provara.com (Priority #3)
+## provara.app (Priority #2)
 
 ### Required Pages
 
@@ -124,7 +90,7 @@ Build three coordinated websites that establish Provara as the **default memory 
    - "Your Memories, Forever"
    - Emotional narrative (family photos, cognitive continuity)
    - "No cloud dependency" positioning
-   - Consumer pricing ($5-10/month for hosted vaults)
+   - Hosted vault pricing ($5-10/month)
 
 2. **How It Works** (`/how-it-works/`)
    - Non-technical explainer
@@ -152,6 +118,44 @@ Build three coordinated websites that establish Provara as the **default memory 
 - Warm, human, accessible
 - No cryptography jargon
 - Focus on outcomes, not technology
+
+---
+
+## huntinformationsystems.com (Priority #3)
+
+### Required Pages
+
+1. **Homepage** (`/`)
+   - "Hunt Information Systems LLC"
+   - "Builders of Provara Protocol"
+   - Corporate positioning
+   - Contact information
+
+2. **Provara** (`/provara/`)
+   - Link to provara.dev (primary product)
+   - Brief overview
+   - Investment/ownership disclosure
+
+3. **Compliance** (`/compliance/`)
+   - EU AI Act Article 12 positioning
+   - Whitepapers
+   - Regulatory contact
+
+4. **About** (`/about/`)
+   - Company mission
+   - Anonymous founder note ("Built for 50-year longevity")
+   - OPSEC-compliant story
+
+5. **Contact** (`/contact/`)
+   - Business inquiries
+   - Regulatory contact
+   - Press inquiries
+
+### Tone
+
+- Professional, corporate
+- Legitimate business presence
+- Separate from Provara brand (but owns it)
 
 ---
 
@@ -198,8 +202,8 @@ Build three coordinated websites that establish Provara as the **default memory 
 | Agent | Domain | Responsibilities |
 |-------|--------|------------------|
 | **Claude Opus** | provara.dev | Homepage, quickstart, docs structure |
-| **Gemini CLI** | provara.ai | Spec integration, whitepapers, conformance |
-| **Codex** | provara.com | Consumer copy, pricing, signup flow |
+| **Gemini CLI** | provara.app | Consumer copy, pricing, use cases |
+| **Codex** | huntinformationsystems.com | Corporate site, compliance pages |
 | **Qwen** | All three | Design system, shared components, deployment |
 
 ### Coordination Protocol
@@ -218,17 +222,18 @@ sites/
 │   ├── docs/
 │   ├── examples/
 │   └── about/
-├── ai/            # provara.ai
-│   ├── index.html
-│   ├── spec/
-│   ├── papers/
-│   └── conformance/
-├── com/           # provara.com
+├── app/           # provara.app
 │   ├── index.html
 │   ├── how-it-works/
 │   ├── use-cases/
 │   ├── pricing/
 │   └── signup/
+├── his/           # huntinformationsystems.com
+│   ├── index.html
+│   ├── provara/
+│   ├── compliance/
+│   ├── about/
+│   └── contact/
 └── _shared/       # Shared CSS, JS, components
     ├── css/
     ├── js/
@@ -244,19 +249,24 @@ sites/
 1. Go to https://pages.cloudflare.com/
 2. Connect GitHub repo `provara-protocol/provara`
 3. Create 3 projects:
-   - `provara-dev` → `sites/dev/`
-   - `provara-ai` → `sites/ai/`
-   - `provara-com` → `sites/com/`
-4. Custom domains:
-   - provara.dev → `provara-dev.pages.dev`
-   - provara.ai → `provara-ai.pages.dev`
-   - provara.com → `provara-com.pages.dev`
+   - `provara-dev` → `sites/dev/` → Custom domain: **provara.dev**
+   - `provara-app` → `sites/app/` → Custom domain: **provara.app**
+   - `hunt-his` → `sites/his/` → Custom domain: **huntinformationsystems.com**
+4. DNS configuration:
+   - provara.dev → CNAME to `provara-dev.pages.dev`
+   - provara.app → CNAME to `provara-app.pages.dev`
+   - huntinformationsystems.com → CNAME to `hunt-his.pages.dev`
 
 ### Build Settings
 
 - **Build command:** None (static site)
 - **Output directory:** Site-specific folder
 - **Environment variables:** None needed
+
+### SSL/HTTPS
+
+- Automatic via Cloudflare (included free)
+- Force HTTPS redirect enabled
 
 ---
 
@@ -312,10 +322,10 @@ sites/
 
 1. **[DEV]** Create provara.dev homepage with hero, code snippet, badges
 2. **[DEV]** Build quickstart page from BOOTSTRAP.md content
-3. **[AI]** Embed BACKPACK_PROTOCOL_v1.0.html into spec page
-4. **[AI]** Draft "EU AI Act Compliance" whitepaper outline
-5. **[COM]** Write consumer homepage copy ("Your Memories, Forever")
-6. **[COM]** Create pricing page with 3-tier structure
+3. **[APP]** Write consumer homepage copy ("Your Memories, Forever")
+4. **[APP]** Create pricing page with 3-tier structure
+5. **[HIS]** Draft corporate homepage (Hunt Information Systems LLC)
+6. **[HIS]** Write compliance/EU AI Act page outline
 7. **[ALL]** Build shared design system (`sites/_shared/css/`)
 
 **Commit by end of session. Update this file with progress.**
