@@ -289,6 +289,16 @@ def cmd_hedge_fund_sim(args: argparse.Namespace) -> None:
     )
     print(f"Recorded HEDGE_FUND_SIM for {args.strategy}: {signed['event_id']}")
 
+def cmd_oracle_validate(args: argparse.Namespace) -> None:
+    from .oracle import validate_market_alpha
+    vault = Path(args.path).resolve()
+    keys = Path(args.keyfile).resolve()
+    results = validate_market_alpha(vault, keys, args.actor)
+    if not results:
+        print("No pending MARKET_ALPHA events found.")
+    for r in results:
+        print(f"ATTESTATION recorded: {r['event_id']} (Target: {r['payload']['target_event_id']})")
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="provara", description="Provara Protocol CLI")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -355,6 +365,12 @@ def main() -> None:
     p_hf.add_argument("--ticker")
     p_hf.add_argument("--keyfile", required=True)
     p_hf.add_argument("--actor", default="simulation_engine")
+
+    # oracle-validate
+    p_ov = sub.add_parser("oracle-validate", help="Scan and attest to market alpha performance")
+    p_ov.add_argument("path", help="Path to vault")
+    p_ov.add_argument("--keyfile", required=True)
+    p_ov.add_argument("--actor", default="oracle_node_01")
     
     args = parser.parse_args()
     
@@ -367,6 +383,7 @@ def main() -> None:
     elif args.command == "append": cmd_append(args)
     elif args.command == "market-alpha": cmd_market_alpha(args)
     elif args.command == "hedge-fund-sim": cmd_hedge_fund_sim(args)
+    elif args.command == "oracle-validate": cmd_oracle_validate(args)
 
 if __name__ == "__main__":
     main()
