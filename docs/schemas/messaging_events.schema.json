@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://provara.dev/schemas/v1/messaging_events.schema.json",
+  "title": "Provara Sovereign Messaging",
+  "description": "Schemas for encrypted agent-to-agent communication.",
+  "definitions": {
+    "ENCRYPTED_MESSAGE": {
+      "type": "object",
+      "required": ["recipient_key_id", "ciphertext", "nonce"],
+      "properties": {
+        "recipient_key_id": { "type": "string", "pattern": "^bp1_[a-f0-9]{16}$" },
+        "sender_ephemeral_pubkey_b64": { "type": "string", "description": "X25519 ephemeral pubkey for DH." },
+        "nonce": { "type": "string", "description": "Base64 nonce for AES-GCM." },
+        "ciphertext": { "type": "string", "description": "Base64 encrypted payload." },
+        "subject": { "type": "string" },
+        "priority": { "enum": ["low", "normal", "high"], "default": "normal" }
+      }
+    }
+  }
+}
