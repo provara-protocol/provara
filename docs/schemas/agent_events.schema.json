@@ -10,6 +10,7 @@
       "properties": {
         "agent_uid": { "type": "string" },
         "agent_root_key_id": { "type": "string", "pattern": "^bp1_[a-f0-9]{16}$" },
+        "agent_encryption_pubkey_b64": { "type": "string", "description": "X25519 public key for messaging." },
         "vault_path": { "type": "string" },
         "model_version": { "type": "string" },
         "permissions": { "type": "array", "items": { "type": "string" } }

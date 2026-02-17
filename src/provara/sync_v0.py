@@ -623,24 +623,8 @@ def _reconstruct_state(
             pub_key = resolve_public_key(cp_dict.get("key_id", ""), registry)
             
             if pub_key and verify_checkpoint(cp_dict, pub_key):
-                # Check if checkpoint's merkle_root matches current file system
-                # (Skip this check for performance if we trust the vault directory)
-                
                 # Load checkpoint state into reducer
-                cp_state = cp_dict["state"]
-                reducer.state["canonical"] = cp_state.get("canonical", {})
-                reducer.state["local"] = cp_state.get("local", {})
-                reducer.state["contested"] = cp_state.get("contested", {})
-                reducer.state["archived"] = cp_state.get("archived", {})
-                
-                meta_p = cp_state.get("metadata_partial", {})
-                reducer.state["metadata"]["last_event_id"] = meta_p.get("last_event_id")
-                reducer.state["metadata"]["event_count"] = meta_p.get("event_count", 0)
-                reducer.state["metadata"]["current_epoch"] = meta_p.get("current_epoch")
-                reducer.state["metadata"]["reducer"] = meta_p.get("reducer")
-                
-                # Recompute initial state hash from checkpoint
-                reducer.state["metadata"]["state_hash"] = reducer._compute_state_hash()
+                reducer.load_checkpoint(cp_dict)
                 
                 # Find events that happened AFTER this checkpoint
                 last_id = reducer.state["metadata"]["last_event_id"]

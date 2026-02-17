@@ -604,6 +604,45 @@ class TestBackpackComplianceV1(unittest.TestCase):
             f"Found: {retention.get('events')}",
         )
 
+    # ==================================================================
+    # Cryptographic Proof
+    # ==================================================================
+
+    def test_18_event_signatures(self):
+        """Verify all event signatures using the parallel verification engine."""
+        from provara.sync_v0 import iter_events, verify_all_signatures
+        from provara.backpack_signing import load_keys_registry
+        
+        events_path = self.root / "events" / "events.ndjson"
+        keys_path = self.root / "identity" / "keys.json"
+        
+        if not events_path.is_file():
+            self.skipTest("events.ndjson missing")
+        if not keys_path.is_file():
+            self.skipTest("keys.json missing")
+            
+        # 1. Load context
+        events = list(iter_events(events_path))
+        registry = load_keys_registry(keys_path)
+        
+        # 2. Run Parallel Verification
+        valid, invalid, errors = verify_all_signatures(events, registry)
+        
+        # 3. Assert
+        self.assertEqual(
+            invalid, 0,
+            f"Cryptographic integrity failed! {invalid} invalid signatures detected.\n"
+            + "\n".join(errors)
+        )
+        # Ensure we actually checked something if log isn't empty
+        if len(events) > 0:
+            # Note: GENESIS might be unsigned in some test vectors? 
+            # No, spec says GENESIS is signed.
+            self.assertGreater(
+                valid, 0, 
+                "No signatures were verified. Is the log unsigned?"
+            )
+
 
 # ---------------------------------------------------------------------------
 # Runner
