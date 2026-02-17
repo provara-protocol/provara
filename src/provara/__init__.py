@@ -63,7 +63,8 @@ class Vault:
         return cls(path)
 
     def replay_state(self) -> Dict[str, Any]:
-        events = load_events(self.path / "events" / "events.ndjson")
+        from .sync_v0 import iter_events
+        events = iter_events(self.path / "events" / "events.ndjson")
         reducer = SovereignReducer()
         reducer.apply_events(events)
         return reducer.export_state()
@@ -82,16 +83,17 @@ class Vault:
         """Append a signed event to the vault."""
         import json
         from datetime import datetime, timezone
-        from .sync_v0 import write_events
+        from .sync_v0 import write_events, iter_events
 
         # 1. Load keys
         priv = load_private_key_b64(private_key_b64)
 
-        # 2. Find prev_hash
+        # 2. Find prev_hash (Streaming Search)
         events_file = self.path / "events" / "events.ndjson"
-        all_events = load_events(events_file)
-        actor_events = [e for e in all_events if e.get("actor_key_id") == key_id]
-        prev_hash = actor_events[-1].get("event_id") if actor_events else None
+        prev_hash = None
+        for e in iter_events(events_file):
+            if e.get("actor_key_id") == key_id:
+                prev_hash = e.get("event_id")
 
         # 3. Build event
         event = {
