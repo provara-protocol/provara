@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Threat Model | provara.dev</title>
+  <meta name="description" content="Provara Protocol v1.0 threat model and primary defenses.">
+  <meta property="og:title" content="Provara Threat Model">
+  <meta property="og:description" content="Threats, protocol defenses, and operator duties for Provara v1.0.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://provara.dev/threat-model">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary">
+      <div class="brand">provara.dev <small>threat model</small></div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="spec.html">Spec v1.0</a>
+        <a href="threat-model.html" aria-current="page">Threat Model</a>
+        <a href="compliance-kit.html">Compliance Kit</a>
+        <a href="https://github.com/provara-protocol/provara">GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="container">
+    <section class="hero">
+      <h1>Threat Model</h1>
+      <p>Derived from Security Considerations in <span class="mono">docs/BACKPACK_PROTOCOL_v1.0.md</span>. Provara provides integrity and authenticity guarantees. Confidentiality is intentionally application-layer.</p>
+    </section>
+
+    <section class="card">
+      <h2>Threats and Primary Defenses</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Threat</th><th>Primary defense</th><th>Residual operator duty</th></tr></thead>
+          <tbody>
+            <tr><td>Event tampering</td><td>SHA-256 hash chain + Ed25519 signatures</td><td>Run verification before trust or sync.</td></tr>
+            <tr><td>Event deletion or reordering</td><td>Per-actor causal chain validation</td><td>Retain full event log and compare with signed checkpoints.</td></tr>
+            <tr><td>Identity takeover</td><td>Two-event key rotation protocol with surviving authority</td><td>Protect root/quorum keys in separate physical locations.</td></tr>
+            <tr><td>Path traversal / manifest spoofing</td><td>Safe path checks + deterministic manifest hashing</td><td>Reject vaults with path safety violations.</td></tr>
+            <tr><td>Reducer nondeterminism</td><td>Canonical JSON + deterministic reducer + vectors</td><td>Continuously run cross-language vector checks.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h3>Security boundaries</h3>
+        <ul>
+          <li><strong>In scope:</strong> integrity, authenticity, replayability, attribution.</li>
+          <li><strong>Out of scope:</strong> transport encryption, endpoint compromise, user opsec mistakes.</li>
+          <li><strong>Confidentiality:</strong> not provided by protocol storage format.</li>
+        </ul>
+      </article>
+      <aside class="card">
+        <h3>Operational guidance</h3>
+        <div class="code"><pre># verify local vault
+python tests/backpack_compliance_v1.py tests/fixtures/reference_backpack -v
+
+# verify candidate implementation
+python tools/conformance/verify_impl.py --vault /path/to/vault</pre></div>
+      </aside>
+    </section>
+
+    <section class="card">
+      <h3>Confidentiality note</h3>
+      <p>Event payloads are plaintext JSON by design for 50-year readability and auditability. Encrypt sensitive values before writing payloads when confidentiality requirements exist.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner"><div>Security posture for Provara v1.0</div><div>&copy; <span id="year"></span> Provara</div></div>
+  </footer>
+  <script src="assets/site.js"></script>
+</body>
+</html>

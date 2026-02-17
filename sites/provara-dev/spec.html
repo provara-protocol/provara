@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spec v1.0 | provara.dev</title>
+  <meta name="description" content="Normative Provara Protocol v1.0 specification references and implementation essentials.">
+  <meta property="og:title" content="Provara Spec v1.0">
+  <meta property="og:description" content="Normative protocol profile and implementation references.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://provara.dev/spec/v1.0">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary">
+      <div class="brand">provara.dev <small>spec</small></div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="spec.html" aria-current="page">Spec v1.0</a>
+        <a href="threat-model.html">Threat Model</a>
+        <a href="compliance-kit.html">Compliance Kit</a>
+        <a href="https://github.com/provara-protocol/provara">GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="container">
+    <section class="hero">
+      <h1>Specification</h1>
+      <p>This page maps directly to repository artifacts used by implementers. The frozen normative source is <span class="mono">PROTOCOL_PROFILE.txt</span>; companion documents provide readable structure and operational guidance.</p>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Normative Source</h2>
+        <p><strong>Canonical URL:</strong> <a href="https://provara.dev/spec/v1.0">https://provara.dev/spec/v1.0</a></p>
+        <p><strong>Frozen profile:</strong> <a href="https://github.com/provara-protocol/provara/blob/main/PROTOCOL_PROFILE.txt"><span class="mono">PROTOCOL_PROFILE.txt</span></a></p>
+        <p><strong>Human-readable companion:</strong> <a href="https://github.com/provara-protocol/provara/blob/main/docs/BACKPACK_PROTOCOL_v1.0.md"><span class="mono">docs/BACKPACK_PROTOCOL_v1.0.md</span></a></p>
+      </article>
+      <aside class="card">
+        <h3>Spec Essentials</h3>
+        <ul>
+          <li>Ed25519 signatures over canonical event digest</li>
+          <li>SHA-256 chain linkage and integrity checks</li>
+          <li>Per-actor causal ordering</li>
+          <li>Deterministic reducer and state hash</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section>
+      <h2 class="section-title">Implementation Checklist</h2>
+      <ol>
+        <li>Implement canonical JSON serialization per RFC 8785.</li>
+        <li>Implement Ed25519 signature verify/sign per RFC 8032.</li>
+        <li>Implement chain verification algorithm from <span class="mono">docs/CHAIN_VALIDATION.md</span>.</li>
+        <li>Validate against <span class="mono">test_vectors/vectors.json</span>.</li>
+        <li>Pass the 17 compliance tests.</li>
+      </ol>
+      <div class="code"><pre>python tools/conformance/verify_impl.py --vault /path/to/vault
+python tests/backpack_compliance_v1.py tests/fixtures/reference_backpack -v</pre></div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Direct Spec Artifacts</h2>
+      <ul>
+        <li><a href="https://github.com/provara-protocol/provara/blob/main/docs/spec/v1.0/index.html">docs/spec/v1.0/index.html</a></li>
+        <li><a href="https://github.com/provara-protocol/provara/blob/main/docs/spec/v1.0/provara-v1.0-spec.txt">docs/spec/v1.0/provara-v1.0-spec.txt</a></li>
+        <li><a href="https://github.com/provara-protocol/provara/blob/main/docs/ERROR_CODES.md">docs/ERROR_CODES.md</a></li>
+        <li><a href="https://github.com/provara-protocol/provara/blob/main/docs/schemas/provara_event_schema_v1.json">docs/schemas/provara_event_schema_v1.json</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner"><div>Spec references for v1.0</div><div>&copy; <span id="year"></span> Provara</div></div>
+  </footer>
+  <script src="assets/site.js"></script>
+</body>
+</html>
