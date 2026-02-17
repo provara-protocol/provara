@@ -27,15 +27,10 @@ import sys
 from pathlib import Path
 
 # Add SNP_Core/bin to path
-_project_root = Path(__file__).resolve().parent.parent
-_snp_core_bin = _project_root / "SNP_Core" / "bin"
-if str(_snp_core_bin) not in sys.path:
-    sys.path.insert(0, str(_snp_core_bin))
-
-from bootstrap_v0 import bootstrap_backpack
-from reducer_v0 import SovereignReducerV0
-from sync_v0 import sync_backpacks, verify_causal_chain, load_events, export_delta, import_delta
-from canonical_json import canonical_dumps
+from provara.bootstrap_v0 import bootstrap_backpack
+from provara.reducer_v0 import SovereignReducerV0
+from provara.sync_v0 import sync_backpacks, verify_causal_chain, load_events, export_delta, import_delta
+from provara.canonical_json import canonical_dumps
 
 
 def cmd_init(args):

@@ -41,15 +41,10 @@ logging.basicConfig(
 logger = logging.getLogger("provara-mcp")
 
 # Add SNP_Core/bin to path for Provara primitives
-_project_root = Path(__file__).resolve().parent.parent
-_snp_core_bin = _project_root / "SNP_Core" / "bin"
-if str(_snp_core_bin) not in sys.path:
-    sys.path.insert(0, str(_snp_core_bin))
-
-from bootstrap_v0 import bootstrap_backpack, BootstrapResult
-from reducer_v0 import SovereignReducerV0
-from sync_v0 import sync_backpacks, verify_causal_chain, load_events, export_delta, import_delta
-from backpack_signing import BackpackKeypair
+from provara.bootstrap_v0 import bootstrap_backpack, BootstrapResult
+from provara.reducer_v0 import SovereignReducerV0
+from provara.sync_v0 import sync_backpacks, verify_causal_chain, load_events, export_delta, import_delta
+from provara.backpack_signing import BackpackKeypair
 
 
 # ---------------------------------------------------------------------------
