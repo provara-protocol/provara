@@ -31,6 +31,7 @@ from .sync_v0 import sync_backpacks, load_events
 from .checkpoint_v0 import create_checkpoint, load_latest_checkpoint
 from .perception_v0 import emit_perception_event, PerceptionTier
 from .market import record_market_alpha, record_hedge_fund_sim
+from .oracle import validate_market_alpha
 
 
 class Vault:
@@ -68,6 +69,157 @@ class Vault:
     def sync_from(self, remote_path: str | Path) -> Any:
         return sync_backpacks(self.path, Path(remote_path).resolve())
 
+    def append_event(
+        self,
+        event_type: str,
+        payload: Dict[str, Any],
+        key_id: str,
+        private_key_b64: str,
+        actor: str = "provara_sdk",
+    ) -> Dict[str, Any]:
+        """Append a signed event to the vault."""
+        import json
+        from datetime import datetime, timezone
+        from .sync_v0 import write_events
+
+        # 1. Load keys
+        priv = load_private_key_b64(private_key_b64)
+
+        # 2. Find prev_hash
+        events_file = self.path / "events" / "events.ndjson"
+        all_events = load_events(events_file)
+        actor_events = [e for e in all_events if e.get("actor_key_id") == key_id]
+        prev_hash = actor_events[-1].get("event_id") if actor_events else None
+
+        # 3. Build event
+        event = {
+            "type": event_type.upper(),
+            "actor": actor,
+            "prev_event_hash": prev_hash,
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+            "payload": payload,
+        }
+
+        # 4. Content ID
+        eid_hash = canonical_hash(event)
+        event["event_id"] = f"evt_{eid_hash[:24]}"
+
+        # 5. Sign
+        signed = sign_event(event, priv, key_id)
+
+        # 6. Append
+        with open(events_file, "a", encoding="utf-8") as f:
+            f.write(canonical_dumps(signed) + "\n")
+
+        return signed
+
+    def checkpoint(self, key_id: str, private_key_b64: str) -> Path:
+        """Create a signed state snapshot."""
+        state = self.replay_state()
+        priv = load_private_key_b64(private_key_b64)
+        cp = create_checkpoint(self.path, state, priv, key_id)
+        from .checkpoint_v0 import save_checkpoint
+        return save_checkpoint(self.path, cp)
+
+    def anchor_to_l2(
+        self,
+        key_id: str,
+        private_key_b64: str,
+        network: str = "base-mainnet",
+    ) -> Dict[str, Any]:
+        """
+        Simulate anchoring the current Merkle root to an L2.
+        Records an ANCHOR_ATTESTATION in the vault.
+        """
+        # 1. Get current Merkle root
+        merkle_root_path = self.path / "merkle_root.txt"
+        if not merkle_root_path.exists():
+            raise FileNotFoundError("merkle_root.txt not found. Run manifest first.")
+        merkle_root = merkle_root_path.read_text(encoding="utf-8").strip()
+
+        # 2. MOCK L2 TRANSACTION
+        # In production, this would use web3.py to call a contract
+        import hashlib
+        tx_hash = f"0x{hashlib.sha256(merkle_root.encode()).hexdigest()}"
+
+        payload = {
+            "subject": "vault:state_root",
+            "predicate": "anchored",
+            "value": {
+                "merkle_root": merkle_root,
+                "network": network,
+                "tx_hash": tx_hash,
+                "contract_address": "0xProvaraAnchorV1MockAddress",
+            },
+            "confidence": 1.0,
+            "extension": "provara.crypto.l2_anchor_v1"
+        }
+
+        # 3. Record as ATTESTATION
+        return self.append_event("ATTESTATION", payload, key_id, private_key_b64, actor="anchor_service")
+
+    def create_agent(
+        self,
+        agent_name: str,
+        parent_key_id: str,
+        parent_private_key_b64: str,
+    ) -> Dict[str, Any]:
+        """
+        Spin up a new sovereign sub-agent.
+        1. Generates new keypair.
+        2. Bootstraps a new vault for the agent.
+        3. Records an AGENT_CREATION event in the parent vault (this vault).
+        Returns the new agent's credentials.
+        """
+        import uuid
+        from datetime import datetime, timezone
+        
+        # 1. New Identity
+        new_kp = BackpackKeypair.generate()
+        agent_uid = f"agent-{uuid.uuid4()}"
+        agent_dir = self.path.parent / agent_name
+        
+        # 2. Bootstrap Child Vault
+        res = bootstrap_backpack(
+            agent_dir,
+            uid=agent_uid,
+            actor=agent_name,
+            quiet=True
+        )
+        if not res.success:
+            raise ValueError(f"Failed to bootstrap agent vault: {res.errors}")
+            
+        # 3. Record in Parent Vault
+        payload = {
+            "subject": f"agent:{agent_name}",
+            "predicate": "created",
+            "value": {
+                "agent_uid": agent_uid,
+                "agent_root_key_id": res.root_key_id, # Use bootstrap result key ID
+                "vault_path": str(agent_dir),
+                "created_at_utc": datetime.now(timezone.utc).isoformat(),
+            },
+            "extension": "provara.agent.lifecycle_v1"
+        }
+        
+        # Sign with PARENT authority
+        event = self.append_event(
+            "OBSERVATION", 
+            payload, 
+            parent_key_id, 
+            parent_private_key_b64, 
+            actor="agent_factory"
+        )
+        
+        return {
+            "agent_name": agent_name,
+            "agent_uid": agent_uid,
+            "vault_path": str(agent_dir),
+            "root_key_id": res.root_key_id,
+            "root_private_key": res.root_private_key_b64,
+            "creation_event_id": event["event_id"]
+        }
+
 
 # Backward-compatible alias while public API transitions.
 SovereignReducerV0 = SovereignReducer
@@ -96,4 +248,5 @@ __all__ = [
     "PerceptionTier",
     "record_market_alpha",
     "record_hedge_fund_sim",
+    "validate_market_alpha",
 ]

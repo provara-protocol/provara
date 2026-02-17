@@ -1,6 +1,8 @@
 # AGENTS.md — Universal Project Instructions for AI Coding Agents
 
 > **This file is the single source of truth for any AI agent working on this project.**
+> All agents are strictly bound by the [**PROVARA AGENT GUARDRAILS v1.0**](AGENT_GUARDRAILS.md).
+> "Append only. Lie never."
 > Tool-specific files (CLAUDE.md, GEMINI.md, CODEX.md) extend this file with platform-specific guidance.
 > If anything in a tool-specific file contradicts this file, **this file wins.**
 

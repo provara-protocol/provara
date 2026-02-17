@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://provara.dev/schemas/v1/market_events.schema.json",
+  "title": "Provara Market Intelligence Extensions",
+  "description": "Schemas for high-alpha market observations and AI simulation results.",
+  "definitions": {
+    "MARKET_ALPHA": {
+      "type": "object",
+      "required": ["ticker", "signal", "time_horizon"],
+      "properties": {
+        "ticker": { "type": "string", "description": "Asset identifier (e.g. BTC, NVDA)." },
+        "signal": { "enum": ["LONG", "SHORT", "NEUTRAL"] },
+        "conviction": { "type": "number", "minimum": 0, "maximum": 1 },
+        "time_horizon": { "type": "string", "description": "e.g. 24h, 7d, 30d." },
+        "rationale": { "type": "string" },
+        "catalyst_event_id": { "type": "string", "pattern": "^evt_[a-f0-9]{24}$" }
+      }
+    },
+    "LIQUIDITY_DEPTH": {
+      "type": "object",
+      "required": ["exchange", "pair", "bid_depth", "ask_depth"],
+      "properties": {
+        "exchange": { "type": "string" },
+        "pair": { "type": "string", "description": "e.g. ETH/USDC" },
+        "bid_depth": { "type": "number" },
+        "ask_depth": { "type": "number" },
+        "spread_bps": { "type": "number" }
+      }
+    },
+    "HEDGE_FUND_SIM": {
+      "type": "object",
+      "required": ["simulation_id", "strategy_id", "returns_pct"],
+      "properties": {
+        "simulation_id": { "type": "string" },
+        "strategy_id": { "type": "string" },
+        "ticker": { "type": "string" },
+        "returns_pct": { "type": "number" },
+        "sharpe_ratio": { "type": "number" },
+        "drawdown_max": { "type": "number" },
+        "simulation_logs_ref": { "type": "string", "description": "CAS hash of full logs." }
+      }
+    }
+  }
+}
