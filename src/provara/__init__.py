@@ -32,6 +32,7 @@ from .checkpoint_v0 import create_checkpoint, load_latest_checkpoint
 from .perception_v0 import emit_perception_event, PerceptionTier
 from .market import record_market_alpha, record_hedge_fund_sim
 from .oracle import validate_market_alpha
+from .resume import generate_resume
 
 
 class Vault:
@@ -220,6 +221,37 @@ class Vault:
             "creation_event_id": event["event_id"]
         }
 
+    def log_task(
+        self,
+        key_id: str,
+        private_key_b64: str,
+        task_id: str,
+        status: str,
+        output_hash: str,
+        details: Optional[Dict[str, Any]] = None,
+        actor: str = "agent_worker",
+    ) -> Dict[str, Any]:
+        """
+        Record a TASK_COMPLETION event (The "Billable Hour" of the Agent Economy).
+        """
+        value = {
+            "task_id": task_id,
+            "status": status.upper(),
+            "output_hash": output_hash,
+        }
+        if details:
+            value.update(details)
+            
+        payload = {
+            "subject": f"task:{task_id}",
+            "predicate": "completed",
+            "value": value,
+            "confidence": 1.0,
+            "extension": "provara.agent.task_v1"
+        }
+        
+        return self.append_event("OBSERVATION", payload, key_id, private_key_b64, actor=actor)
+
 
 # Backward-compatible alias while public API transitions.
 SovereignReducerV0 = SovereignReducer
@@ -249,4 +281,5 @@ __all__ = [
     "record_market_alpha",
     "record_hedge_fund_sim",
     "validate_market_alpha",
+    "generate_resume",
 ]

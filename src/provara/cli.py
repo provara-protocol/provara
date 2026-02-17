@@ -299,6 +299,11 @@ def cmd_oracle_validate(args: argparse.Namespace) -> None:
     for r in results:
         print(f"ATTESTATION recorded: {r['event_id']} (Target: {r['payload']['target_event_id']})")
 
+def cmd_resume(args: argparse.Namespace) -> None:
+    from .resume import generate_resume
+    vault = Path(args.path).resolve()
+    print(generate_resume(vault))
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="provara", description="Provara Protocol CLI")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -371,6 +376,10 @@ def main() -> None:
     p_ov.add_argument("path", help="Path to vault")
     p_ov.add_argument("--keyfile", required=True)
     p_ov.add_argument("--actor", default="oracle_node_01")
+
+    # resume
+    p_res = sub.add_parser("resume", help="Generate verifiable agent resume")
+    p_res.add_argument("path", help="Path to vault")
     
     args = parser.parse_args()
     
@@ -384,6 +393,7 @@ def main() -> None:
     elif args.command == "market-alpha": cmd_market_alpha(args)
     elif args.command == "hedge-fund-sim": cmd_hedge_fund_sim(args)
     elif args.command == "oracle-validate": cmd_oracle_validate(args)
+    elif args.command == "resume": cmd_resume(args)
 
 if __name__ == "__main__":
     main()
