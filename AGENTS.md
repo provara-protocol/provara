@@ -383,3 +383,4 @@ passes through the rotation boundary.
 Individual agent profiles with tool-specific details:
 - [`docs/agents/CLAW_PROFILE.md`](docs/agents/CLAW_PROFILE.md) — Claude Sonnet 4.5 (orchestrator)
 - [`docs/agents/CODEX_PROFILE.md`](docs/agents/CODEX_PROFILE.md) — Codex (backend implementation)
+- [`docs/agents/GEMINI_PROFILE.md`](docs/agents/GEMINI_PROFILE.md) — Gemini (CRO / protocol hardening)

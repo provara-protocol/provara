@@ -37,6 +37,7 @@ from backpack_signing import (
     key_id_from_public_bytes,
     sign_event,
 )
+from canonical_json import canonical_dumps, canonical_hash
 from manifest_generator import build_manifest, manifest_leaves
 from backpack_integrity import merkle_root_hex, MANIFEST_EXCLUDE, canonical_json_bytes
 from reducer_v0 import SovereignReducerV0
@@ -205,6 +206,63 @@ def cmd_replay(args):
     state = reducer.export_state()
     print(json.dumps(state, indent=2))
 
+def cmd_append(args):
+    vault = Path(args.path).resolve()
+    keys_data = _load_keys(Path(args.keyfile))
+    
+    # Use specified key or first available
+    kid = args.key_id or list(keys_data.keys())[0]
+    if kid not in keys_data:
+        print(f"Error: Key {kid} not found in {args.keyfile}")
+        sys.exit(1)
+    priv = load_private_key_b64(keys_data[kid])
+    
+    # Load existing events to find prev_hash for this actor
+    all_events = load_events(vault / "events" / "events.ndjson")
+    actor_events = [e for e in all_events if e.get("actor_key_id") == kid]
+    prev_hash = actor_events[-1].get("event_id") if actor_events else None
+    
+    # Build event
+    try:
+        payload_data = json.loads(args.data)
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON data: {e}")
+        sys.exit(1)
+        
+    # Mapping for convenience (similar to psmc)
+    subject = payload_data.get("subject") or "provara_cli"
+    predicate = payload_data.get("predicate") or args.type
+    
+    event = {
+        "type": args.type.upper(),
+        "actor": args.actor or "provara_user",
+        "prev_event_hash": prev_hash,
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "payload": {
+            "subject": subject,
+            "predicate": predicate,
+            "value": payload_data,
+            "confidence": float(args.confidence or 1.0)
+        }
+    }
+    
+    # Compute content-addressed ID: evt_ + SHA256(canonical_json(event_without_id_sig))[:24]
+    eid_hash = canonical_hash(event)
+    event["event_id"] = f"evt_{eid_hash[:24]}"
+    
+    # sign_event handles actor_key_id and sig
+    signed = sign_event(event, priv, kid)
+    
+    # Append
+    events_file = vault / "events" / "events.ndjson"
+    with open(events_file, "a", encoding="utf-8") as f:
+        f.write(canonical_dumps(signed) + "\n")
+        
+    print(f"Appended event {signed['event_id']} (type={signed['type']})")
+    
+    # Auto-regenerate manifest
+    cmd_manifest(args)
+
 def main():
     parser = argparse.ArgumentParser(prog="provara", description="Provara Protocol CLI")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -240,6 +298,16 @@ def main():
     # replay
     p_replay = sub.add_parser("replay", help="Show derived belief state")
     p_replay.add_argument("path", help="Path to vault")
+
+    # append
+    p_app = sub.add_parser("append", help="Append a signed event")
+    p_app.add_argument("path", help="Path to vault")
+    p_app.add_argument("--type", required=True, help="Event type (e.g. OBSERVATION, ASSERTION)")
+    p_app.add_argument("--data", required=True, help="JSON object for event data")
+    p_app.add_argument("--keyfile", required=True, help="Path to your private keys JSON")
+    p_app.add_argument("--key-id", help="Key ID to sign with (defaults to first)")
+    p_app.add_argument("--actor", help="Human-readable actor identifier")
+    p_app.add_argument("--confidence", type=float, help="Confidence score (0.0-1.0)")
     
     args = parser.parse_args()
     
@@ -249,6 +317,7 @@ def main():
     elif args.command == "manifest": cmd_manifest(args)
     elif args.command == "checkpoint": cmd_checkpoint(args)
     elif args.command == "replay": cmd_replay(args)
+    elif args.command == "append": cmd_append(args)
 
 if __name__ == "__main__":
     main()

@@ -514,52 +514,73 @@ The sync protocol is a union merge with causal chain verification.
 
 ### 13.1 Chain Validation Algorithm
 
-To validate the causal integrity of a backpack, a conformant implementation MUST perform the following steps:
+To validate causal and cryptographic integrity, a conformant implementation MUST execute the following deterministic procedure:
 
-1.  **Initialize**: Group all events by `actor`.
-2.  **Sort**: For each actor's event set, sort events by `timestamp_utc` (primary) and `event_id` (secondary, lexicographical).
-3.  **Validate Links**:
-    *   For the **first event** in the sorted set:
-        *   Assert `prev_event_hash` is `null`.
-    *   For every **subsequent event** $E_i$ (where $i > 0$):
-        *   Identify the preceding event $E_{i-1}$ in the sorted set.
-        *   Assert $E_i.prev\_event\_hash == E_{i-1}.event\_id$.
-4.  **Verify Content Identity**:
-    *   For every event $E$:
-        *   Assert $E.event\_id$ matches the content-addressed derivation rule (see §5).
-5.  **Verify Signatures**:
-    *   For every event $E$:
-        *   Assert $E.sig$ is a valid Ed25519 signature over $E$'s canonical form using the public key associated with $E.actor\_key\_id$.
-
-Any failure in steps 3, 4, or 5 MUST result in the chain being marked as invalid.
+1. Parse all NDJSON lines as UTF-8 JSON objects.
+2. Build `event_by_id[event_id]` and fail on duplicate IDs.
+3. For each event:
+   - Recompute content-derived ID from the event with `event_id` and `sig` removed.
+   - Verify recomputed ID equals `event_id`.
+4. Build `actor_events[actor]` and sort each actor list by:
+   - `timestamp_utc` (primary, ascending)
+   - `event_id` (secondary, ascending)
+5. For each actor chain:
+   - First event MUST have `prev_event_hash = null`.
+   - Each subsequent event MUST set `prev_event_hash` to the immediately preceding event ID in that actor-sorted list.
+   - `prev_event_hash` MUST reference an event by the same actor (cross-actor references are invalid).
+6. For each signed event:
+   - Resolve public key by `actor_key_id`.
+   - Reject missing, unknown, or revoked key IDs.
+   - Verify Ed25519 signature over canonical JSON bytes of event-without-`sig`.
+7. If all checks pass, the chain is valid; otherwise invalid with a specific error code (see §16.1).
 
 ### 13.2 Algorithm Pseudocode
 
 ```
 function verify_vault(events):
-    actors = group_by(events, "actor")
-    
-    for actor_id in actors:
-        actor_events = sort(actors[actor_id], by=["timestamp_utc", "event_id"])
-        
-        for i from 0 to len(actor_events) - 1:
-            curr = actor_events[i]
-            
-            # Linkage check
+    event_by_id = {}
+    actor_events = {}
+
+    for e in events:
+        require_utf8_json(e)                                   # PROVARA_E007
+        require_required_fields(e)                             # PROVARA_E004
+        if e.event_id in event_by_id:
+            fail(PROVARA_E010, "DUPLICATE_EVENT_ID")
+        event_by_id[e.event_id] = e
+
+        derived = derive_event_id(remove_fields(e, ["event_id", "sig"]))
+        if derived != e.event_id:
+            fail(PROVARA_E001, "HASH_MISMATCH")
+
+        actor_events[e.actor].append(e)
+
+    for actor in actor_events:
+        chain = sort(actor_events[actor], by=["timestamp_utc", "event_id"])
+        for i in range(0, len(chain)):
+            curr = chain[i]
             if i == 0:
-                assert curr.prev_event_hash == null
+                if curr.prev_event_hash is not null:
+                    fail(PROVARA_E002, "BROKEN_CAUSAL_CHAIN")
             else:
-                prev = actor_events[i-1]
-                assert curr.prev_event_hash == prev.event_id
-            
-            # Content identity check
-            assert curr.event_id == derive_event_id(curr)
-            
-            # Signature check
-            pub_key = lookup_key(curr.actor_key_id)
-            assert verify_signature(curr, pub_key)
-            
-    return true
+                prev = chain[i - 1]
+                if curr.prev_event_hash != prev.event_id:
+                    fail(PROVARA_E002, "BROKEN_CAUSAL_CHAIN")
+
+                # explicit same-actor check for referenced prev
+                linked = event_by_id.get(curr.prev_event_hash)
+                if linked is null or linked.actor != actor:
+                    fail(PROVARA_E011, "CROSS_ACTOR_REFERENCE")
+
+            if has_field(curr, "sig"):
+                key = key_registry.get(curr.actor_key_id)
+                if key is null:
+                    fail(PROVARA_E012, "UNKNOWN_KEY_ID")
+                if key.status == "revoked":
+                    fail(PROVARA_E006, "REVOKED_KEY_USE")
+                if !verify_ed25519_signature(curr, key.public_key):
+                    fail(PROVARA_E003, "INVALID_SIGNATURE")
+
+    return ok()
 ```
 
 ### 13.3 Fencing Tokens
@@ -654,6 +675,12 @@ Standardized error codes for validation failures. Implementations SHOULD use the
 | `PROVARA_E006` | `REVOKED_KEY_USE` | Event signed by a key that was revoked at the time of signing |
 | `PROVARA_E007` | `MALFORMED_JSON` | Event or file is not valid UTF-8 or standard JSON |
 | `PROVARA_E008` | `MERKLE_ROOT_MISMATCH` | Recomputed Merkle root does not match `merkle_root.txt` |
+| `PROVARA_E009` | `UNSAFE_PATH` | Manifest entry path is absolute, traverses `..`, or escapes root |
+| `PROVARA_E010` | `DUPLICATE_EVENT_ID` | Duplicate `event_id` found in a log that requires uniqueness |
+| `PROVARA_E011` | `CROSS_ACTOR_REFERENCE` | Event references previous hash from a different actor chain |
+| `PROVARA_E012` | `UNKNOWN_KEY_ID` | `actor_key_id` cannot be resolved in active key registry |
+
+Canonical source for these codes: `docs/ERROR_CODES.md`
 
 ### 16.2 Minimum Test Coverage
 
@@ -720,21 +747,80 @@ The Python reference implementation is the canonical source of truth for any amb
 
 ### 18.1 Threat Model
 
-| Threat | Provara Defense |
-|--------|-----------------|
-| **Data Tampering** | Merkle tree seals the vault; Ed25519 signatures seal each event. |
-| **History Re-ordering** | Causal hash-chaining enforces total order per actor. |
-| **Silent Deletion** | Causal chain gaps and Merkle root mismatches detect missing files or events. |
-| **Identity Takeover** | Key rotation protocol requires surviving authority; compromised keys cannot self-promote replacements. |
-| **Stale Writes** | Fencing tokens ensure sync operations target the correct chain head. |
+| Threat | Primary Defense | Residual Risk / Operator Duty |
+|--------|------------------|-------------------------------|
+| **Payload/data tampering** | Event signatures + manifest file hashes + Merkle root verification | Private key compromise can still produce valid malicious events until revocation. |
+| **History re-ordering** | Per-actor causal chain (`prev_event_hash`) + deterministic sort on replay | Incorrect timestamp parsing in non-conformant ports can still cause divergence. |
+| **Silent deletion / truncation** | Missing links (`prev_event_hash`) and manifest mismatch detection | Deletion of newest tail events can appear as a stale snapshot if no external anchor/checkpoint is compared. |
+| **Identity takeover** | Rotation requires surviving signer; self-promotion is prohibited | If all authorities are compromised, identity continuity is cryptographically lost (new genesis required). |
+| **Stale-write overwrite** | Fencing token includes latest event ID, timestamp, nonce, and signature | Long offline windows increase merge complexity and contested state volume. |
+| **Fork-and-discard (equivocation)** | Fork detection by identical actor + identical `prev_event_hash`; conflicting branches remain auditable | Governance must define how forks are adjudicated and whether one branch is quarantined. |
+| **Time/backdating manipulation** | Event ID is content-addressed and signed; chain linkage is authoritative, not wall-clock time | `timestamp_utc` is still untrusted metadata and can mislead human readers if not cross-checked. |
+| **Resource-exhaustion (DoS)** | Streaming hash/verification, bounded input handling, malformed-line rejection | Operators must enforce max event size, max payload depth, and replay quotas in production deployments. |
+| **Key ID collision attempt** | Key IDs are SHA-256-derived; practical collision resistance at current security levels | Profile migration plan needed if SHA-256 security assumptions materially degrade in future. |
 
-### 18.2 Privacy
+### 18.2 Mandatory Validation Order
 
-Provara events are stored in plaintext JSON. This protocol provides **integrity** and **authenticity**, but not **confidentiality**. Sensitive data SHOULD be encrypted at the application layer before being placed in an event's `payload.value` field.
+To reduce attack surface and ambiguous error handling, implementations SHOULD validate in this order:
 
-### 18.3 Replay Attacks
+1. UTF-8 + JSON parse checks
+2. Required field checks
+3. Event ID recomputation checks
+4. Causal chain linkage checks
+5. Key resolution/revocation checks
+6. Signature verification checks
+7. Manifest and Merkle verification checks
 
-Events include unique content-addressed IDs and actor sequence numbers (`ts_logical`). Implementations MUST reject duplicate events and out-of-order causal chains.
+Fail closed at the first critical invariant break and emit the corresponding `PROVARA_E###` code.
+
+### 18.3 Replay and Duplication Attacks
+
+Replay of already-seen events is constrained by unique `event_id` and dedup rules. Implementations MUST reject duplicate IDs in contexts that require uniqueness and MUST NOT permit duplicate events to mutate derived state more than once.
+
+For delta import/sync workflows, unknown event types are preserved, but replayed known events still require full ID/signature/chain validation before acceptance.
+
+### 18.4 Truncation and Partial Snapshot Risk
+
+Protocol checks can prove integrity of what is present; they cannot prove the local copy is globally complete without comparison to a stronger anchor (signed checkpoint, remote peer state, or externally pinned digest).
+
+Operational guidance:
+
+- Keep signed checkpoints.
+- Compare latest known event IDs across peers.
+- Treat unexplained chain-head regressions as incident conditions.
+
+### 18.5 Time Semantics and Backdating
+
+`timestamp_utc` supports ordering and audit readability but is not a trust root. Chain linkage and signatures are authoritative. Implementations SHOULD prefer deterministic chain order (`timestamp_utc`, then `event_id`) and SHOULD log suspicious clock drift for operators.
+
+### 18.6 Privacy and Confidentiality
+
+Provara provides integrity and authenticity, not confidentiality. Events are plaintext JSON unless encrypted upstream.
+
+Recommendations:
+
+- Encrypt sensitive payloads before event creation.
+- Avoid direct storage of PII/secrets in `payload.value`.
+- Separate key-management concerns from vault transport/storage concerns.
+
+### 18.7 Key Compromise and Rotation Boundaries
+
+Key compromise is handled by `KEY_REVOCATION` + `KEY_PROMOTION` signed by surviving authority. Implementations SHOULD surface `trust_boundary_event_id` prominently in audit output to distinguish trusted pre-compromise history from post-compromise uncertainty.
+
+### 18.8 Denial-of-Service Considerations
+
+Implementations SHOULD set explicit limits for:
+
+- maximum event byte size
+- maximum payload nesting depth
+- maximum lines processed per import batch
+- maximum replay wall-clock budget before checkpoint fallback
+
+Malformed input MUST be rejected or quarantined deterministically, never silently coerced into valid state transitions.
+
+### 18.9 Cryptographic Agility
+
+Profile A fixes SHA-256 and Ed25519 for interoperability. Future profiles SHOULD define migration events and dual-signing windows for algorithm transition (including post-quantum profiles) without breaking append-only verification semantics.
 
 ---
 
