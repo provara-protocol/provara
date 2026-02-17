@@ -452,6 +452,29 @@ class TestNamespaceCollision(unittest.TestCase):
         self.assertEqual(contested["total_evidence_count"], 2)
         self.assertEqual(len(contested["evidence_by_value"]), 2)
 
+    def test_identical_timestamp_conflict_is_deterministic(self):
+        """
+        Even with identical timestamps, the winner is determined by log order.
+        This ensures that given the same event sequence, the output is identical.
+        """
+        ts = "2026-02-12T10:00:00Z"
+        e1 = _obs("e1", "actor_a", "system", "status", "ok", 0.4, ts=ts)
+        e2 = _obs("e2", "actor_b", "system", "status", "error", 0.4, ts=ts)
+
+        # Run 1: e1 then e2
+        r1 = SovereignReducerV0()
+        r1.apply_events([e1, e2])
+        val1 = r1.state["local"]["system:status"]["value"]
+
+        # Run 2: e2 then e1
+        r2 = SovereignReducerV0()
+        r2.apply_events([e2, e1])
+        val2 = r2.state["local"]["system:status"]["value"]
+
+        self.assertEqual(val1, "error", "Last event in sequence must win for low-conf")
+        self.assertEqual(val2, "ok", "Last event in sequence must win for low-conf")
+        self.assertNotEqual(val1, val2, "Order sensitivity is expected for same-timestamp low-conf")
+
 
 class TestRetractionEventType(unittest.TestCase):
     """RETRACTION events (PROTOCOL_PROFILE.txt core type) remove active beliefs."""

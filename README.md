@@ -8,7 +8,7 @@
          Provara Protocol v1.0 — Reference Implementation
 </pre>
 
-**Sovereign Memory. Verifiable Continuity.**
+**A sovereign, tamper-evident memory substrate for AI systems, governance frameworks, and long-lived digital institutions.**
 
 ![Protocol](https://img.shields.io/badge/Protocol-Provara_v1.0-blue)
 ![Tests](https://img.shields.io/badge/Tests-110_passing-brightgreen)
@@ -37,6 +37,7 @@
   - [Cryptographic Primitives](#cryptographic-primitives)
   - [Vault Anatomy](#vault-anatomy)
   - [Causal Chain](#causal-chain)
+- [AI Governance Use Cases](#ai-governance-use-cases)
 - [Module Reference](#module-reference)
 - [Testing](#testing)
   - [Compliance Breakdown](#compliance-breakdown)
@@ -60,7 +61,7 @@ The Provara Legacy Kit is a self-sovereign, cryptographically-signed event log t
 
 > **Golden Rule:** Truth is not merged. Evidence is merged. Truth is recomputed.
 
-This system is built for individuals preserving family records, AI agents maintaining cognitive continuity across embodied robotic systems, organizations requiring tamper-evident audit trails, and anyone who needs to prove what they knew, when they knew it, with cryptographic certainty. If your memories matter, they deserve better than a terms-of-service agreement.
+This system is built for individuals preserving family records, AI agents maintaining cognitive continuity across embodied robotic systems, organizations requiring tamper-evident audit trails, AI governance frameworks enforcing policy compliance, and anyone who needs to prove what they knew, when they knew it, with cryptographic certainty. If your memories matter — or your AI decisions require an auditable chain of evidence — they deserve better than a terms-of-service agreement.
 
 ---
 
@@ -294,6 +295,31 @@ Events form a per-actor linked list via `prev_event_hash`:
 - **Cross-actor**: an event must never reference another actor's events
 
 This creates an unforgeable causal ordering. If event E claims to follow event P, then P must exist, and P must belong to the same actor. Any gap or forgery breaks the chain and fails compliance.
+
+---
+
+## AI Governance Use Cases
+
+Provara's append-only event log, deterministic reducer, and Ed25519 signature chain make it a natural substrate for AI governance and control plane systems. The same properties that guarantee cognitive continuity for autonomous agents guarantee auditability and non-repudiation for AI oversight frameworks.
+
+| Use Case | How Provara Supports It |
+|----------|------------------------|
+| **Model evaluation logging** | Each evaluation run is a signed `OBSERVATION` event with model ID, benchmark, and scores. Results are tamper-evident and reproducible. |
+| **Prompt & test result logging** | Prompt inputs, model outputs, and latency metrics are recorded as chained events. Any after-the-fact alteration breaks the causal chain. |
+| **Policy enforcement decisions** | When a governance policy permits or denies an AI action, the decision, the policy version, and the reasoning are recorded as an `ATTESTATION`. Auditors can replay the full decision history. |
+| **AI cost & routing oversight** | Token usage, model selection, routing decisions, and cost data are logged as signed events. Spend anomalies surface through reducer-computed aggregates. |
+| **Red-team audit records** | Adversarial test cases, model responses, and severity assessments form a signed, append-only audit trail. Results cannot be silently retracted or amended. |
+
+**Why this works:**
+
+- **Append-only guarantees** mean no record can be deleted or modified after the fact — a hard requirement for regulatory compliance.
+- **Deterministic reducers** mean any auditor can replay the event log and independently verify every derived conclusion.
+- **Ed25519 signatures** bind every event to a specific key holder, providing non-repudiation.
+- **Causal chains** provide total ordering per actor, making it impossible to insert, reorder, or remove events without detection.
+
+> For a detailed treatment, see [`docs/GOVERNANCE_ALIGNMENT.md`](docs/GOVERNANCE_ALIGNMENT.md).
+>
+> For example event schemas, see [`examples/ai_governance_events/`](examples/ai_governance_events/).
 
 ---
 
