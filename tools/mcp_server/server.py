@@ -8,6 +8,8 @@ provides a small JSON-RPC surface compatible with MCP-style tool calls.
 from __future__ import annotations
 
 import argparse
+import contextlib
+import io
 import json
 import queue
 import sys
@@ -22,7 +24,16 @@ PSMC_DIR = REPO_ROOT / "tools" / "psmc"
 if str(PSMC_DIR) not in sys.path:
     sys.path.insert(0, str(PSMC_DIR))
 
-from psmc import append_event, compute_vault_state, generate_digest, verify_chain  # type: ignore
+from psmc import (  # type: ignore
+    append_event,
+    checkpoint_vault,
+    compute_vault_state,
+    export_markdown,
+    generate_digest,
+    list_conflicts,
+    query_timeline,
+    verify_chain,
+)
 
 
 SERVER_INFO = {
@@ -104,6 +115,35 @@ def _tool_snapshot_state(args: Dict[str, Any]) -> Dict[str, Any]:
     return compute_vault_state(vault)
 
 
+def _tool_query_timeline(args: Dict[str, Any]) -> Dict[str, Any]:
+    vault = _ensure_vault(args)
+    events = query_timeline(
+        vault,
+        event_type=args.get("event_type"),
+        start_time=args.get("start_time"),
+        end_time=args.get("end_time"),
+        limit=args.get("limit"),
+    )
+    return {"events": events}
+
+
+def _tool_list_conflicts(args: Dict[str, Any]) -> Dict[str, Any]:
+    vault = _ensure_vault(args)
+    conflicts = list_conflicts(vault)
+    return {"conflicts": conflicts}
+
+
+def _tool_export_markdown(args: Dict[str, Any]) -> Dict[str, Any]:
+    vault = _ensure_vault(args)
+    content = export_markdown(vault)
+    return {"markdown": content}
+
+
+def _tool_checkpoint_vault(args: Dict[str, Any]) -> Dict[str, Any]:
+    vault = _ensure_vault(args)
+    return checkpoint_vault(vault)
+
+
 TOOLS: Dict[str, Dict[str, Any]] = {
     "append_event": {
         "description": "Append a signed event to a PSMC/Provara vault.",
@@ -130,6 +170,18 @@ TOOLS: Dict[str, Dict[str, Any]] = {
         "handler": _tool_verify_chain,
     },
     "generate_digest": {
+        "description": "Alias for export_digest.",
+        "input_schema": {
+            "type": "object",
+            "required": ["vault_path"],
+            "properties": {
+                "vault_path": {"type": "string"},
+                "weeks": {"type": "integer", "minimum": 1},
+            },
+        },
+        "handler": _tool_generate_digest,
+    },
+    "export_digest": {
         "description": "Generate weekly digest markdown from recent memory events.",
         "input_schema": {
             "type": "object",
@@ -141,7 +193,7 @@ TOOLS: Dict[str, Dict[str, Any]] = {
         },
         "handler": _tool_generate_digest,
     },
-    "snapshot_state": {
+    "snapshot_belief": {
         "description": "Compute deterministic vault snapshot and state hash.",
         "input_schema": {
             "type": "object",
@@ -149,6 +201,69 @@ TOOLS: Dict[str, Dict[str, Any]] = {
             "properties": {"vault_path": {"type": "string"}},
         },
         "handler": _tool_snapshot_state,
+    },
+    "snapshot_state": {
+        "description": "Alias for snapshot_belief.",
+        "input_schema": {
+            "type": "object",
+            "required": ["vault_path"],
+            "properties": {"vault_path": {"type": "string"}},
+        },
+        "handler": _tool_snapshot_state,
+    },
+    "query_timeline": {
+        "description": "Query vault events with filters.",
+        "input_schema": {
+            "type": "object",
+            "required": ["vault_path"],
+            "properties": {
+                "vault_path": {"type": "string"},
+                "event_type": {"type": "string"},
+                "start_time": {"type": "string"},
+                "end_time": {"type": "string"},
+                "limit": {"type": "integer"},
+            },
+        },
+        "handler": _tool_query_timeline,
+    },
+    "list_conflicts": {
+        "description": "List conflicting high-confidence evidence.",
+        "input_schema": {
+            "type": "object",
+            "required": ["vault_path"],
+            "properties": {"vault_path": {"type": "string"}},
+        },
+        "handler": _tool_list_conflicts,
+    },
+    "export_digest": {
+        "description": "Generate weekly digest markdown from recent memory events.",
+        "input_schema": {
+            "type": "object",
+            "required": ["vault_path"],
+            "properties": {
+                "vault_path": {"type": "string"},
+                "weeks": {"type": "integer", "minimum": 1},
+            },
+        },
+        "handler": _tool_generate_digest,
+    },
+    "export_markdown": {
+        "description": "Export the entire vault history as a formatted Markdown document.",
+        "input_schema": {
+            "type": "object",
+            "required": ["vault_path"],
+            "properties": {"vault_path": {"type": "string"}},
+        },
+        "handler": _tool_export_markdown,
+    },
+    "checkpoint_vault": {
+        "description": "Sign and save a new state snapshot (checkpoint) for faster loading.",
+        "input_schema": {
+            "type": "object",
+            "required": ["vault_path"],
+            "properties": {"vault_path": {"type": "string"}},
+        },
+        "handler": _tool_checkpoint_vault,
     },
 }
 
@@ -200,7 +315,11 @@ def handle_jsonrpc_request(request: Dict[str, Any]) -> Dict[str, Any]:
         if tool is None:
             return _jsonrpc_error(request_id, -32601, f"Unknown tool: {name}")
         try:
-            data = tool["handler"](args)
+            # Redirect stdout → stderr so tool diagnostic prints (e.g. psmc's
+            # "Digest written: …" / "OK: … events verified") don't contaminate
+            # the stdio JSON-RPC response stream.
+            with contextlib.redirect_stdout(sys.stderr):
+                data = tool["handler"](args)
         except ValueError as exc:
             return _jsonrpc_error(request_id, -32602, str(exc))
         except Exception as exc:

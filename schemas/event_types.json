@@ -1,0 +1,384 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://provara.dev/schemas/v1.0/event_types.json",
+  "title": "Provara Protocol Event Types",
+  "description": "JSON Schema definitions for all Provara v1.0 event types",
+  "definitions": {
+    "base_event": {
+      "type": "object",
+      "description": "Common fields present in all Provara events",
+      "required": [
+        "event_id",
+        "type",
+        "namespace",
+        "actor",
+        "payload"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^evt_[a-f0-9]{24}$",
+          "description": "Content-addressed event ID: evt_ + first 24 hex chars of SHA-256(canonical_json(event_without_id_sig))"
+        },
+        "type": {
+          "type": "string",
+          "description": "Event type identifier"
+        },
+        "namespace": {
+          "type": "string",
+          "enum": ["canonical", "local", "contested", "archived"],
+          "description": "Namespace for belief state routing"
+        },
+        "actor": {
+          "type": "string",
+          "description": "Actor identifier (typically same as actor_key_id)"
+        },
+        "actor_key_id": {
+          "type": "string",
+          "pattern": "^bp1_[a-f0-9]{16}$",
+          "description": "Backpack v1 key ID: bp1_ + first 16 hex chars of SHA-256(public_key_bytes)"
+        },
+        "ts_logical": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Logical timestamp (monotonic per actor)"
+        },
+        "prev_event_hash": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "string",
+              "pattern": "^evt_[a-f0-9]{24}$"
+            }
+          ],
+          "description": "event_id of previous event by this actor (null for first event)"
+        },
+        "timestamp_utc": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp in UTC"
+        },
+        "payload": {
+          "type": "object",
+          "description": "Event-specific payload (schema varies by type)"
+        },
+        "sig": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$",
+          "description": "Base64-encoded Ed25519 signature over canonical JSON of event without sig field"
+        }
+      }
+    },
+    "genesis_event": {
+      "allOf": [
+        {"$ref": "#/definitions/base_event"},
+        {
+          "properties": {
+            "type": {
+              "const": "GENESIS"
+            },
+            "payload": {
+              "type": "object",
+              "required": ["uid", "created_at_utc", "root_key_id"],
+              "properties": {
+                "uid": {
+                  "type": "string",
+                  "format": "uuid",
+                  "description": "Unique identifier for this vault"
+                },
+                "created_at_utc": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Vault creation timestamp"
+                },
+                "root_key_id": {
+                  "type": "string",
+                  "pattern": "^bp1_[a-f0-9]{16}$",
+                  "description": "Root authority key ID"
+                },
+                "quorum_key_id": {
+                  "type": "string",
+                  "pattern": "^bp1_[a-f0-9]{16}$",
+                  "description": "Optional quorum key for recovery"
+                },
+                "actor": {
+                  "type": "string",
+                  "description": "Genesis actor name"
+                },
+                "provara_version": {
+                  "type": "string",
+                  "description": "Protocol version"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "observation_event": {
+      "allOf": [
+        {"$ref": "#/definitions/base_event"},
+        {
+          "properties": {
+            "type": {
+              "const": "OBSERVATION"
+            },
+            "payload": {
+              "type": "object",
+              "required": ["subject", "predicate", "value"],
+              "properties": {
+                "subject": {
+                  "type": "string",
+                  "description": "Entity being observed (e.g., door_01, sensor_temp_1)"
+                },
+                "predicate": {
+                  "type": "string",
+                  "description": "Property or relationship (e.g., status, temperature, color)"
+                },
+                "value": {
+                  "description": "Observed value (any JSON type)"
+                },
+                "confidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 1.0,
+                  "description": "Confidence level (0.0 to 1.0)"
+                },
+                "timestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Observation timestamp (may differ from event timestamp)"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "assertion_event": {
+      "allOf": [
+        {"$ref": "#/definitions/base_event"},
+        {
+          "properties": {
+            "type": {
+              "const": "ASSERTION"
+            },
+            "payload": {
+              "type": "object",
+              "required": ["subject", "predicate", "value"],
+              "properties": {
+                "subject": {
+                  "type": "string",
+                  "description": "Entity the assertion is about"
+                },
+                "predicate": {
+                  "type": "string",
+                  "description": "Property or claim"
+                },
+                "value": {
+                  "description": "Asserted value (any JSON type)"
+                },
+                "confidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 0.5,
+                  "description": "Confidence level (default lower than OBSERVATION)"
+                },
+                "reasoning": {
+                  "type": "string",
+                  "description": "Optional justification or reasoning"
+                },
+                "timestamp": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "attestation_event": {
+      "allOf": [
+        {"$ref": "#/definitions/base_event"},
+        {
+          "properties": {
+            "type": {
+              "const": "ATTESTATION"
+            },
+            "payload": {
+              "type": "object",
+              "required": ["subject", "predicate", "value"],
+              "properties": {
+                "subject": {
+                  "type": "string",
+                  "description": "Entity being attested"
+                },
+                "predicate": {
+                  "type": "string",
+                  "description": "Property being certified"
+                },
+                "value": {
+                  "description": "Canonical value (any JSON type)"
+                },
+                "target_event_id": {
+                  "type": "string",
+                  "pattern": "^evt_[a-f0-9]{24}$",
+                  "description": "Optional reference to the observation/assertion being attested"
+                },
+                "attestation_authority": {
+                  "type": "string",
+                  "description": "Authority granting attestation"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "key_revocation_event": {
+      "allOf": [
+        {"$ref": "#/definitions/base_event"},
+        {
+          "properties": {
+            "type": {
+              "const": "KEY_REVOCATION"
+            },
+            "payload": {
+              "type": "object",
+              "required": ["revoked_key_id", "reason", "revoked_at_utc"],
+              "properties": {
+                "revoked_key_id": {
+                  "type": "string",
+                  "pattern": "^bp1_[a-f0-9]{16}$",
+                  "description": "Key being revoked"
+                },
+                "reason": {
+                  "type": "string",
+                  "enum": ["key_compromise", "key_rotation", "security_upgrade", "administrative"],
+                  "description": "Reason for revocation"
+                },
+                "revoked_at_utc": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Effective revocation timestamp"
+                },
+                "trust_boundary_event_id": {
+                  "type": "string",
+                  "pattern": "^evt_[a-f0-9]{24}$",
+                  "description": "Last trusted event signed by revoked key (events after this are quarantined)"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "key_promotion_event": {
+      "allOf": [
+        {"$ref": "#/definitions/base_event"},
+        {
+          "properties": {
+            "type": {
+              "const": "KEY_PROMOTION"
+            },
+            "payload": {
+              "type": "object",
+              "required": ["new_key_id", "new_public_key_b64", "algorithm", "roles", "promoted_by", "promoted_at_utc"],
+              "properties": {
+                "new_key_id": {
+                  "type": "string",
+                  "pattern": "^bp1_[a-f0-9]{16}$",
+                  "description": "New key being promoted"
+                },
+                "new_public_key_b64": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9+/]{43}=$",
+                  "description": "Base64-encoded Ed25519 public key (32 bytes raw)"
+                },
+                "algorithm": {
+                  "type": "string",
+                  "const": "Ed25519",
+                  "description": "Signature algorithm"
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": ["root", "attestation", "sync", "observer", "quorum"]
+                  },
+                  "minItems": 1,
+                  "description": "Roles granted to new key"
+                },
+                "promoted_by": {
+                  "type": "string",
+                  "pattern": "^bp1_[a-f0-9]{16}$",
+                  "description": "Key ID of surviving authority that signed this promotion"
+                },
+                "replaces_key_id": {
+                  "type": "string",
+                  "pattern": "^bp1_[a-f0-9]{16}$",
+                  "description": "Key being replaced (should have corresponding REVOCATION event)"
+                },
+                "promoted_at_utc": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Promotion timestamp"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "retraction_event": {
+      "allOf": [
+        {"$ref": "#/definitions/base_event"},
+        {
+          "properties": {
+            "type": {
+              "const": "RETRACTION"
+            },
+            "payload": {
+              "type": "object",
+              "required": ["retracted_event_id", "reason"],
+              "properties": {
+                "retracted_event_id": {
+                  "type": "string",
+                  "pattern": "^evt_[a-f0-9]{24}$",
+                  "description": "Event being retracted"
+                },
+                "reason": {
+                  "type": "string",
+                  "description": "Explanation for retraction"
+                },
+                "correction_event_id": {
+                  "type": "string",
+                  "pattern": "^evt_[a-f0-9]{24}$",
+                  "description": "Optional event_id of corrected observation"
+                },
+                "retracted_at_utc": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Retraction timestamp"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "oneOf": [
+    {"$ref": "#/definitions/genesis_event"},
+    {"$ref": "#/definitions/observation_event"},
+    {"$ref": "#/definitions/assertion_event"},
+    {"$ref": "#/definitions/attestation_event"},
+    {"$ref": "#/definitions/key_revocation_event"},
+    {"$ref": "#/definitions/key_promotion_event"},
+    {"$ref": "#/definitions/retraction_event"}
+  ]
+}
+

@@ -59,3 +59,9 @@ hunt-mcp/
 # Claude Code local MCP config (machine-specific paths)
 .mcp.json
 tools/mcp_server/test_vault/
+tools/mcp_server/test_vault_stdio/
+tools/mcp_server/test_vault_sse/
+
+# Multi-agent lock files (ephemeral)
+.locks/*.lock
+!.locks/README.md

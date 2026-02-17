@@ -29,7 +29,7 @@ import sys
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 # ---------------------------------------------------------------------------
 # Provara core imports (shared cryptographic primitives)
@@ -40,8 +40,19 @@ if str(_snp_core_bin) not in sys.path:
     sys.path.insert(0, str(_snp_core_bin))
 
 from canonical_json import canonical_dumps, canonical_hash  # noqa: E402
-from backpack_signing import key_id_from_public_bytes, sign_event  # noqa: E402
+from backpack_signing import (  # noqa: E402
+    key_id_from_public_bytes,
+    sign_event,
+    resolve_public_key,
+    load_keys_registry,
+)
 from reducer_v0 import SovereignReducerV0  # noqa: E402
+from checkpoint_v0 import (  # noqa: E402
+    create_checkpoint,
+    save_checkpoint,
+    load_latest_checkpoint,
+    verify_checkpoint,
+)
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import (  # noqa: E402
     Ed25519PrivateKey,
@@ -733,15 +744,46 @@ def rotate_key(vault: Path) -> None:
 # Reducer Integration
 # ---------------------------------------------------------------------------
 def compute_vault_state(vault: Path) -> dict:
-    """Run the Provara reducer over PSMC events to derive current state."""
+    """Run the Provara reducer over PSMC events to derive current state (optimized)."""
     events_file = vault_path(vault, "events", "events.ndjson")
     if not events_file.exists():
         return {}
 
-    psmc_events = _read_ndjson(events_file)
-    provara_events = []
+    reducer = SovereignReducerV0()
+    
+    # 1. Try to load latest checkpoint
+    cp_dict = load_latest_checkpoint(vault)
+    if cp_dict:
+        # Load active public key for verification
+        active_pub = load_public_key(vault)
+        if verify_checkpoint(cp_dict, active_pub):
+            # Load state
+            cp_state = cp_dict["state"]
+            reducer.state["canonical"] = cp_state.get("canonical", {})
+            reducer.state["local"] = cp_state.get("local", {})
+            reducer.state["contested"] = cp_state.get("contested", {})
+            reducer.state["archived"] = cp_state.get("archived", {})
+            
+            meta_p = cp_state.get("metadata_partial", {})
+            reducer.state["metadata"]["last_event_id"] = meta_p.get("last_event_id")
+            reducer.state["metadata"]["event_count"] = meta_p.get("event_count", 0)
+            reducer.state["metadata"]["current_epoch"] = meta_p.get("current_epoch")
+            reducer.state["metadata"]["reducer"] = meta_p.get("reducer")
+            reducer.state["metadata"]["state_hash"] = reducer._compute_state_hash()
 
-    for pe in psmc_events:
+    # 2. Replay events after checkpoint
+    psmc_events = _read_ndjson(events_file)
+    last_id = reducer.state["metadata"]["last_event_id"]
+    
+    start_idx = 0
+    if last_id:
+        for i, pe in enumerate(psmc_events):
+            if (pe.get("hash") or pe.get("id")) == last_id:
+                start_idx = i + 1
+                break
+    
+    provara_events = []
+    for pe in psmc_events[start_idx:]:
         # Map PSMC types to Provara types
         p_type = "OBSERVATION"
         if pe["type"] in ["belief", "decision", "reflection"]:
@@ -765,9 +807,22 @@ def compute_vault_state(vault: Path) -> dict:
             }
         })
 
-    reducer = SovereignReducerV0()
     reducer.apply_events(provara_events)
     return reducer.export_state()
+
+
+def checkpoint_vault(vault: Path) -> dict:
+    """Create and sign a new state checkpoint."""
+    state = compute_vault_state(vault)
+    priv = load_private_key(vault)
+    pub = priv.public_key()
+    pub_bytes = pub.public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
+    kid = key_id_from_public_bytes(pub_bytes)
+    
+    cp = create_checkpoint(vault, state, priv, kid)
+    cp_path = save_checkpoint(vault, cp)
+    
+    return {"path": str(cp_path), "event_count": cp.event_count}
 
 
 # ---------------------------------------------------------------------------
@@ -847,6 +902,39 @@ def _write_ndjson(filepath: Path, entries: list[dict]) -> None:
             f.write(canonical_dumps(entry) + "\n")
 
 
+def query_timeline(
+    vault: Path,
+    event_type: Optional[str] = None,
+    start_time: Optional[str] = None,
+    end_time: Optional[str] = None,
+    limit: Optional[int] = None,
+) -> List[Dict[str, Any]]:
+    """Query vault events with filters."""
+    events = _read_ndjson(vault_path(vault, "events", "events.ndjson"))
+
+    if event_type:
+        events = [e for e in events if e.get("type") == event_type]
+
+    if start_time:
+        start_dt = datetime.fromisoformat(start_time)
+        events = [e for e in events if datetime.fromisoformat(e["timestamp"]) >= start_dt]
+
+    if end_time:
+        end_dt = datetime.fromisoformat(end_time)
+        events = [e for e in events if datetime.fromisoformat(e["timestamp"]) <= end_dt]
+
+    if limit:
+        events = events[-limit:]
+
+    return events
+
+
+def list_conflicts(vault: Path) -> Dict[str, Any]:
+    """List all contested beliefs in the vault."""
+    state = compute_vault_state(vault)
+    return state.get("contested", {})
+
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -891,6 +979,9 @@ def main():
     # sync
     p_sync = sub.add_parser("sync", help="Sync with another PSMC vault")
     p_sync.add_argument("remote_vault", help="Path to remote vault directory")
+
+    # checkpoint
+    sub.add_parser("checkpoint", help="Sign and save a new state snapshot")
 
     # rotate-key
     sub.add_parser("rotate-key", help="Rotate signing key")
@@ -941,6 +1032,10 @@ def main():
             print(f"ERROR: {result['error']}", file=sys.stderr)
             sys.exit(1)
         print(f"Sync complete. Merged {result['merged']} new events.")
+
+    elif args.command == "checkpoint":
+        result = checkpoint_vault(vault)
+        print(f"Checkpoint saved: {result['path']} (events={result['event_count']})")
 
     elif args.command == "rotate-key":
         rotate_key(vault)
