@@ -271,6 +271,24 @@ def cmd_append(args: argparse.Namespace) -> None:
     # Auto-regenerate manifest
     cmd_manifest(args)
 
+def cmd_market_alpha(args: argparse.Namespace) -> None:
+    from .market import record_market_alpha
+    vault = Path(args.path).resolve()
+    keys = Path(args.keyfile).resolve()
+    signed = record_market_alpha(
+        vault, keys, args.ticker, args.signal, args.conviction, args.horizon, args.rationale, args.actor
+    )
+    print(f"Recorded MARKET_ALPHA for {args.ticker}: {signed['event_id']}")
+
+def cmd_hedge_fund_sim(args: argparse.Namespace) -> None:
+    from .market import record_hedge_fund_sim
+    vault = Path(args.path).resolve()
+    keys = Path(args.keyfile).resolve()
+    signed = record_hedge_fund_sim(
+        vault, keys, args.sim_id, args.strategy, args.returns, args.ticker, args.actor
+    )
+    print(f"Recorded HEDGE_FUND_SIM for {args.strategy}: {signed['event_id']}")
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="provara", description="Provara Protocol CLI")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -316,6 +334,27 @@ def main() -> None:
     p_app.add_argument("--key-id", help="Key ID to sign with (defaults to first)")
     p_app.add_argument("--actor", help="Human-readable actor identifier")
     p_app.add_argument("--confidence", type=float, help="Confidence score (0.0-1.0)")
+
+    # market-alpha
+    p_ma = sub.add_parser("market-alpha", help="Record a market signal")
+    p_ma.add_argument("path", help="Path to vault")
+    p_ma.add_argument("--ticker", required=True, help="e.g. BTC, NVDA")
+    p_ma.add_argument("--signal", required=True, choices=["LONG", "SHORT", "NEUTRAL"])
+    p_ma.add_argument("--conviction", type=float, default=0.5)
+    p_ma.add_argument("--horizon", default="7d")
+    p_ma.add_argument("--rationale")
+    p_ma.add_argument("--keyfile", required=True)
+    p_ma.add_argument("--actor", default="market_analyst")
+
+    # hedge-fund-sim
+    p_hf = sub.add_parser("hedge-fund-sim", help="Record simulation results")
+    p_hf.add_argument("path", help="Path to vault")
+    p_hf.add_argument("--sim-id", required=True)
+    p_hf.add_argument("--strategy", required=True)
+    p_hf.add_argument("--returns", type=float, required=True)
+    p_hf.add_argument("--ticker")
+    p_hf.add_argument("--keyfile", required=True)
+    p_hf.add_argument("--actor", default="simulation_engine")
     
     args = parser.parse_args()
     
@@ -326,6 +365,8 @@ def main() -> None:
     elif args.command == "checkpoint": cmd_checkpoint(args)
     elif args.command == "replay": cmd_replay(args)
     elif args.command == "append": cmd_append(args)
+    elif args.command == "market-alpha": cmd_market_alpha(args)
+    elif args.command == "hedge-fund-sim": cmd_hedge_fund_sim(args)
 
 if __name__ == "__main__":
     main()

@@ -774,7 +774,7 @@ class TestMalformedEventHandling(unittest.TestCase):
         events = load_events(path)
         self.assertEqual(len(events), 1)
 
-        from reducer_v0 import SovereignReducerV0
+        from provara.reducer_v0 import SovereignReducerV0
         r = SovereignReducerV0()
         r.apply_events(events)
         self.assertEqual(r.state["metadata"]["event_count"], 1)
@@ -847,7 +847,7 @@ class TestLongChainPerformance(unittest.TestCase):
             ))
             prev = eid
 
-        from reducer_v0 import SovereignReducerV0
+        from provara.reducer_v0 import SovereignReducerV0
         start = time.monotonic()
         r = SovereignReducerV0()
         r.apply_events(events)

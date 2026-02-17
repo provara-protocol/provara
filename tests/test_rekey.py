@@ -541,7 +541,7 @@ class TestMidChainRotation(unittest.TestCase):
         Data events before rotation → rotation events → data events after rotation.
         verify_causal_chain for the data actor must pass across the boundary.
         """
-        from sync_v0 import verify_causal_chain
+        from provara.sync_v0 import verify_causal_chain
 
         with tempfile.TemporaryDirectory() as tmp:
             bp, root_kp, quorum_kp = make_test_backpack(Path(tmp))
@@ -602,7 +602,7 @@ class TestMidChainRotation(unittest.TestCase):
 
     def test_rotation_actor_chain_valid(self):
         """KEY_REVOCATION + KEY_PROMOTION events form a valid chain for their actor."""
-        from sync_v0 import verify_causal_chain
+        from provara.sync_v0 import verify_causal_chain
 
         with tempfile.TemporaryDirectory() as tmp:
             bp, root_kp, quorum_kp = make_test_backpack(Path(tmp))
@@ -651,7 +651,7 @@ class TestDuplicateAttestation(unittest.TestCase):
 
     def test_double_attestation_same_value(self):
         """Attesting the same key:value twice archives the first under second."""
-        from reducer_v0 import SovereignReducerV0
+        from provara.reducer_v0 import SovereignReducerV0
 
         r = SovereignReducerV0()
         r.apply_event({
@@ -681,7 +681,7 @@ class TestDuplicateAttestation(unittest.TestCase):
 
     def test_double_attestation_different_value(self):
         """Attesting a new value supersedes the previous canonical entry."""
-        from reducer_v0 import SovereignReducerV0
+        from provara.reducer_v0 import SovereignReducerV0
 
         r = SovereignReducerV0()
         r.apply_event({

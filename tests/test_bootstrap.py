@@ -264,7 +264,7 @@ class TestBootstrapRotationIntegration(unittest.TestCase):
             )
 
             # Load quorum private key
-            from backpack_signing import load_private_key_b64
+            from provara.backpack_signing import load_private_key_b64
             quorum_sk = load_private_key_b64(result.quorum_private_key_b64)
 
             # Rotate root key using quorum authority

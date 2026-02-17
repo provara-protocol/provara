@@ -30,6 +30,7 @@ from .bootstrap_v0 import bootstrap_backpack
 from .sync_v0 import sync_backpacks, load_events
 from .checkpoint_v0 import create_checkpoint, load_latest_checkpoint
 from .perception_v0 import emit_perception_event, PerceptionTier
+from .market import record_market_alpha, record_hedge_fund_sim
 
 
 class Vault:
@@ -93,4 +94,6 @@ __all__ = [
     "load_latest_checkpoint",
     "emit_perception_event",
     "PerceptionTier",
+    "record_market_alpha",
+    "record_hedge_fund_sim",
 ]
