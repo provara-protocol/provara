@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://provara.dev/schemas/v1/agent_events.schema.json",
+  "title": "Provara Agent Lifecycle & Task Events",
+  "description": "Schemas for agent creation, task execution, and reputation building.",
+  "definitions": {
+    "AGENT_CREATION": {
+      "type": "object",
+      "required": ["agent_uid", "agent_root_key_id", "vault_path"],
+      "properties": {
+        "agent_uid": { "type": "string" },
+        "agent_root_key_id": { "type": "string", "pattern": "^bp1_[a-f0-9]{16}$" },
+        "vault_path": { "type": "string" },
+        "model_version": { "type": "string" },
+        "permissions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "TASK_COMPLETION": {
+      "type": "object",
+      "required": ["task_id", "status", "output_hash"],
+      "properties": {
+        "task_id": { "type": "string" },
+        "parent_task_id": { "type": "string" },
+        "status": { "enum": ["SUCCESS", "FAILURE", "PARTIAL"] },
+        "output_hash": { "type": "string", "description": "SHA-256 of the artifact/result." },
+        "output_location": { "type": "string", "description": "URL, path, or CAS ref." },
+        "latency_ms": { "type": "integer" },
+        "tokens_used": { "type": "integer" },
+        "cost_usd": { "type": "number" },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

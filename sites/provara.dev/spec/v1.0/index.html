@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Provara Protocol v1.0 Specification</title>
+  <meta name="description" content="Provara Protocol v1.0 normative specification, designed for 50-year readability and deterministic implementation.">
+  <link rel="stylesheet" href="../../shared/tokens.css">
+  <link rel="stylesheet" href="../../shared/components.css">
+</head>
+<body>
+  <div class="pv-shell">
+    <header class="pv-topbar">
+      <div><strong>Provara</strong> / Protocol v1.0</div>
+      <div>Version-locked reference: <code>/spec/v1.0</code></div>
+    </header>
+
+    <h1 class="pv-title">Provara Protocol v1.0</h1>
+    <p class="pv-subtitle">This page is a durable, implementation-facing publication. Normative language uses RFC 2119/8174 keywords. Explanatory content is non-binding.</p>
+
+    <div class="pv-grid">
+      <aside class="pv-toc" aria-label="Table of contents">
+        <h2>Contents</h2>
+        <ol>
+          <li><a href="#scope">Scope</a></li>
+          <li><a href="#invariants">Cryptographic Invariants</a></li>
+          <li><a href="#events">Event Model</a></li>
+          <li><a href="#reducer">Reducer Determinism</a></li>
+          <li><a href="#verification">Verification Checklist</a></li>
+        </ol>
+      </aside>
+
+      <main class="pv-main">
+        <section id="scope">
+          <span class="pv-badge">NORMATIVE</span>
+          <span class="pv-badge">REFERENCE</span>
+          <h2>1. Scope</h2>
+          <p>The protocol defines append-only evidence logs, deterministic state reduction, and cryptographic verification semantics for local-first memory vaults.</p>
+          <div class="pv-callout must"><strong>MUST:</strong> Implementations MUST preserve append-only event history and MUST NOT rewrite historical events.</div>
+          <div class="pv-callout should"><strong>SHOULD:</strong> Implementations SHOULD keep protocol data human-readable in JSON/NDJSON form.</div>
+        </section>
+
+        <section id="invariants">
+          <span class="pv-badge">NORMATIVE</span>
+          <h2>2. Cryptographic Invariants</h2>
+          <div class="pv-status-row">
+            <div class="pv-status"><strong>Signing</strong>Ed25519 / RFC 8032</div>
+            <div class="pv-status"><strong>Hashing</strong>SHA-256 / FIPS 180-4</div>
+            <div class="pv-status"><strong>Serialization</strong>RFC 8785 Canonical JSON</div>
+          </div>
+          <div class="pv-callout must"><strong>MUST:</strong> `prev_hash` MUST equal SHA-256 over canonical JSON bytes of the prior event in the actor chain.</div>
+          <div class="pv-callout must"><strong>MUST:</strong> Event signatures MUST verify against active key material at signing time.</div>
+        </section>
+
+        <section id="events">
+          <span class="pv-badge">NORMATIVE</span>
+          <span class="pv-badge">EXAMPLE</span>
+          <h2>3. Event Model</h2>
+          <p>Events are append-only records in NDJSON. Each record carries actor identity, causal linkage, payload, and signature proof.</p>
+          <pre class="pv-protocol-block">{
+  "event_id": "evt_...",
+  "type": "OBSERVATION",
+  "actor": "agent_01",
+  "prev_event_hash": "evt_prev_...",
+  "payload": {
+    "subject": "memory:key",
+    "predicate": "observation",
+    "value": "example",
+    "confidence": 1.0,
+    "namespace": "local"
+  },
+  "sig": "base64..."
+}</pre>
+          <div class="pv-callout may"><strong>MAY:</strong> Implementations MAY expose additional UI metadata fields, but these MUST NOT alter canonical event semantics.</div>
+        </section>
+
+        <section id="reducer">
+          <span class="pv-badge">NORMATIVE</span>
+          <h2>4. Reducer Determinism</h2>
+          <p>Reducer output is a pure function of input event sequence. Identical input MUST produce identical state hash across compliant implementations.</p>
+          <div class="pv-callout must"><strong>MUST:</strong> Namespace transitions (`local`, `contested`, `canonical`, `archived`) MUST be reproducible from evidence replay only.</div>
+        </section>
+
+        <section id="verification">
+          <span class="pv-badge">REFERENCE</span>
+          <h2>5. Verification Checklist</h2>
+          <ol>
+            <li>Schema validation passes for all events.</li>
+            <li>Per-actor causal chains verify.</li>
+            <li>All signatures verify against key registry.</li>
+            <li>Reducer replay is deterministic.</li>
+          </ol>
+          <p>Authoritative normative source remains <code>PROTOCOL_PROFILE.txt</code> in repository root.</p>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
