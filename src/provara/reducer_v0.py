@@ -203,6 +203,31 @@ class SovereignReducerV0:
             for key, evs in sorted(self._evidence.items())
         }
 
+    def load_checkpoint(self, checkpoint_dict: Dict[str, Any]) -> None:
+        """
+        Load reducer state from a checkpoint record.
+        This is an optimization path for replay speed, not a source of truth.
+        """
+        cp_state = checkpoint_dict.get("state", {})
+        if not isinstance(cp_state, dict):
+            return
+
+        self.state["canonical"] = dict(cp_state.get("canonical", {}))
+        self.state["local"] = dict(cp_state.get("local", {}))
+        self.state["contested"] = dict(cp_state.get("contested", {}))
+        self.state["archived"] = dict(cp_state.get("archived", {}))
+
+        metadata_partial = cp_state.get("metadata_partial", {})
+        if isinstance(metadata_partial, dict):
+            self.state["metadata"]["last_event_id"] = metadata_partial.get("last_event_id")
+            self.state["metadata"]["event_count"] = int(metadata_partial.get("event_count", 0))
+            self.state["metadata"]["current_epoch"] = metadata_partial.get("current_epoch")
+            reducer_meta = metadata_partial.get("reducer")
+            if isinstance(reducer_meta, dict):
+                self.state["metadata"]["reducer"] = reducer_meta
+
+        self.state["metadata"]["state_hash"] = self._compute_state_hash()
+
     # ------------------------------------------------------------------
     # State hash (non-self-referential)
     # ------------------------------------------------------------------

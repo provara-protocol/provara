@@ -347,6 +347,68 @@ def cmd_agent_loop(args: argparse.Namespace) -> None:
     keys = Path(args.keyfile).resolve()
     run_alpha_loop(vault, keys, args.actor, args.cycles)
 
+def cmd_send_message(args: argparse.Namespace) -> None:
+    from . import Vault
+    v = Vault(args.path)
+    keys_data = _load_keys(Path(args.keyfile))
+    kid = args.key_id or list(keys_data.keys())[0]
+    priv = keys_data[kid]
+    sender_enc_priv = args.sender_encryption_private_key or priv
+    
+    # We need the recipient's public key
+    # If not provided directly, we try to find it in the vault registry
+    recip_pub = args.recipient_pubkey
+    if not recip_pub:
+        from .backpack_signing import load_keys_registry
+        reg = load_keys_registry(v.path / "identity" / "keys.json")
+        if args.recipient_id:
+            entry = reg.get(args.recipient_id)
+            if entry:
+                pub = entry.get("public_key_b64")
+                if isinstance(pub, str):
+                    recip_pub = pub
+    
+    if not recip_pub:
+        print("Error: Recipient public key or ID required.")
+        sys.exit(1)
+        
+    # Read message from arg or file
+    if args.message.startswith("@"):
+        msg_str = Path(args.message[1:]).read_text(encoding="utf-8")
+    else:
+        msg_str = args.message
+        
+    msg_dict = json.loads(msg_str)
+    
+    res = v.send_message(
+        kid,
+        priv,
+        sender_enc_priv,
+        recip_pub,
+        msg_dict,
+        subject=args.subject,
+    )
+    print(f"Message sent! Event ID: {res['event_id']}")
+
+def cmd_read_messages(args: argparse.Namespace) -> None:
+    from . import Vault
+    v = Vault(args.path)
+    keys_data = _load_keys(Path(args.keyfile))
+    kid = args.key_id or list(keys_data.keys())[0]
+    my_enc_priv = args.my_encryption_private_key or keys_data[kid]
+    
+    messages = v.get_messages(my_enc_priv)
+    if not messages:
+        print("No messages found.")
+        return
+        
+    print(f"--- Inbox for {kid} ---")
+    for m in messages:
+        print(f"\nFrom:    {m['from_actor']} ({m['from_key_id']})")
+        print(f"Date:    {m['timestamp']}")
+        print(f"Subject: {m['subject']}")
+        print(f"Body:    {json.dumps(m['body'], indent=2)}")
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="provara", description="Provara Protocol CLI")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -445,6 +507,30 @@ def main() -> None:
     p_loop.add_argument("--keyfile", required=True)
     p_loop.add_argument("--actor", default="Alpha_Bot_01")
     p_loop.add_argument("--cycles", type=int, default=1)
+
+    # send-message
+    p_sm = sub.add_parser("send-message", help="Send encrypted message to another agent")
+    p_sm.add_argument("path", help="Path to vault")
+    p_sm.add_argument("--keyfile", required=True)
+    p_sm.add_argument("--key-id", help="My Key ID")
+    p_sm.add_argument("--recipient-id", help="Recipient's Key ID")
+    p_sm.add_argument("--recipient-pubkey", help="Recipient's Public Key (B64)")
+    p_sm.add_argument(
+        "--sender-encryption-private-key",
+        help="Sender X25519 private key (Base64). Defaults to selected key value.",
+    )
+    p_sm.add_argument("--message", required=True, help="Message JSON string or @file")
+    p_sm.add_argument("--subject", help="Message subject")
+
+    # read-messages
+    p_rm = sub.add_parser("read-messages", help="Read and decrypt messages intended for me")
+    p_rm.add_argument("path", help="Path to vault")
+    p_rm.add_argument("--keyfile", required=True)
+    p_rm.add_argument("--key-id", help="My Key ID")
+    p_rm.add_argument(
+        "--my-encryption-private-key",
+        help="My X25519 private key (Base64). Defaults to selected key value.",
+    )
     
     args = parser.parse_args()
     
@@ -463,6 +549,11 @@ def main() -> None:
     elif args.command == "wallet-export": cmd_wallet_export(args)
     elif args.command == "wallet-import": cmd_wallet_import(args)
     elif args.command == "agent-loop": cmd_agent_loop(args)
+    elif args.command == "send-message": cmd_send_message(args)
+    elif args.command == "read-messages": cmd_read_messages(args)
+
+    # ... after other subparsers ...
+    # Wait, I need to add the actual subparser definitions too.
 
 if __name__ == "__main__":
     main()
