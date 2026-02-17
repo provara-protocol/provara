@@ -304,6 +304,49 @@ def cmd_resume(args: argparse.Namespace) -> None:
     vault = Path(args.path).resolve()
     print(generate_resume(vault))
 
+def cmd_check_safety(args: argparse.Namespace) -> None:
+    from . import Vault
+    v = Vault(args.path)
+    res = v.check_safety(args.action)
+    print(f"Action: {args.action.upper()}")
+    print(f"Status: {res['status']}")
+    if 'tier' in res:
+        print(f"Tier:   {res['tier']}")
+    print(f"Reason: {res.get('reason') or res.get('description', '')}")
+
+def cmd_wallet_export(args: argparse.Namespace) -> None:
+    from .wallet import export_to_solana
+    keys_data = _load_keys(Path(args.keyfile))
+    kid = args.key_id or list(keys_data.keys())[0]
+    priv_b64 = keys_data[kid]
+    
+    solana_keypair = export_to_solana(priv_b64)
+    
+    out_path = Path(args.out).resolve()
+    out_path.write_text(json.dumps(solana_keypair), encoding="utf-8")
+    print(f"Exported Provara key {kid} to Solana wallet: {out_path}")
+
+def cmd_wallet_import(args: argparse.Namespace) -> None:
+    from .wallet import import_from_solana
+    in_path = Path(args.file).resolve()
+    try:
+        solana_kp = json.loads(in_path.read_text(encoding="utf-8"))
+        res = import_from_solana(solana_kp)
+    except Exception as e:
+        print(f"Error importing Solana key: {e}")
+        sys.exit(1)
+        
+    print("Imported Solana Key:")
+    print(f"Key ID: {res['key_id']}")
+    print(f"Private Key (Provara format): {res['private_key_b64']}")
+    print("Add this to your keys.json to use it as an actor.")
+
+def cmd_agent_loop(args: argparse.Namespace) -> None:
+    from .agent_loop import run_alpha_loop
+    vault = Path(args.path).resolve()
+    keys = Path(args.keyfile).resolve()
+    run_alpha_loop(vault, keys, args.actor, args.cycles)
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="provara", description="Provara Protocol CLI")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -380,6 +423,28 @@ def main() -> None:
     # resume
     p_res = sub.add_parser("resume", help="Generate verifiable agent resume")
     p_res.add_argument("path", help="Path to vault")
+
+    # check-safety
+    p_cs = sub.add_parser("check-safety", help="Evaluate action against safety policy")
+    p_cs.add_argument("path", help="Path to vault")
+    p_cs.add_argument("--action", required=True, help="Action to check (e.g. DELETE_VAULT, APPEND_OBSERVATION)")
+
+    # wallet-export
+    p_we = sub.add_parser("wallet-export", help="Export Provara key to Solana CLI format")
+    p_we.add_argument("--keyfile", required=True)
+    p_we.add_argument("--key-id", help="Specific Key ID to export")
+    p_we.add_argument("--out", required=True, help="Output path for id.json")
+
+    # wallet-import
+    p_wi = sub.add_parser("wallet-import", help="Import Solana CLI keypair to Provara format")
+    p_wi.add_argument("--file", required=True, help="Path to Solana id.json")
+
+    # agent-loop
+    p_loop = sub.add_parser("agent-loop", help="Run autonomous alpha engine loop")
+    p_loop.add_argument("path", help="Path to vault")
+    p_loop.add_argument("--keyfile", required=True)
+    p_loop.add_argument("--actor", default="Alpha_Bot_01")
+    p_loop.add_argument("--cycles", type=int, default=1)
     
     args = parser.parse_args()
     
@@ -394,6 +459,10 @@ def main() -> None:
     elif args.command == "hedge-fund-sim": cmd_hedge_fund_sim(args)
     elif args.command == "oracle-validate": cmd_oracle_validate(args)
     elif args.command == "resume": cmd_resume(args)
+    elif args.command == "check-safety": cmd_check_safety(args)
+    elif args.command == "wallet-export": cmd_wallet_export(args)
+    elif args.command == "wallet-import": cmd_wallet_import(args)
+    elif args.command == "agent-loop": cmd_agent_loop(args)
 
 if __name__ == "__main__":
     main()

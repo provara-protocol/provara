@@ -33,6 +33,7 @@ from .perception_v0 import emit_perception_event, PerceptionTier
 from .market import record_market_alpha, record_hedge_fund_sim
 from .oracle import validate_market_alpha
 from .resume import generate_resume
+from .wallet import export_to_solana, import_from_solana
 
 
 class Vault:
@@ -252,6 +253,53 @@ class Vault:
         
         return self.append_event("OBSERVATION", payload, key_id, private_key_b64, actor=actor)
 
+    def check_safety(self, action_type: str) -> Dict[str, Any]:
+        """
+        Evaluate a proposed action against the vault's safety policy.
+        Returns a result dict with 'status' (APPROVED, BLOCKED, REQUIRES_MFA).
+        """
+        import json
+        policy_path = self.path / "policies" / "safety_policy.json"
+        if not policy_path.exists():
+            return {"status": "APPROVED", "reason": "No safety policy found (L0 default)"}
+            
+        policy = json.loads(policy_path.read_text())
+        
+        # Action to Tier Mapping (Extensible)
+        tier_map = {
+            "READ": "L0",
+            "REPLAY": "L0",
+            "APPEND_OBSERVATION": "L1",
+            "APPEND_ASSERTION": "L1",
+            "CHECKPOINT": "L1",
+            "SYNC_OUT": "L1",
+            "REKEY": "L2",
+            "UPDATE_POLICY": "L2",
+            "SYNC_IN": "L2",
+            "DELETE_VAULT": "L3",
+            "EXPORT_PRIVATE_KEYS": "L3"
+        }
+        
+        target_tier = tier_map.get(action_type.upper(), "L1") # Default to L1 for unknown
+        tier_config = policy.get("action_classes", {}).get(target_tier)
+        
+        if not tier_config:
+            return {"status": "BLOCKED", "reason": f"Tier {target_tier} not defined in policy"}
+            
+        approval = tier_config.get("approval")
+        
+        if approval == "remote_signature_or_mfa":
+            return {"status": "REQUIRES_MFA", "tier": target_tier, "reason": tier_config.get("description")}
+        elif target_tier == "L3":
+            return {"status": "BLOCKED", "tier": "L3", "reason": "L3 actions are human-only"}
+        else:
+            return {
+                "status": "APPROVED", 
+                "tier": target_tier, 
+                "approval": approval,
+                "description": tier_config.get("description")
+            }
+
 
 # Backward-compatible alias while public API transitions.
 SovereignReducerV0 = SovereignReducer
@@ -282,4 +330,7 @@ __all__ = [
     "record_hedge_fund_sim",
     "validate_market_alpha",
     "generate_resume",
+    "check_safety",
+    "export_to_solana",
+    "import_from_solana",
 ]

@@ -640,7 +640,9 @@ Tests Passing       232 (125 unit + 8 vector + 17 compliance + 60 PSMC + 22 MCP)
 Apache 2.0. See [`LICENSE`](LICENSE) for details.
 
 Normative specification: [`PROTOCOL_PROFILE.txt`](PROTOCOL_PROFILE.txt) (immutable after distribution).
-Human-readable spec: [`docs/spec/v1.0/provara-v1.0-spec.txt`](docs/spec/v1.0/provara-v1.0-spec.txt).
+Canonical spec URL: [`https://provara.dev/spec/v1.0`](https://provara.dev/spec/v1.0).
+Human-readable spec source: [`docs/spec/v1.0/provara-v1.0-spec.txt`](docs/spec/v1.0/provara-v1.0-spec.txt).
+Static spec HTML source: [`docs/spec/v1.0/index.html`](docs/spec/v1.0/index.html).
 
 
 
