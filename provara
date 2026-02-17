@@ -1,0 +1,17 @@
+#!/bin/bash
+# provara — Provara Protocol CLI wrapper
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CORE_BIN="$SCRIPT_DIR/SNP_Core/bin"
+export PYTHONPATH="$CORE_BIN"
+
+if command -v python3 &>/dev/null; then
+    PY=python3
+elif command -v python &>/dev/null; then
+    PY=python
+else
+    echo "ERROR: Python 3 not found."
+    exit 1
+fi
+
+$PY "$CORE_BIN/provara.py" "$@"

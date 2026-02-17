@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provara Protocol v1.0 — Normative Specification</title>
+    <meta name="description" content="Provara v1.0 Protocol Profile — Immutable cryptographic and serialization specification">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --heading: #0a0a0a;
+            --link: #0066cc;
+            --code-bg: #f5f5f5;
+            --border: #e0e0e0;
+            --accent: #2563eb;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f0f0f;
+                --text: #e0e0e0;
+                --heading: #ffffff;
+                --link: #60a5fa;
+                --code-bg: #1a1a1a;
+                --border: #333333;
+                --accent: #3b82f6;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        h1, h2, h3 {
+            color: var(--heading);
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        h2 {
+            font-size: 1.75rem;
+            margin-top: 3rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        h3 {
+            font-size: 1.25rem;
+            margin-top: 2rem;
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        ul, ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        code {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            background: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: var(--code-bg);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+        
+        pre code {
+            padding: 0;
+            background: none;
+        }
+        
+        .metadata {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            margin: 2rem 0;
+        }
+        
+        .metadata dl {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 0.5rem 1rem;
+        }
+        
+        .metadata dt {
+            font-weight: 600;
+            color: var(--heading);
+        }
+        
+        .metadata dd {
+            color: var(--text);
+        }
+        
+        .rfc-keyword {
+            font-weight: 700;
+            color: var(--accent);
+            font-variant: small-caps;
+        }
+        
+        .toc {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            border: 1px solid var(--border);
+        }
+        
+        .toc h2 {
+            margin-top: 0;
+            border-bottom: none;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            margin-left: 1.5rem;
+        }
+        
+        .toc a {
+            color: var(--link);
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        
+        a {
+            color: var(--link);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid var(--border);
+        }
+        
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+        }
+        
+        .warning {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 4px solid #f59e0b;
+            margin: 1rem 0;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .warning {
+                background: #451a03;
+                color: #fcd34d;
+                border-left-color: #f59e0b;
+            }
+        }
+        
+        @media print {
+            body {
+                max-width: none;
+                font-size: 11pt;
+                line-height: 1.5;
+            }
+            
+            h1 {
+                page-break-before: always;
+            }
+            
+            h2, h3 {
+                page-break-after: avoid;
+            }
+            
+            pre, .metadata, .toc {
+                page-break-inside: avoid;
+            }
+            
+            a {
+                color: #000;
+                text-decoration: none;
+            }
+            
+            .toc {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>Provara Protocol v1.0</h1>
+
+<div class="metadata">
+    <dl>
+        <dt>Profile ID:</dt>
+        <dd><code>PROVARA-1.0_PROFILE_A</code></dd>
+        
+        <dt>Date Frozen:</dt>
+        <dd>2026-02-13</dd>
+        
+        <dt>Status:</dt>
+        <dd><strong>IMMUTABLE</strong> — Do not modify after distribution.</dd>
+        
+        <dt>Canonical URL:</dt>
+        <dd><a href="https://provara.dev/spec/v1.0">https://provara.dev/spec/v1.0</a></dd>
+        
+        <dt>License:</dt>
+        <dd>Apache 2.0</dd>
+    </dl>
+</div>
+
+<div class="warning">
+    <strong>RFC 2119 Keywords:</strong> The key words <span class="rfc-keyword">MUST</span>, <span class="rfc-keyword">MUST NOT</span>, <span class="rfc-keyword">SHALL</span>, <span class="rfc-keyword">SHALL NOT</span>, and <span class="rfc-keyword">MAY</span> in this document are to be interpreted as described in RFC 2119.
+</div>
+
+<p>This document is the normative cryptographic and serialization profile for Provara v1.0. Two compliant implementations processing the same event log <span class="rfc-keyword">MUST</span> produce byte-identical state hashes. Test vectors are provided in <code>test_vectors/vectors.json</code> for cross-validation.</p>
+
+<nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+        <li><a href="#hash">Hash Algorithm</a></li>
+        <li><a href="#signature">Signature Algorithm</a></li>
+        <li><a href="#canonicalization">Canonicalization</a></li>
+        <li><a href="#event-identity">Event Identity</a></li>
+        <li><a href="#merkle">Merkle Tree</a></li>
+        <li><a href="#reducer">Reducer Determinism</a></li>
+        <li><a href="#causal">Causal Chain</a></li>
+        <li><a href="#key-rotation">Key Rotation</a></li>
+        <li><a href="#safety">Safety Tiers</a></li>
+        <li><a href="#permanence">Event Permanence</a></li>
+        <li><a href="#extensions">Extension Rules</a></li>
+        <li><a href="#version">Spec Version</a></li>
+        <li><a href="#compliance">Compliance</a></li>
+        <li><a href="#reimplementation">Reimplementation Guidance</a></li>
+    </ol>
+</nav>
+
+<h2 id="hash">1. Hash Algorithm</h2>
+
+<p>Implementations <span class="rfc-keyword">MUST</span> use SHA-256 (FIPS 180-4). Output <span class="rfc-keyword">MUST</span> be 64 lowercase hexadecimal characters. Input <span class="rfc-keyword">MUST</span> be UTF-8 encoded bytes. No other hash algorithm is permitted in Profile A.</p>
+
+<p>SHA-256 <span class="rfc-keyword">MUST</span> be used for:</p>
+<ul>
+    <li>Event content addressing (<code>event_id</code>)</li>
+    <li>File integrity (manifest entries)</li>
+    <li>Merkle tree computation (leaves and nodes)</li>
+    <li>State hash (reducer output)</li>
+    <li>Key ID derivation</li>
+</ul>
+
+<h2 id="signature">2. Signature Algorithm</h2>
+
+<p>Implementations <span class="rfc-keyword">MUST</span> use Ed25519 (RFC 8032). Key size <span class="rfc-keyword">MUST</span> be 256-bit (32 bytes public, 64 bytes private with seed). Signatures <span class="rfc-keyword">MUST</span> be 64 bytes. Signature encoding <span class="rfc-keyword">MUST</span> be Base64 (standard alphabet, with padding). No other signature algorithm is permitted in Profile A.</p>
+
+<h3>Signing Payload for Events</h3>
+
+<p>Implementations <span class="rfc-keyword">MUST</span> sign <code>canonical_bytes(event_without_sig_field)</code>. The <code>"sig"</code> field <span class="rfc-keyword">MUST</span> be excluded before signing. The <code>"event_id"</code> field <span class="rfc-keyword">MUST</span> be included in the signing payload.</p>
+
+<h3>Key ID Derivation</h3>
+
+<p><code>key_id</code> <span class="rfc-keyword">MUST</span> equal <code>"bp1_" + SHA-256(raw_public_key_bytes)[:16 hex chars]</code>. Raw public key bytes <span class="rfc-keyword">MUST</span> be the 32-byte Ed25519 public key.</p>
+
+<p><strong>Example:</strong> <code>bp1_27a6549d43046062</code></p>
+
+<h2 id="canonicalization">3. Canonicalization</h2>
+
+<p>Implementations <span class="rfc-keyword">MUST</span> use RFC 8785 (JSON Canonicalization Scheme).</p>
+
+<p>The following rules <span class="rfc-keyword">MUST</span> be applied:</p>
+<ul>
+    <li>Object keys <span class="rfc-keyword">MUST</span> be sorted lexicographically by Unicode code point</li>
+    <li>There <span class="rfc-keyword">MUST</span> be no whitespace between tokens</li>
+    <li>There <span class="rfc-keyword">MUST</span> be no trailing commas</li>
+    <li>Numbers <span class="rfc-keyword">MUST NOT</span> have leading zeros, positive signs, or trailing decimal zeros</li>
+    <li>Strings <span class="rfc-keyword">MUST</span> use minimal escape sequences</li>
+    <li>Encoding <span class="rfc-keyword">MUST</span> be UTF-8 without BOM</li>
+    <li>Null values <span class="rfc-keyword">MUST</span> be preserved as <code>"null"</code> (<span class="rfc-keyword">MUST NOT</span> be omitted)</li>
+</ul>
+
+<p><strong>Implementation reference:</strong> <code>canonical_json.py</code> (<code>canonical_bytes</code>, <code>canonical_dumps</code>)</p>
+
+<h2 id="event-identity">4. Event Identity</h2>
+
+<p>Event IDs <span class="rfc-keyword">MUST</span> be content-addressed using derived hashes. UUIDv7 is <span class="rfc-keyword">NOT</span> permitted for event IDs in Profile A.</p>
+
+<h3>Derivation Rule</h3>
+
+<ol>
+    <li>Remove <code>"event_id"</code> and <code>"sig"</code> fields from the event</li>
+    <li>Compute canonical JSON bytes of the remaining object</li>
+    <li><code>event_id = "evt_" + SHA-256(canonical_bytes)[:24 hex chars]</code></li>
+</ol>
+
+<p>This rule <span class="rfc-keyword">MUST</span> be deterministic: identical event content <span class="rfc-keyword">MUST</span> always produce the same <code>event_id</code>.</p>
+
+<h2 id="merkle">5. Merkle Tree</h2>
+
+<p>Structure <span class="rfc-keyword">MUST</span> be binary, balanced. If leaf count is odd, the last leaf <span class="rfc-keyword">MUST</span> be duplicated.</p>
+
+<h3>Leaf Computation</h3>
+
+<pre><code>leaf_hash = SHA-256(canonical_bytes(file_entry_object))</code></pre>
+
+<p>File entry object <span class="rfc-keyword">MUST</span> contain exactly: <code>{"path": "...", "sha256": "...", "size": N}</code></p>
+
+<p>Leaf ordering <span class="rfc-keyword">MUST</span> be lexicographic by file path.</p>
+
+<h3>Node Computation</h3>
+
+<pre><code>node_hash = SHA-256(left_child_bytes || right_child_bytes)</code></pre>
+
+<p>Concatenation is raw bytes (32 bytes + 32 bytes), <span class="rfc-keyword">NOT</span> hex strings.</p>
+
+<p>Root <span class="rfc-keyword">MUST</span> be a single 64-character lowercase hex string stored in <code>merkle_root.txt</code>.</p>
+
+<h2 id="reducer">6. Reducer Determinism</h2>
+
+<p class="warning"><strong>MANDATORY COMPLIANCE REQUIREMENT (Test 16)</strong></p>
+
+<p><strong>Rule:</strong> Given the same event sequence, any compliant reducer <span class="rfc-keyword">MUST</span> produce a byte-identical <code>state_hash</code>.</p>
+
+<h3>State Hash Computation</h3>
+
+<pre><code>state_hash = SHA-256(canonical_bytes(state_without_metadata_block))</code></pre>
+
+<p>Scope <span class="rfc-keyword">MUST</span> include: <code>canonical</code>, <code>local</code>, <code>contested</code>, <code>archived</code> namespaces.</p>
+
+<p>Scope <span class="rfc-keyword">MUST</span> exclude: metadata block.</p>
+
+<p>Violation of this rule indicates a non-compliant implementation.</p>
+
+<h2 id="causal">7. Causal Chain</h2>
+
+<p>Model <span class="rfc-keyword">MUST</span> be per-actor linked list via <code>prev_event_hash</code>.</p>
+
+<h3>Rules</h3>
+
+<ul>
+    <li>First event by an actor: <code>prev_event_hash</code> <span class="rfc-keyword">MUST</span> be <code>null</code></li>
+    <li>Subsequent events: <code>prev_event_hash</code> <span class="rfc-keyword">MUST</span> equal the <code>event_id</code> of that actor's immediately preceding event</li>
+    <li>Cross-actor references: <code>prev_event_hash</code> <span class="rfc-keyword">MUST NOT</span> reference another actor's events</li>
+</ul>
+
+<h3>Integrity Rule</h3>
+
+<p>For any event E by actor A, if <code>E.prev_event_hash</code> is not null, there <span class="rfc-keyword">MUST</span> exist an event P where <code>P.event_id == E.prev_event_hash</code> AND <code>P.actor == A</code>.</p>
+
+<h2 id="key-rotation">8. Key Rotation</h2>
+
+<p>Model <span class="rfc-keyword">MUST</span> be two-event: <code>KEY_REVOCATION</code> followed by <code>KEY_PROMOTION</code>. The revoking/promoting signer <span class="rfc-keyword">MUST</span> be a surviving trusted authority. Self-signing <span class="rfc-keyword">MUST NOT</span> be permitted: a new key <span class="rfc-keyword">MUST NOT</span> authorize its own promotion.</p>
+
+<p><code>KEY_REVOCATION</code> <span class="rfc-keyword">MUST</span> set <code>trust_boundary_event_id</code> (the last event trusted under the old key).</p>
+
+<h2 id="safety">9. Safety Tiers</h2>
+
+<p>Implementations <span class="rfc-keyword">MUST</span> support four tiers:</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Tier</th>
+            <th>Description</th>
+            <th>Mechanism</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>L0</strong></td>
+            <td>Data-only, reversible</td>
+            <td>local reducer</td>
+        </tr>
+        <tr>
+            <td><strong>L1</strong></td>
+            <td>Low-kinetic</td>
+            <td>reducer + policy, logged</td>
+        </tr>
+        <tr>
+            <td><strong>L2</strong></td>
+            <td>High-kinetic</td>
+            <td>multi-sensor + signed policy</td>
+        </tr>
+        <tr>
+            <td><strong>L3</strong></td>
+            <td>Critical, irreversible</td>
+            <td>human MFA or remote signature</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>Merge Ratchet Rule</h3>
+
+<p><code>most_restrictive_wins</code> — Safety tiers <span class="rfc-keyword">MUST</span> only tighten on merge. Loosening <span class="rfc-keyword">MUST NOT</span> occur without explicit authority from a key with L3 clearance.</p>
+
+<h2 id="permanence">10. Event Permanence</h2>
+
+<ul>
+    <li>Events <span class="rfc-keyword">MUST</span> be permanent. Implementations <span class="rfc-keyword">MUST NOT</span> delete events.</li>
+    <li>Checkpoints <span class="rfc-keyword">MUST</span> be permanent.</li>
+    <li>Perception raw data: 30-day default, oldest-first eviction (<span class="rfc-keyword">MAY</span> vary).</li>
+    <li>CAS artifacts: permanent if referenced, 90-day if unreferenced (<span class="rfc-keyword">MAY</span> vary).</li>
+    <li>State caches: <span class="rfc-keyword">MAY</span> be evicted (regeneratable from events).</li>
+</ul>
+
+<h2 id="extensions">11. Extension Rules</h2>
+
+<p>Custom event types <span class="rfc-keyword">MUST</span> use reverse-domain prefix:</p>
+
+<pre><code>com.huntinfo.ar.perception_frame
+org.example.custom_event</code></pre>
+
+<p>Core event types (<code>OBSERVATION</code>, <code>ATTESTATION</code>, <code>RETRACTION</code>, <code>GENESIS</code>, <code>KEY_REVOCATION</code>, <code>KEY_PROMOTION</code>) <span class="rfc-keyword">MUST NOT</span> use a prefix.</p>
+
+<h3>Forward Compatibility</h3>
+
+<ul>
+    <li>Unknown event types <span class="rfc-keyword">MUST</span> be preserved in the event log on merge.</li>
+    <li>Unknown event types <span class="rfc-keyword">MUST NOT</span> affect core reducer state (<code>canonical</code>, <code>local</code>, <code>contested</code>, <code>archived</code>).</li>
+    <li>Unknown fields in known event types <span class="rfc-keyword">MUST</span> be preserved and <span class="rfc-keyword">MUST NOT</span> affect core reducer output.</li>
+</ul>
+
+<h2 id="version">12. Spec Version</h2>
+
+<p>Manifest <span class="rfc-keyword">MUST</span> contain: <code>backpack_spec_version = "1.0"</code></p>
+
+<p>Manifest format <span class="rfc-keyword">MUST</span> be: <code>manifest.v0</code></p>
+
+<h2 id="compliance">13. Compliance</h2>
+
+<p>Minimum compliance requires passing 17 tests (<code>backpack_compliance_v1.py</code>).</p>
+
+<h3>Test Coverage</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Tests</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Directory structure</td>
+            <td>2</td>
+            <td><span class="rfc-keyword">MUST</span> pass</td>
+        </tr>
+        <tr>
+            <td>Identity schema</td>
+            <td>2</td>
+            <td><span class="rfc-keyword">MUST</span> pass</td>
+        </tr>
+        <tr>
+            <td>Event schema + uniqueness + causal chain</td>
+            <td>3</td>
+            <td><span class="rfc-keyword">MUST</span> pass</td>
+        </tr>
+        <tr>
+            <td>Manifest integrity + Merkle + phantoms + paths</td>
+            <td>5</td>
+            <td><span class="rfc-keyword">MUST</span> pass</td>
+        </tr>
+        <tr>
+            <td>Safety policy structure + ratchet</td>
+            <td>2</td>
+            <td><span class="rfc-keyword">MUST</span> pass</td>
+        </tr>
+        <tr>
+            <td>Sync contract schema</td>
+            <td>1</td>
+            <td><span class="rfc-keyword">MUST</span> pass</td>
+        </tr>
+        <tr>
+            <td>Reducer determinism</td>
+            <td>1</td>
+            <td><span class="rfc-keyword">MUST</span> pass</td>
+        </tr>
+        <tr>
+            <td>Retention permanence</td>
+            <td>1</td>
+            <td><span class="rfc-keyword">MUST</span> pass</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2 id="reimplementation">14. Reimplementation Guidance</h2>
+
+<p>To reimplement Provara v1.0 in another language:</p>
+
+<ol>
+    <li>Implement SHA-256, Ed25519, and RFC 8785 canonical JSON</li>
+    <li>Validate against <code>test_vectors/vectors.json</code> (7 vectors)</li>
+    <li>Build a reducer that processes <code>OBSERVATION</code>, <code>ATTESTATION</code>, <code>RETRACTION</code> events</li>
+    <li>Verify: your reducer produces the same <code>state_hash</code> as the Python reference for the test vector event sequence</li>
+    <li>Run the 17 compliance tests against your output</li>
+</ol>
+
+<p><strong>If the state hashes match, the implementation is correct.</strong> If they do not match, the canonical JSON or hash computation has a bug. The Python reference implementation is the canonical source of truth for any ambiguity not covered by this profile.</p>
+
+<hr style="margin: 3rem 0; border: none; border-top: 2px solid var(--border);">
+
+<footer style="text-align: center; color: var(--text); opacity: 0.7; font-size: 0.9rem; margin-top: 3rem;">
+    <p>Provara Protocol v1.0 — Profile A</p>
+    <p>Frozen: 2026-02-13 | License: Apache 2.0</p>
+    <p><a href="https://provara.dev">provara.dev</a> | <a href="https://github.com/provara-protocol/provara">GitHub</a></p>
+</footer>
+
+</body>
+</html>
