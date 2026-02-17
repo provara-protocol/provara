@@ -375,3 +375,11 @@ passes through the rotation boundary.
 - **Don't say "I can't"** without offering 2-3 ranked alternatives.
 - **Don't speculate about module internals** — read the source.
 - **Don't leave the repo dirty.** Clean state, passing tests, updated TODO.md.
+
+---
+
+## Agent-Specific Profiles
+
+Individual agent profiles with tool-specific details:
+- [`docs/agents/CLAW_PROFILE.md`](docs/agents/CLAW_PROFILE.md) — Claude Sonnet 4.5 (orchestrator)
+- [`docs/agents/CODEX_PROFILE.md`](docs/agents/CODEX_PROFILE.md) — Codex (backend implementation)
