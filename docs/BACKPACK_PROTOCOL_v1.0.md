@@ -185,6 +185,8 @@ A *fork* occurs when two events by the same actor share the same `prev_event_has
 
 ## 7. Event Types
 
+Machine-readable schema: `docs/schemas/provara_event_schema_v1.json`
+
 ### Core Types (no prefix required)
 
 All core event types are reserved. Custom extensions MUST use reverse-domain prefixes (`com.example.my_type`).
@@ -510,19 +512,57 @@ Safety constraints only tighten automatically on merge (`most_restrictive_wins`)
 
 The sync protocol is a union merge with causal chain verification.
 
-### Algorithm
+### 13.1 Chain Validation Algorithm
 
-1. **Union merge** all events from both vaults, deduplicating by `event_id`
-2. **Sort** merged events by `(timestamp_utc, event_id)` — stable, deterministic
-3. **Detect forks** — same actor, same `prev_event_hash`, different events
-4. **Re-run reducer** on merged events to recompute belief state
-5. **Regenerate manifest** and Merkle root
+To validate the causal integrity of a backpack, a conformant implementation MUST perform the following steps:
 
-### Determinism Guarantee
+1.  **Initialize**: Group all events by `actor`.
+2.  **Sort**: For each actor's event set, sort events by `timestamp_utc` (primary) and `event_id` (secondary, lexicographical).
+3.  **Validate Links**:
+    *   For the **first event** in the sorted set:
+        *   Assert `prev_event_hash` is `null`.
+    *   For every **subsequent event** $E_i$ (where $i > 0$):
+        *   Identify the preceding event $E_{i-1}$ in the sorted set.
+        *   Assert $E_i.prev\_event\_hash == E_{i-1}.event\_id$.
+4.  **Verify Content Identity**:
+    *   For every event $E$:
+        *   Assert $E.event\_id$ matches the content-addressed derivation rule (see §5).
+5.  **Verify Signatures**:
+    *   For every event $E$:
+        *   Assert $E.sig$ is a valid Ed25519 signature over $E$'s canonical form using the public key associated with $E.actor\_key\_id$.
 
-`merge(A, B)` and `merge(B, A)` produce identical merged event sequences (same sort order) and therefore identical state hashes.
+Any failure in steps 3, 4, or 5 MUST result in the chain being marked as invalid.
 
-### Fencing Tokens
+### 13.2 Algorithm Pseudocode
+
+```
+function verify_vault(events):
+    actors = group_by(events, "actor")
+    
+    for actor_id in actors:
+        actor_events = sort(actors[actor_id], by=["timestamp_utc", "event_id"])
+        
+        for i from 0 to len(actor_events) - 1:
+            curr = actor_events[i]
+            
+            # Linkage check
+            if i == 0:
+                assert curr.prev_event_hash == null
+            else:
+                prev = actor_events[i-1]
+                assert curr.prev_event_hash == prev.event_id
+            
+            # Content identity check
+            assert curr.event_id == derive_event_id(curr)
+            
+            # Signature check
+            pub_key = lookup_key(curr.actor_key_id)
+            assert verify_signature(curr, pub_key)
+            
+    return true
+```
+
+### 13.3 Fencing Tokens
 
 Before writing to a backpack, generate a fencing token:
 
@@ -600,7 +640,22 @@ All file paths in the manifest MUST:
 
 ## 16. Compliance Requirements
 
-A compliant Provara v1.0 implementation MUST pass all 17 tests in `backpack_compliance_v1.py`. The minimum test coverage:
+### 16.1 Error Taxonomy
+
+Standardized error codes for validation failures. Implementations SHOULD use these codes to ensure interoperability and clear auditing.
+
+| Code | Label | Description |
+|------|-------|-------------|
+| `PROVARA_E001` | `HASH_MISMATCH` | Event ID does not match computed content hash |
+| `PROVARA_E002` | `BROKEN_CAUSAL_CHAIN` | `prev_event_hash` does not link to correct previous event |
+| `PROVARA_E003` | `INVALID_SIGNATURE` | Signature verification failed for the given public key |
+| `PROVARA_E004` | `MISSING_FIELD` | A required top-level or payload field is missing |
+| `PROVARA_E005` | `UNAUTHORIZED_SIGNER` | The signing key does not have authority for the event type |
+| `PROVARA_E006` | `REVOKED_KEY_USE` | Event signed by a key that was revoked at the time of signing |
+| `PROVARA_E007` | `MALFORMED_JSON` | Event or file is not valid UTF-8 or standard JSON |
+| `PROVARA_E008` | `MERKLE_ROOT_MISMATCH` | Recomputed Merkle root does not match `merkle_root.txt` |
+
+### 16.2 Minimum Test Coverage
 
 | Category | Tests | Requirement |
 |----------|------:|-------------|
@@ -658,6 +713,28 @@ Common causes:
 4. **Missing metadata fields** — `state_hash` excludes `metadata.state_hash` but includes all other metadata fields
 
 The Python reference implementation is the canonical source of truth for any ambiguity.
+
+---
+
+## 18. Security Considerations
+
+### 18.1 Threat Model
+
+| Threat | Provara Defense |
+|--------|-----------------|
+| **Data Tampering** | Merkle tree seals the vault; Ed25519 signatures seal each event. |
+| **History Re-ordering** | Causal hash-chaining enforces total order per actor. |
+| **Silent Deletion** | Causal chain gaps and Merkle root mismatches detect missing files or events. |
+| **Identity Takeover** | Key rotation protocol requires surviving authority; compromised keys cannot self-promote replacements. |
+| **Stale Writes** | Fencing tokens ensure sync operations target the correct chain head. |
+
+### 18.2 Privacy
+
+Provara events are stored in plaintext JSON. This protocol provides **integrity** and **authenticity**, but not **confidentiality**. Sensitive data SHOULD be encrypted at the application layer before being placed in an event's `payload.value` field.
+
+### 18.3 Replay Attacks
+
+Events include unique content-addressed IDs and actor sequence numbers (`ts_logical`). Implementations MUST reject duplicate events and out-of-order causal chains.
 
 ---
 

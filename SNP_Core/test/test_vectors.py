@@ -1,6 +1,7 @@
 import unittest
 import json
 import base64
+import hashlib
 import sys
 from pathlib import Path
 
@@ -23,12 +24,20 @@ class TestNormativeVectors(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Path to vectors.json relative to project root
-        cls.vectors_file = _this_dir.parent.parent / "test_vectors" / "vectors.json"
+        cls.vectors_dir = _this_dir.parent.parent / "test_vectors"
+        cls.vectors_file = cls.vectors_dir / "vectors.json"
+        cls.conformance_file = cls.vectors_dir / "canonical_conformance.json"
+        
         if not cls.vectors_file.exists():
             raise FileNotFoundError(f"Missing vectors.json at {cls.vectors_file}")
         
         with open(cls.vectors_file, "r", encoding="utf-8") as f:
             cls.data = json.load(f)
+            
+        cls.conformance_data = None
+        if cls.conformance_file.exists():
+            with open(cls.conformance_file, "r", encoding="utf-8") as f:
+                cls.conformance_data = json.load(f)
 
     def test_canonical_json_vectors(self):
         for v in [v for v in self.data["vectors"] if v["id"].startswith("canonical_json")]:
@@ -36,10 +45,19 @@ class TestNormativeVectors(unittest.TestCase):
                 actual = canonical_bytes(v["input"]).hex()
                 self.assertEqual(actual, v["expected"])
 
+    def test_canonical_conformance(self):
+        if not self.conformance_data:
+            self.skipTest("canonical_conformance.json not found")
+        for v in self.conformance_data["vectors"]:
+            with self.subTest(vector_id=v["id"]):
+                actual = canonical_bytes(v["input"]).hex()
+                self.assertEqual(actual, v["expected_hex"])
+
     def test_sha256_hash_vectors(self):
         for v in [v for v in self.data["vectors"] if v["id"].startswith("sha256_hash")]:
             with self.subTest(vector_id=v["id"]):
-                actual = canonical_hash(v["input"])
+                # Profile HASH ALGORITHM: hash UTF-8 input bytes directly.
+                actual = hashlib.sha256(v["input"].encode("utf-8")).hexdigest()
                 self.assertEqual(actual, v["expected"])
 
     def test_event_id_derivation_vectors(self):

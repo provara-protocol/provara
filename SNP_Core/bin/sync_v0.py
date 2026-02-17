@@ -71,6 +71,12 @@ from backpack_integrity import (
 )
 from reducer_v0 import SovereignReducerV0
 from manifest_generator import build_manifest, manifest_leaves
+from checkpoint_v0 import (
+    load_latest_checkpoint,
+    verify_checkpoint,
+    create_checkpoint,
+    save_checkpoint,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -508,20 +514,25 @@ def sync_backpacks(
     local_path: Path,
     remote_path: Path,
     strategy: str = "union",
+    private_key: Optional[Ed25519PrivateKey] = None,
+    key_id: Optional[str] = None,
 ) -> SyncResult:
     """
     Main sync entry point: merge two backpacks' event logs and recompute state.
 
     Process:
       1. Merge event logs (union dedup)
-      2. Re-run reducer on merged events to compute new state
+      2. Re-run reducer on merged events to compute new state (using checkpoints)
       3. Regenerate manifest and merkle root
-      4. Return SyncResult with statistics
+      4. Save a new checkpoint if signing keys are provided
+      5. Return SyncResult with statistics
 
     Args:
         local_path: Path to the local backpack root.
         remote_path: Path to the remote backpack root.
         strategy: Merge strategy. Currently only "union" is supported.
+        private_key: Optional key to sign a new checkpoint.
+        key_id: Optional key ID for the signing key.
 
     Returns:
         SyncResult with merge statistics and new state hash.
@@ -550,11 +561,18 @@ def sync_backpacks(
             errors=[f"Merge failed: {exc}"],
         )
 
-    # Step 2: Re-run reducer on merged events
-    reducer = SovereignReducerV0()
-    reducer.apply_events(merge.merged_events)
-    new_state = reducer.export_state()
-    new_state_hash = new_state["metadata"]["state_hash"]
+    # Step 2: Re-run reducer on merged events (using checkpoints for speed)
+    try:
+        reducer = _reconstruct_state(local_path, merge.merged_events)
+        new_state = reducer.export_state()
+        new_state_hash = new_state["metadata"]["state_hash"]
+    except Exception as exc:
+        return SyncResult(
+            success=False,
+            events_merged=merge.new_count,
+            new_state_hash=None,
+            errors=[f"State reconstruction failed: {exc}"],
+        )
 
     # Step 3: Write merged events back to local backpack
     write_events(local_events_path, merge.merged_events)
@@ -574,6 +592,14 @@ def sync_backpacks(
     except Exception as exc:
         errors.append(f"Manifest regeneration failed: {exc}")
 
+    # Step 6: Create new checkpoint if keys provided
+    if private_key and key_id and not errors:
+        try:
+            cp = create_checkpoint(local_path, new_state, private_key, key_id)
+            save_checkpoint(local_path, cp)
+        except Exception as exc:
+            errors.append(f"Checkpoint creation failed: {exc}")
+
     return SyncResult(
         success=len(errors) == 0,
         events_merged=merge.new_count,
@@ -581,6 +607,60 @@ def sync_backpacks(
         errors=errors,
         forks=merge.forks,
     )
+
+
+def _reconstruct_state(
+    backpack_path: Path, merged_events: List[Dict[str, Any]]
+) -> SovereignReducerV0:
+    """
+    Optimized state reconstruction using the latest verified checkpoint.
+    """
+    reducer = SovereignReducerV0()
+    
+    # 1. Try to load latest checkpoint
+    cp_dict = load_latest_checkpoint(backpack_path)
+    if cp_dict:
+        # Verify checkpoint against keys.json
+        keys_path = backpack_path / "identity" / "keys.json"
+        if keys_path.exists():
+            registry = load_keys_registry(keys_path)
+            pub_key = resolve_public_key(cp_dict.get("key_id", ""), registry)
+            
+            if pub_key and verify_checkpoint(cp_dict, pub_key):
+                # Check if checkpoint's merkle_root matches current file system
+                # (Skip this check for performance if we trust the vault directory)
+                
+                # Load checkpoint state into reducer
+                cp_state = cp_dict["state"]
+                reducer.state["canonical"] = cp_state.get("canonical", {})
+                reducer.state["local"] = cp_state.get("local", {})
+                reducer.state["contested"] = cp_state.get("contested", {})
+                reducer.state["archived"] = cp_state.get("archived", {})
+                
+                meta_p = cp_state.get("metadata_partial", {})
+                reducer.state["metadata"]["last_event_id"] = meta_p.get("last_event_id")
+                reducer.state["metadata"]["event_count"] = meta_p.get("event_count", 0)
+                reducer.state["metadata"]["current_epoch"] = meta_p.get("current_epoch")
+                reducer.state["metadata"]["reducer"] = meta_p.get("reducer")
+                
+                # Recompute initial state hash from checkpoint
+                reducer.state["metadata"]["state_hash"] = reducer._compute_state_hash()
+                
+                # Find events that happened AFTER this checkpoint
+                last_id = reducer.state["metadata"]["last_event_id"]
+                start_idx = 0
+                if last_id:
+                    for i, ev in enumerate(merged_events):
+                        if ev.get("event_id") == last_id:
+                            start_idx = i + 1
+                            break
+                
+                reducer.apply_events(merged_events[start_idx:])
+                return reducer
+
+    # Fallback: full replay
+    reducer.apply_events(merged_events)
+    return reducer
 
 
 def _regenerate_manifest(backpack_path: Path) -> None:

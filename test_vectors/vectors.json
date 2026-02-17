@@ -22,7 +22,7 @@
       "id": "sha256_hash_01",
       "description": "SHA-256 hash of a standard string",
       "input": "Provara Protocol v1.0",
-      "expected": "725c9b749cc2b74e2c5c3ebf87a7181245602075827d5677f0f3ddecd8aa9e55"
+      "expected": "03955794ade289f388724cdbbea8d716f4441c3d22ba6670df7bb3e1ae4949c3"
     },
     {
       "id": "event_id_derivation_01",

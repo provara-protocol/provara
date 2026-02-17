@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+lock_dir="${repo_root}/.locks"
+
+if [[ ! -d "${lock_dir}" ]]; then
+  exit 0
+fi
+
+mapfile -t locks < <(find "${lock_dir}" -maxdepth 1 -type f -name "*.lock" | sort)
+
+if [[ "${#locks[@]}" -gt 0 ]]; then
+  echo "ERROR: Active lock files detected. Release locks before committing."
+  echo
+  for lock in "${locks[@]}"; do
+    rel="${lock#${repo_root}/}"
+    echo "  - ${rel}"
+  done
+  echo
+  echo "Tip: run 'python tools/check_locks.py status' and release stale locks."
+  exit 1
+fi
+
+exit 0

@@ -1,0 +1,468 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://provara.dev/spec/v1.0/schema/event",
+  "title": "Provara Event Schema v1.0",
+  "description": "Machine-readable event schema for Provara Protocol v1.0 Profile A.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/$defs/eventEnvelope"
+    },
+    {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/genesisEvent"
+        },
+        {
+          "$ref": "#/$defs/observationEvent"
+        },
+        {
+          "$ref": "#/$defs/assertionEvent"
+        },
+        {
+          "$ref": "#/$defs/attestationEvent"
+        },
+        {
+          "$ref": "#/$defs/retractionEvent"
+        },
+        {
+          "$ref": "#/$defs/keyRevocationEvent"
+        },
+        {
+          "$ref": "#/$defs/keyPromotionEvent"
+        },
+        {
+          "$ref": "#/$defs/reducerEpochEvent"
+        },
+        {
+          "$ref": "#/$defs/customEvent"
+        }
+      ]
+    }
+  ],
+  "$defs": {
+    "eventId": {
+      "type": "string",
+      "pattern": "^evt_[0-9a-f]{24}$"
+    },
+    "keyId": {
+      "type": "string",
+      "pattern": "^bp1_[0-9a-f]{16}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "eventEnvelope": {
+      "type": "object",
+      "required": [
+        "event_id",
+        "type",
+        "actor",
+        "timestamp_utc",
+        "payload"
+      ],
+      "properties": {
+        "event_id": {
+          "$ref": "#/$defs/eventId"
+        },
+        "type": {
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string",
+          "enum": [
+            "canonical",
+            "local",
+            "contested",
+            "archived"
+          ]
+        },
+        "actor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "actor_key_id": {
+          "$ref": "#/$defs/keyId"
+        },
+        "ts_logical": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "prev_event_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "timestamp_utc": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "payload": {
+          "type": "object"
+        },
+        "sig": {
+          "type": "string",
+          "contentEncoding": "base64"
+        }
+      },
+      "additionalProperties": true
+    },
+    "genesisPayload": {
+      "type": "object",
+      "required": [
+        "uid",
+        "root_key_id",
+        "birth_timestamp"
+      ],
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1
+        },
+        "root_key_id": {
+          "$ref": "#/$defs/keyId"
+        },
+        "birth_timestamp": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "spec_version": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "beliefPayload": {
+      "type": "object",
+      "required": [
+        "subject",
+        "predicate"
+      ],
+      "properties": {
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "predicate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {},
+        "confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "timestamp": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "additionalProperties": true
+    },
+    "attestationPayload": {
+      "type": "object",
+      "required": [
+        "subject",
+        "predicate",
+        "value"
+      ],
+      "properties": {
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "predicate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {},
+        "target_event_id": {
+          "$ref": "#/$defs/eventId"
+        },
+        "actor_key_id": {
+          "$ref": "#/$defs/keyId"
+        }
+      },
+      "additionalProperties": true
+    },
+    "retractionPayload": {
+      "type": "object",
+      "required": [
+        "subject",
+        "predicate"
+      ],
+      "properties": {
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "predicate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "keyRevocationPayload": {
+      "type": "object",
+      "required": [
+        "revoked_key_id"
+      ],
+      "properties": {
+        "revoked_key_id": {
+          "$ref": "#/$defs/keyId"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "trust_boundary_event_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revoked_at_utc": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "additionalProperties": true
+    },
+    "keyPromotionPayload": {
+      "type": "object",
+      "required": [
+        "new_key_id",
+        "new_public_key_b64",
+        "algorithm",
+        "replaces_key_id"
+      ],
+      "properties": {
+        "new_key_id": {
+          "$ref": "#/$defs/keyId"
+        },
+        "new_public_key_b64": {
+          "type": "string",
+          "contentEncoding": "base64"
+        },
+        "algorithm": {
+          "type": "string",
+          "const": "Ed25519"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "promoted_by": {
+          "$ref": "#/$defs/keyId"
+        },
+        "replaces_key_id": {
+          "$ref": "#/$defs/keyId"
+        },
+        "promoted_at_utc": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "additionalProperties": true
+    },
+    "reducerEpochPayload": {
+      "type": "object",
+      "required": [
+        "epoch_id",
+        "reducer_hash"
+      ],
+      "properties": {
+        "epoch_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reducer_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effective_from_event_id": {
+          "type": "string"
+        },
+        "ontology_versions": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": true
+    },
+    "genesisEvent": {
+      "type": "object",
+      "required": [
+        "type",
+        "namespace",
+        "payload"
+      ],
+      "properties": {
+        "type": {
+          "const": "GENESIS"
+        },
+        "namespace": {
+          "const": "canonical"
+        },
+        "payload": {
+          "$ref": "#/$defs/genesisPayload"
+        }
+      }
+    },
+    "observationEvent": {
+      "type": "object",
+      "required": [
+        "type",
+        "namespace",
+        "payload"
+      ],
+      "properties": {
+        "type": {
+          "const": "OBSERVATION"
+        },
+        "namespace": {
+          "const": "local"
+        },
+        "payload": {
+          "$ref": "#/$defs/beliefPayload"
+        }
+      }
+    },
+    "assertionEvent": {
+      "type": "object",
+      "required": [
+        "type",
+        "payload"
+      ],
+      "properties": {
+        "type": {
+          "const": "ASSERTION"
+        },
+        "payload": {
+          "$ref": "#/$defs/beliefPayload"
+        }
+      }
+    },
+    "attestationEvent": {
+      "type": "object",
+      "required": [
+        "type",
+        "namespace",
+        "payload"
+      ],
+      "properties": {
+        "type": {
+          "const": "ATTESTATION"
+        },
+        "namespace": {
+          "const": "canonical"
+        },
+        "payload": {
+          "$ref": "#/$defs/attestationPayload"
+        }
+      }
+    },
+    "retractionEvent": {
+      "type": "object",
+      "required": [
+        "type",
+        "payload"
+      ],
+      "properties": {
+        "type": {
+          "const": "RETRACTION"
+        },
+        "payload": {
+          "$ref": "#/$defs/retractionPayload"
+        }
+      }
+    },
+    "keyRevocationEvent": {
+      "type": "object",
+      "required": [
+        "type",
+        "namespace",
+        "payload"
+      ],
+      "properties": {
+        "type": {
+          "const": "KEY_REVOCATION"
+        },
+        "namespace": {
+          "const": "canonical"
+        },
+        "payload": {
+          "$ref": "#/$defs/keyRevocationPayload"
+        }
+      }
+    },
+    "keyPromotionEvent": {
+      "type": "object",
+      "required": [
+        "type",
+        "namespace",
+        "payload"
+      ],
+      "properties": {
+        "type": {
+          "const": "KEY_PROMOTION"
+        },
+        "namespace": {
+          "const": "canonical"
+        },
+        "payload": {
+          "$ref": "#/$defs/keyPromotionPayload"
+        }
+      }
+    },
+    "reducerEpochEvent": {
+      "type": "object",
+      "required": [
+        "type",
+        "payload"
+      ],
+      "properties": {
+        "type": {
+          "const": "REDUCER_EPOCH"
+        },
+        "payload": {
+          "$ref": "#/$defs/reducerEpochPayload"
+        }
+      }
+    },
+    "customEvent": {
+      "type": "object",
+      "required": [
+        "type",
+        "payload"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(\\.[a-z0-9][a-z0-9-]*)+\\.[a-z][a-z0-9_]*$",
+          "not": {
+            "enum": [
+              "GENESIS",
+              "OBSERVATION",
+              "ASSERTION",
+              "ATTESTATION",
+              "RETRACTION",
+              "KEY_REVOCATION",
+              "KEY_PROMOTION",
+              "REDUCER_EPOCH"
+            ]
+          }
+        },
+        "payload": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
