@@ -513,3 +513,125 @@ class TestKeyFingerprint:
         pk1 = psmc.load_public_key(vault)
         pk2 = Ed25519PrivateKey.generate().public_key()
         assert psmc.key_fingerprint(pk1) != psmc.key_fingerprint(pk2)
+
+
+# ---------------------------------------------------------------------------
+# Provara Reducer Integration
+# ---------------------------------------------------------------------------
+class TestProvaraReducerIntegration:
+    def test_reducer_runs_after_provara_event(self, vault):
+        """When --provara flag is used, reducer runs and creates state file."""
+        # Append with provara flag
+        psmc.append_event(vault, "note", {"content": "test"}, emit_provara=True)
+        
+        # Check state file exists
+        state_file = vault / "state" / "current_state.json"
+        assert state_file.exists()
+        
+        # Check state structure
+        state = json.loads(state_file.read_text(encoding="utf-8"))
+        assert "canonical" in state
+        assert "local" in state
+        assert "contested" in state
+        assert "archived" in state
+        assert "metadata" in state
+        
+    def test_reducer_state_has_correct_metadata(self, vault):
+        """Reducer state includes metadata with event count and state hash."""
+        psmc.append_event(vault, "note", {"content": "test1"}, emit_provara=True)
+        psmc.append_event(vault, "note", {"content": "test2"}, emit_provara=True)
+        
+        state_file = vault / "state" / "current_state.json"
+        state = json.loads(state_file.read_text(encoding="utf-8"))
+        
+        meta = state["metadata"]
+        assert meta["event_count"] == 2
+        assert "state_hash" in meta
+        assert meta["state_hash"] is not None
+        assert "reducer" in meta
+        assert meta["reducer"]["name"] == "SovereignReducerV0"
+        
+    def test_reducer_creates_local_beliefs(self, vault):
+        """Observations should appear in local/ namespace."""
+        psmc.append_event(vault, "note", {"content": "test", "subject": "door_01"}, emit_provara=True)
+        
+        state_file = vault / "state" / "current_state.json"
+        state = json.loads(state_file.read_text(encoding="utf-8"))
+        
+        # Should have at least one local belief
+        assert len(state["local"]) > 0
+        
+    def test_reducer_beliefs_use_assertions(self, vault):
+        """Belief/decision/reflection types should create ASSERTION events (confidence 0.5)."""
+        psmc.append_event(
+            vault, 
+            "belief", 
+            {"statement": "Testing is important", "confidence": 0.85, "subject": "testing"}, 
+            emit_provara=True
+        )
+        
+        state_file = vault / "state" / "current_state.json"
+        state = json.loads(state_file.read_text(encoding="utf-8"))
+        
+        # Check that local beliefs exist
+        assert len(state["local"]) > 0
+        
+        # Find the testing belief
+        testing_key = None
+        for key in state["local"]:
+            if "testing" in key:
+                testing_key = key
+                break
+                
+        assert testing_key is not None, "Should have a belief key containing 'testing'"
+        belief = state["local"][testing_key]
+        assert "confidence" in belief
+        
+    def test_reducer_state_hash_deterministic(self, vault):
+        """Same events should produce same state hash on re-run."""
+        psmc.append_event(vault, "note", {"content": "test"}, emit_provara=True)
+        
+        state_file = vault / "state" / "current_state.json"
+        state1 = json.loads(state_file.read_text(encoding="utf-8"))
+        hash1 = state1["metadata"]["state_hash"]
+        
+        # Re-run reducer manually
+        state2 = psmc.run_provara_reducer(vault)
+        hash2 = state2["metadata"]["state_hash"]
+        
+        assert hash1 == hash2
+        
+    def test_no_reducer_without_provara_flag(self, vault):
+        """Without --provara flag, no state file should be created."""
+        psmc.append_event(vault, "note", {"content": "test"}, emit_provara=False)
+        
+        state_file = vault / "state" / "current_state.json"
+        assert not state_file.exists()
+        
+    def test_reducer_handles_multiple_events(self, vault):
+        """Reducer correctly processes multiple events in sequence."""
+        for i in range(5):
+            psmc.append_event(vault, "note", {"content": f"test{i}"}, emit_provara=True)
+        
+        state_file = vault / "state" / "current_state.json"
+        state = json.loads(state_file.read_text(encoding="utf-8"))
+        
+        assert state["metadata"]["event_count"] == 5
+        
+    def test_provara_events_written_to_separate_file(self, vault):
+        """Provara events go to events/provara.ndjson, not events.ndjson."""
+        psmc.append_event(vault, "note", {"content": "test"}, emit_provara=True)
+        
+        provara_file = vault / "events" / "provara.ndjson"
+        assert provara_file.exists()
+        
+        # Read and validate Provara event format
+        content = provara_file.read_text(encoding="utf-8").strip()
+        provara_event = json.loads(content)
+        
+        assert "event_id" in provara_event
+        assert provara_event["event_id"].startswith("evt_")
+        assert "type" in provara_event
+        assert provara_event["type"] in ["OBSERVATION", "ASSERTION"]
+        assert "actor" in provara_event
+        assert "sig" in provara_event
