@@ -905,13 +905,12 @@ footer {
     <div>
       <div class="hero-badge">
         <span class="dot"></span>
-        v1.0 stable &mdash; 110 tests passing
+        Flight Recorder for the Agentic Economy &mdash; v1.0 Live
       </div>
-      <h1><span class="gradient">Provara<br>Protocol</span></h1>
-      <p class="hero-tagline">Tamper-evident memory for humans and AI agents.</p>
+      <h1><span class="gradient">Verifiable<br>Agent Memory</span></h1>
+      <p class="hero-tagline">The cryptographically verifiable, offline-first memory substrate for the next generation of autonomous intelligence.</p>
       <p class="hero-specs">
-        <span>Ed25519</span> + <span>SHA-256</span> + <span>event sourcing</span><br>
-        110 tests &middot; one dependency &middot; Apache 2.0
+        <span>Trust the Math.</span> Provara provides blockchain-grade integrity with local-file performance. No gas. No cloud. No compromise.
       </p>
       <div class="hero-buttons">
         <a href="#" class="btn btn-primary">
@@ -961,12 +960,12 @@ test_ed25519_signatures ... ok
   <div class="container">
     <div class="stats-grid">
       <div>
-        <div class="stat-num">110</div>
+        <div class="stat-num">219</div>
         <div class="stat-label">Tests passing</div>
       </div>
       <div>
-        <div class="stat-num">~2k</div>
-        <div class="stat-label">Lines of code</div>
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Sovereign</div>
       </div>
       <div>
         <div class="stat-num">7</div>
@@ -983,6 +982,36 @@ test_ed25519_signatures ... ok
     </div>
   </div>
 </div>
+
+<!-- ════════════════════════════════════════════════
+     TRIBES (AUDIENCE)
+     ════════════════════════════════════════════════ -->
+<section id="tribes" style="padding-bottom: 0;">
+  <div class="container">
+    <div class="section-label">Tribes of the Frontier</div>
+    <h2 class="section-title">Who is Provara for?</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🤖</span>
+        <h3>Agent Architects</h3>
+        <p>Your agent is black-boxed. Give it a Flight Recorder. Log reasoning chains that you can replay, verify, and audit.</p>
+        <a href="#quickstart" class="text-blue mt-4" style="display:inline-block;font-size:12px;text-decoration:none;">Install the SDK &rarr;</a>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⛓️</span>
+        <h3>Crypto Founders</h3>
+        <p>Prove off-chain inference or DePIN sensor work on-chain for a fraction of the cost. Anchor Merkle roots to any L1/L2.</p>
+        <a href="#" class="text-blue mt-4" style="display:inline-block;font-size:12px;text-decoration:none;">Read L2 Specs &rarr;</a>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⚖️</span>
+        <h3>Governance Officers</h3>
+        <p>Enforce AI non-repudiation. Build an immutable audit trail that holds up in court. The "Credit Score" for your AI workforce.</p>
+        <a href="#" class="text-blue mt-4" style="display:inline-block;font-size:12px;text-decoration:none;">Contact Hunt IS &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- ════════════════════════════════════════════════
      WHY PROVARA
@@ -1028,9 +1057,41 @@ test_ed25519_signatures ... ok
 </section>
 
 <!-- ════════════════════════════════════════════════
-     HOW IT WORKS
+     RAW EVIDENCE
      ════════════════════════════════════════════════ -->
-<section id="how" style="background: var(--bg-raised);">
+<section id="evidence" style="background: var(--bg-raised);">
+  <div class="container">
+    <div class="section-label">Radical Simplicity</div>
+    <h2 class="section-title">It's just JSON and Keys</h2>
+    <p class="section-sub">No proprietary blobs. No complex database engines. Just Ed25519-signed NDJSON that you can read with a text editor in 2076.</p>
+    
+    <div style="margin-top: 48px;">
+      <div class="code-window">
+        <div class="code-titlebar">
+          <span class="code-dot red"></span>
+          <span class="code-dot yellow"></span>
+          <span class="code-dot green"></span>
+          <span class="code-title">events.ndjson</span>
+        </div>
+        <div class="code-body">
+<pre>{
+  <span class="syn-kw">"event_id"</span>: <span class="syn-str">"evt_1f29500047c577046d99f5c1"</span>,
+  <span class="syn-kw">"type"</span>: <span class="syn-str">"OBSERVATION"</span>,
+  <span class="syn-kw">"actor"</span>: <span class="syn-str">"Gemini_Analyst"</span>,
+  <span class="syn-kw">"prev_event_hash"</span>: <span class="syn-str">"evt_a1cca5c6..."</span>,
+  <span class="syn-kw">"payload"</span>: {
+    <span class="syn-kw">"subject"</span>: <span class="syn-str">"market:BTC"</span>,
+    <span class="syn-kw">"predicate"</span>: <span class="syn-str">"signal"</span>,
+    <span class="syn-kw">"value"</span>: { <span class="syn-kw">"ticker"</span>: <span class="syn-str">"BTC"</span>, <span class="syn-kw">"signal"</span>: <span class="syn-str">"LONG"</span> },
+    <span class="syn-kw">"confidence"</span>: <span class="syn-num">1.0</span>
+  },
+  <span class="syn-kw">"sig"</span>: <span class="syn-str">"ieZj1PILiyJKzY0F4o+KCqC/2s6b3Ss0..."</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
   <div class="container">
     <div class="section-label">How It Works</div>
     <h2 class="section-title">Four steps to sovereign memory</h2>
