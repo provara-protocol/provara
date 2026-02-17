@@ -533,5 +533,205 @@ class TestVerificationDetectsAbuse(unittest.TestCase):
             )
 
 
+class TestMidChainRotation(unittest.TestCase):
+    """Key rotation between data events — causal chain must still verify."""
+
+    def test_chain_verifies_across_rotation_boundary(self):
+        """
+        Data events before rotation → rotation events → data events after rotation.
+        verify_causal_chain for the data actor must pass across the boundary.
+        """
+        from sync_v0 import verify_causal_chain
+
+        with tempfile.TemporaryDirectory() as tmp:
+            bp, root_kp, quorum_kp = make_test_backpack(Path(tmp))
+            events_path = bp / "events" / "events.ndjson"
+
+            # seed_001 is already in the log (by actor "genesis"), signed by root_kp.
+            # Perform key rotation, using a known new keypair so we can sign with it.
+            known_new_kp = BackpackKeypair.generate()
+            result = rotate_key(
+                backpack_root=bp,
+                compromised_key_id=root_kp.key_id,
+                signing_private_key=quorum_kp.private_key,
+                signing_key_id=quorum_kp.key_id,
+                new_keypair=known_new_kp,
+                actor="security_admin",
+            )
+            self.assertTrue(result.success, f"Rotation failed: {result.errors}")
+
+            # Append a post-rotation event by the same "genesis" actor, now with new key.
+            events = []
+            with events_path.open("r", encoding="utf-8") as f:
+                for line in f:
+                    if line.strip():
+                        events.append(json.loads(line))
+
+            genesis_events = [e for e in events if e.get("actor") == "genesis"]
+            last_genesis_id = genesis_events[-1]["event_id"] if genesis_events else None
+
+            post_event = {
+                "event_id": "post_rotation_001",
+                "type": "OBSERVATION",
+                "namespace": "local",
+                "actor": "genesis",
+                "actor_key_id": known_new_kp.key_id,
+                "ts_logical": 99,
+                "prev_event_hash": last_genesis_id,
+                "timestamp_utc": "2026-02-13T01:00:00Z",
+                "payload": {
+                    "subject": "system",
+                    "predicate": "rotation_complete",
+                    "value": "true",
+                    "confidence": 1.0,
+                },
+            }
+            post_event = sign_event(post_event, known_new_kp.private_key, known_new_kp.key_id)
+            append_event(events_path, post_event)
+
+            # Reload all events
+            all_events = []
+            with events_path.open("r", encoding="utf-8") as f:
+                for line in f:
+                    if line.strip():
+                        all_events.append(json.loads(line))
+
+            # The "genesis" actor chain should still verify
+            chain_valid = verify_causal_chain(all_events, "genesis")
+            self.assertTrue(chain_valid, "Causal chain must verify across rotation boundary")
+
+    def test_rotation_actor_chain_valid(self):
+        """KEY_REVOCATION + KEY_PROMOTION events form a valid chain for their actor."""
+        from sync_v0 import verify_causal_chain
+
+        with tempfile.TemporaryDirectory() as tmp:
+            bp, root_kp, quorum_kp = make_test_backpack(Path(tmp))
+
+            result = rotate_key(
+                backpack_root=bp,
+                compromised_key_id=root_kp.key_id,
+                signing_private_key=quorum_kp.private_key,
+                signing_key_id=quorum_kp.key_id,
+                actor="security_admin",
+            )
+            self.assertTrue(result.success)
+
+            all_events = []
+            with (bp / "events" / "events.ndjson").open("r", encoding="utf-8") as f:
+                for line in f:
+                    if line.strip():
+                        all_events.append(json.loads(line))
+
+            chain_valid = verify_causal_chain(all_events, "security_admin")
+            self.assertTrue(chain_valid, "Rotation event chain must be valid")
+
+    def test_rotation_signatures_verify_post_rotation(self):
+        """All rotation event signatures must verify after rotation and new events."""
+        with tempfile.TemporaryDirectory() as tmp:
+            bp, root_kp, quorum_kp = make_test_backpack(Path(tmp))
+
+            rotate_key(
+                backpack_root=bp,
+                compromised_key_id=root_kp.key_id,
+                signing_private_key=quorum_kp.private_key,
+                signing_key_id=quorum_kp.key_id,
+            )
+
+            verifications = verify_rotation_events(bp)
+            self.assertTrue(len(verifications) > 0)
+            for v in verifications:
+                self.assertTrue(
+                    v["signature_valid"],
+                    f"Signature invalid for {v['event_id']}: {v['issues']}",
+                )
+
+
+class TestDuplicateAttestation(unittest.TestCase):
+    """Same belief attested twice — idempotent behavior and proper archival."""
+
+    def test_double_attestation_same_value(self):
+        """Attesting the same key:value twice archives the first under second."""
+        from reducer_v0 import SovereignReducerV0
+
+        r = SovereignReducerV0()
+        r.apply_event({
+            "event_id": "a1",
+            "type": "ATTESTATION",
+            "namespace": "canonical",
+            "actor": "admin",
+            "payload": {"subject": "door", "predicate": "opens", "value": "inward",
+                        "actor_key_id": "admin_key"},
+        })
+        self.assertEqual(r.state["canonical"]["door:opens"]["value"], "inward")
+
+        r.apply_event({
+            "event_id": "a2",
+            "type": "ATTESTATION",
+            "namespace": "canonical",
+            "actor": "admin",
+            "payload": {"subject": "door", "predicate": "opens", "value": "inward",
+                        "actor_key_id": "admin_key"},
+        })
+        # Still "inward"; a2 is now canonical, a1 archived
+        self.assertEqual(r.state["canonical"]["door:opens"]["value"], "inward")
+        self.assertEqual(r.state["canonical"]["door:opens"]["attestation_event_id"], "a2")
+        archived = r.state["archived"].get("door:opens", [])
+        self.assertEqual(len(archived), 1)
+        self.assertEqual(archived[0]["superseded_by"], "a2")
+
+    def test_double_attestation_different_value(self):
+        """Attesting a new value supersedes the previous canonical entry."""
+        from reducer_v0 import SovereignReducerV0
+
+        r = SovereignReducerV0()
+        r.apply_event({
+            "event_id": "a1",
+            "type": "ATTESTATION",
+            "namespace": "canonical",
+            "actor": "admin",
+            "payload": {"subject": "door", "predicate": "opens", "value": "inward",
+                        "actor_key_id": "k"},
+        })
+        r.apply_event({
+            "event_id": "a2",
+            "type": "ATTESTATION",
+            "namespace": "canonical",
+            "actor": "admin",
+            "payload": {"subject": "door", "predicate": "opens", "value": "outward",
+                        "actor_key_id": "k"},
+        })
+        self.assertEqual(r.state["canonical"]["door:opens"]["value"], "outward")
+        archived = r.state["archived"].get("door:opens", [])
+        self.assertEqual(len(archived), 1)
+        self.assertEqual(archived[0]["value"], "inward")
+
+    def test_double_key_rotation_graceful(self):
+        """Revoking an already-revoked key must fail gracefully, not crash."""
+        with tempfile.TemporaryDirectory() as tmp:
+            bp, root_kp, quorum_kp = make_test_backpack(Path(tmp))
+
+            known_new_kp = BackpackKeypair.generate()
+            r1 = rotate_key(
+                backpack_root=bp,
+                compromised_key_id=root_kp.key_id,
+                signing_private_key=quorum_kp.private_key,
+                signing_key_id=quorum_kp.key_id,
+                new_keypair=known_new_kp,
+            )
+            self.assertTrue(r1.success)
+
+            # Try to revoke the same key again
+            r2 = rotate_key(
+                backpack_root=bp,
+                compromised_key_id=root_kp.key_id,
+                signing_private_key=quorum_kp.private_key,
+                signing_key_id=quorum_kp.key_id,
+            )
+            # Must either succeed idempotently or fail with a clear error
+            self.assertIsInstance(r2.success, bool)
+            self.assertIsInstance(r2.errors, list)
+            # What must NOT happen: crash or exception propagation
+
+
 if __name__ == "__main__":
     unittest.main()

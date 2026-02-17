@@ -1,0 +1,21 @@
+# Force LF line endings for all text files on checkout (cross-platform consistency)
+# Required for byte-exact Provara manifest hashing: file sizes must match on all platforms.
+# After adding this file, run: git add --renormalize . && git commit -m "chore: normalize line endings"
+
+* text=auto
+
+# Provara data files — must be LF to match manifest-recorded sizes
+*.json text eol=lf
+*.ndjson text eol=lf
+
+# Source and config files
+*.py text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.sh text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# Windows scripts — keep CRLF
+*.bat text eol=crlf
+*.ps1 text eol=crlf
