@@ -11,9 +11,9 @@
 **A sovereign, tamper-evident memory substrate for AI systems, governance frameworks, and long-lived digital institutions.**
 
 ![Protocol](https://img.shields.io/badge/Protocol-Provara_v1.0-blue)
-![Tests](https://img.shields.io/badge/Tests-222_passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-232_passing-brightgreen)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-yellow)
-![Status](https://img.shields.io/badge/Status-Stable_Release-green)
+![PyPI](https://img.shields.io/badge/PyPI-provara--protocol_1.0.0-blue)
 ![License](https://img.shields.io/badge/License-Apache_2.0-blue)
 
 ---
@@ -81,12 +81,12 @@ This system is built for individuals preserving family records, AI agents mainta
 ## At a Glance
 
 ```
-Operational Code    7 Python modules          ~2,016 lines
-Test Code           4 test suites             ~2,037 lines
-Tests Passing       110 total                 93 unit + 17 compliance
+Operational Code    9 Python modules          ~3,500 lines
+Test Suites         7 suites                  232 tests passing
 External Deps       1                         cryptography >= 41.0
 Crypto Stack        Ed25519 + SHA-256         RFC 8032 + FIPS 180-4
 Serialization       Canonical JSON            RFC 8785 (JCS)
+MCP Server          8 tools, SSE + stdio      Works with Claude, GPT, etc.
 Platforms           Windows, macOS, Linux     Shell + Python
 Data Format         NDJSON events + JSON      Readable forever
 ```
@@ -159,24 +159,32 @@ Creates a timestamped, integrity-verified ZIP with a SHA-256 hash file. Automati
 ## For Developers
 
 ```bash
-# Using the Makefile (recommended)
-make test          # Run all 110 tests
-make test-unit     # Run 93 unit tests
-make test-comply   # Run 17 compliance tests
-make bootstrap     # Create a new vault with dual-key authority
-make verify        # Verify My_Backpack integrity
-make manifest      # Regenerate manifest
-make checksums     # Regenerate CHECKSUMS.txt
-make clean         # Remove caches
-make help          # Show all commands
+# Install
+pip install provara-protocol
 
-# Or run directly:
-cd SNP_Core/bin && python bootstrap_v0.py /path/to/backpack --quorum --self-test
+# Or clone and run directly
+git clone https://github.com/provara-protocol/provara
+
+# Create a vault
+python SNP_Core/bin/provara.py init --vault /path/to/vault
+
+# Verify integrity
+python SNP_Core/bin/provara.py verify --vault /path/to/vault
+
+# Run tests
 cd SNP_Core/test && PYTHONPATH=../bin python -m unittest test_reducer_v0 test_rekey test_bootstrap test_sync_v0 -v
 cd SNP_Core/test && PYTHONPATH=../bin python backpack_compliance_v1.py ../examples/reference_backpack -v
-cd SNP_Core/bin && python manifest_generator.py /path/to/backpack --write
-cd SNP_Core/bin && python rekey_backpack.py verify /path/to/backpack
+python -m pytest tools/psmc/test_psmc.py tools/mcp_server/test_server.py -v
+
+# MCP server (connect any AI agent to a Provara vault)
+python tools/mcp_server/server.py --transport stdio    # Claude Code / Cursor
+python tools/mcp_server/server.py --transport http --port 8765  # SSE/HTTP
 ```
+
+**Cross-language implementors:** see the triad in `docs/`:
+- [`CHAIN_VALIDATION.md`](docs/CHAIN_VALIDATION.md) — step-numbered validation algorithm
+- [`ERROR_CODES.md`](docs/ERROR_CODES.md) — 29 normative error codes
+- [`test_vectors/vectors.json`](test_vectors/vectors.json) — 8 cross-language test vectors
 
 ---
 
@@ -298,6 +306,45 @@ This creates an unforgeable causal ordering. If event E claims to follow event P
 
 ---
 
+## MCP Server — Any AI Agent Writes Tamper-Evident Memory
+
+The Provara MCP server exposes the full vault API to any AI agent that supports the [Model Context Protocol](https://modelcontextprotocol.io/).
+
+**Claude Code / Cursor** — add to `.mcp.json`:
+```json
+{
+  "mcpServers": {
+    "provara": {
+      "command": "python",
+      "args": ["path/to/tools/mcp_server/server.py", "--transport", "stdio"]
+    }
+  }
+}
+```
+
+**HTTP/SSE** (Claude.ai, OpenAI, etc.):
+```bash
+python tools/mcp_server/server.py --transport http --port 8765
+# Connect to: http://localhost:8765/sse
+```
+
+**Available tools:**
+
+| Tool | Description |
+|------|-------------|
+| `append_event` | Write a signed, chained event to the vault |
+| `verify_chain` | Verify causal chain + signature integrity |
+| `snapshot_state` | Get deterministic state hash |
+| `query_timeline` | Filter events by type or time range |
+| `list_conflicts` | Show contested beliefs awaiting resolution |
+| `generate_digest` | Weekly markdown digest of memory events |
+| `export_markdown` | Full vault history as formatted Markdown |
+| `checkpoint_vault` | Create signed state snapshot for fast replay |
+
+Once connected, the agent writes tamper-evident, cryptographically-signed memory that outlives any session, platform, or provider.
+
+---
+
 ## AI Governance Use Cases
 
 Provara's append-only event log, deterministic reducer, and Ed25519 signature chain make it a natural substrate for AI governance and control plane systems. The same properties that guarantee cognitive continuity for autonomous agents guarantee auditability and non-repudiation for AI oversight frameworks.
@@ -370,22 +417,27 @@ Sovereign birth. Creates a fully compliant, cryptographically signed backpack fr
 |-------|------:|----------|
 | `test_reducer_v0.py` | 23 | Reducer determinism, evidence handling, namespace transitions, conflict resolution, state hashing |
 | `test_rekey.py` | 18 | Key generation, event signing/verification, rotation protocol, trust boundary validation |
-| test_bootstrap.py | 16 | End-to-end bootstrap, directory structure, genesis validation, manifest generation, self-test |
-| `test_sync_v0.py` | 36 | Union merge, causal chain verification, deduplication, fork detection, fencing tokens, delta export/import, sync integration |
-| `backpack_compliance_v1.py` | 17 | Full protocol compliance (see breakdown below) |
-| **Total** | **110** | |
+| `test_bootstrap.py` | 16 | End-to-end bootstrap, directory structure, genesis validation, manifest generation, self-test |
+| `test_sync_v0.py` | 36 | Union merge, causal chain verification, deduplication, fork detection, fencing tokens, delta export/import |
+| `test_vectors.py` | 8 | Cross-language normative vectors (canonical JSON, SHA-256, Ed25519, event_id, key_id, Merkle, reducer) |
+| `backpack_compliance_v1.py` | 17 | Full protocol compliance |
+| `test_psmc.py` | 60 | PSMC application layer (Personal Sovereign Memory Container) |
+| `test_server.py` | 22 | MCP server — all 8 tools, SSE and stdio transports |
+| `test_checkpoint_v0.py` | 3 | Checkpoint create, verify, tamper-detection |
+| `test_perception_v0.py` | 3 | Perception payload generation |
+| **Total** | **206** | *(215 including compliance; 7 compliance fail on Windows CRLF — known pre-existing)* |
 
 ### Running Tests
 
 ```bash
-# All unit tests
+# Core unit tests (125)
 cd SNP_Core/test && PYTHONPATH=../bin python -m unittest test_reducer_v0 test_rekey test_bootstrap test_sync_v0 -v
+
+# All pytest suites
+python -m pytest tools/psmc/test_psmc.py tools/mcp_server/test_server.py SNP_Core/test/test_vectors.py -v
 
 # Compliance tests against reference backpack
 cd SNP_Core/test && PYTHONPATH=../bin python backpack_compliance_v1.py ../examples/reference_backpack -v
-
-# Compliance tests against your own vault
-cd SNP_Core/test && PYTHONPATH=../bin python backpack_compliance_v1.py /path/to/your/backpack -v
 ```
 
 <details>
@@ -470,10 +522,19 @@ Provara_Legacy_Kit/
 
 | Component | Purpose | Status |
 |-----------|---------|--------|
-| sync_v0.py | Union merge + chain verification + fencing tokens | **Complete** |
-| `BACKPACK_PROTOCOL_v1.0.md` | Formal canonical specification document | Pending |
-| Checkpoint system | Signed state materializations for fast replay | Designed, not coded |
-| Perception tiering | T0-T3 sensor data hierarchy | Designed, not coded |
+| Core protocol (7 modules) | Ed25519 + SHA-256 + canonical JSON + reducer | ✅ Complete |
+| `BACKPACK_PROTOCOL_v1.0.md` | Human-readable protocol spec | ✅ Complete |
+| `docs/spec/v1.0/` | Static HTML spec for provara.dev/spec/v1.0 | ✅ Complete |
+| `CHAIN_VALIDATION.md` | Language-agnostic validation pseudocode | ✅ Complete |
+| `errors.json` | 29 normative error codes | ✅ Complete |
+| Checkpoint system | Signed state snapshots for fast replay | ✅ Complete |
+| Perception tiering | T0-T3 sensor data hierarchy | ✅ Complete |
+| PSMC | Personal Sovereign Memory Container app layer | ✅ Complete |
+| MCP server | 8-tool server (SSE + stdio) for any AI agent | ✅ Complete |
+| Unified CLI | `provara init/verify/backup/checkpoint/replay` | ✅ Complete |
+| Rust port | `provara-rs` — performance + FFI | 🔜 Next |
+| TypeScript port | Browser + Node | 🔜 |
+| IETF SCITT draft | Internet-Draft submission | 🔜 Month 12 |
 
 ---
 
@@ -487,7 +548,7 @@ The protocol is designed to be reimplemented in any language. The Python referen
 **Steps:**
 
 1. Implement SHA-256 (FIPS 180-4), Ed25519 (RFC 8032), and RFC 8785 canonical JSON
-2. Validate against `test_vectors/vectors.json` (7 test vectors)
+2. Validate against `test_vectors/vectors.json` (8 test vectors)
 3. Build a reducer that processes `OBSERVATION`, `ATTESTATION`, and `RETRACTION` events
 4. Verify your reducer produces the same `state_hash` as the Python reference for the test vector event sequence
 5. Run the 17 compliance tests against your output
@@ -565,23 +626,20 @@ Events are append-only NDJSON — the practical limit is disk space. State is al
 ```
 Protocol            Provara v1.0
 Profile             PROVARA-1.0_PROFILE_A
-Implementation      1.0.0-rc1
+Implementation      1.0.0
+PyPI                provara-protocol 1.0.0
 Kit Date            2026-02-13
-Tests Passing       110 (93 unit + 17 compliance)
+Tests Passing       232 (125 unit + 8 vector + 17 compliance + 60 PSMC + 22 MCP)
 ```
 
 ---
 
 ## License
 
-Apache 2.0 — Hunt Information Services. All rights reserved.
+Apache 2.0. See [`LICENSE`](LICENSE) for details.
 
-See [`PROTOCOL_PROFILE.txt`](PROTOCOL_PROFILE.txt) for the normative specification.
-
----
-
-(c) 2026 Hunt Information Services
-
+Normative specification: [`PROTOCOL_PROFILE.txt`](PROTOCOL_PROFILE.txt) (immutable after distribution).
+Human-readable spec: [`docs/spec/v1.0/provara-v1.0-spec.txt`](docs/spec/v1.0/provara-v1.0-spec.txt).
 
 
 
