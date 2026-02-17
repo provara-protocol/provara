@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Provara | Verifiable Memory Infrastructure</title>
+  <meta name="description" content="Provara is a self-sovereign, tamper-evident event memory system for humans and AI agents. Signed, chained, replayable.">
+  <meta property="og:title" content="Provara">
+  <meta property="og:description" content="Signed, chained, deterministic memory infrastructure for AI and human systems.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://provara.app/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary">
+      <div class="brand">Provara</div>
+      <div class="links">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#use-cases">Use cases</a>
+        <a href="https://provara.dev/spec/v1.0">Spec</a>
+      </div>
+      <a class="btn btn-ghost" href="https://github.com/provara-protocol/provara">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <p class="eyebrow">Provara Protocol v1.0</p>
+          <h1>Verifiable memory for long-lived systems.</h1>
+          <p class="lead">Provara is an append-only cryptographic event log. Every event is signed, causally chained, and replayable into deterministic state.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="https://provara.dev/spec/v1.0">Read the spec</a>
+            <a class="btn btn-ghost" href="https://github.com/provara-protocol/provara">View source</a>
+          </div>
+          <ul class="stats" aria-label="Protocol highlights">
+            <li><strong>Ed25519</strong><span>RFC 8032 signatures</span></li>
+            <li><strong>SHA-256</strong><span>FIPS 180-4 hashing</span></li>
+            <li><strong>RFC 8785</strong><span>Canonical JSON</span></li>
+          </ul>
+        </div>
+        <aside class="terminal" aria-label="Example event">
+<pre>{
+  "event_id": "evt_8fd3...",
+  "type": "OBSERVATION",
+  "actor": "agent_01",
+  "prev_event_hash": "evt_1a2b...",
+  "payload": {
+    "subject": "model:gpt",
+    "predicate": "policy_status",
+    "value": "allowed",
+    "confidence": 1.0
+  },
+  "sig": "ed25519:..."
+}</pre>
+        </aside>
+      </div>
+    </section>
+
+    <section id="features" class="section">
+      <div class="container">
+        <h2>Why teams adopt Provara</h2>
+        <div class="cards">
+          <article class="card">
+            <h3>Tamper-evident by design</h3>
+            <p>Merkle integrity, signature verification, and chain validation detect mutation, deletion, and reordering.</p>
+          </article>
+          <article class="card">
+            <h3>Deterministic replay</h3>
+            <p>Same evidence in means same state hash out. Audits are reproducible across implementations.</p>
+          </article>
+          <article class="card">
+            <h3>Local-first sovereignty</h3>
+            <p>No cloud dependency required. Vaults remain valid as plain JSON plus cryptographic proofs.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" class="section alt">
+      <div class="container">
+        <h2>How it works</h2>
+        <ol class="steps">
+          <li><strong>Append evidence</strong><span>Write signed events to append-only NDJSON logs.</span></li>
+          <li><strong>Verify chain</strong><span>Validate hash links, signatures, and key authority.</span></li>
+          <li><strong>Reduce state</strong><span>Run deterministic reducer across canonical/local/contested/archived namespaces.</span></li>
+          <li><strong>Prove output</strong><span>Publish state hash and conformance results.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="use-cases" class="section">
+      <div class="container split">
+        <div>
+          <h2>Built for AI governance and durable records</h2>
+          <p>Provara fits model evaluation logging, policy decision audits, key rotation traceability, and long-horizon institutional memory.</p>
+          <p>It is protocol infrastructure, not a SaaS black box.</p>
+        </div>
+        <div class="panel">
+          <h3>Developer entry points</h3>
+          <ul>
+            <li><a href="https://provara.dev/spec/v1.0">Specification</a></li>
+            <li><a href="https://github.com/provara-protocol/provara">Reference implementation</a></li>
+            <li><a href="https://github.com/provara-protocol/provara/blob/main/docs/CONFORMANCE_KIT.md">Conformance kit</a></li>
+            <li><a href="https://github.com/provara-protocol/provara/blob/main/docs/GOVERNANCE_ALIGNMENT.md">Governance alignment</a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <span>Provara Protocol v1.0</span>
+      <span>&copy; <span id="year"></span> Provara</span>
+    </div>
+  </footer>
+
+  <script>
+    const y = document.getElementById('year');
+    if (y) y.textContent = String(new Date().getFullYear());
+  </script>
+</body>
+</html>
