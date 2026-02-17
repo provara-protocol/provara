@@ -52,6 +52,7 @@ hunt-logo.html
 # Session-specific operational files (not part of the kit)
 BOOTLOADER.md
 TODO.md
+OWNER_CHECKLIST.md
 
 # MCP server (separate repo: github.com/provara-protocol/provara-mcp)
 hunt-mcp/
@@ -70,3 +71,6 @@ tools/mcp_server/test_vault_sse/
 # Multi-agent lock files (ephemeral)
 .locks/*.lock
 !.locks/README.md
+
+# Local brainstorm files
+provara_github_brainstorm.md
