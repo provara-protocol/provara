@@ -56,6 +56,9 @@ TODO.md
 # MCP server (separate repo: github.com/provara-protocol/provara-mcp)
 hunt-mcp/
 
+# Live memory vault (contains private Ed25519 key — never commit)
+vault/
+
 # Claude Code local MCP config (machine-specific paths)
 .mcp.json
 tools/mcp_server/test_vault/
