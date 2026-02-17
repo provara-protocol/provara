@@ -1,0 +1,233 @@
+{
+  "$schema": "https://provara.dev/schemas/errors.json",
+  "provara_version": "1.0",
+  "profile": "PROVARA-1.0_PROFILE_A",
+  "status": "normative",
+  "description": "Normative error code taxonomy. Implementations SHOULD use these codes.",
+  "errors": [
+    {
+      "code": "PROVARA_E001",
+      "name": "HASH_MISMATCH",
+      "category": "core_integrity",
+      "spec_section": ["1", "6"],
+      "message": "A stored or transmitted hash value does not equal the hash computed from the referenced data.",
+      "applies_to": ["event_id", "manifest_file_hash", "state_hash", "merkle_leaves"]
+    },
+    {
+      "code": "PROVARA_E002",
+      "name": "BROKEN_CAUSAL_CHAIN",
+      "category": "core_integrity",
+      "spec_section": ["7"],
+      "message": "prev_event_hash does not equal the event_id of the actor's immediately preceding event.",
+      "applies_to": ["event.prev_event_hash"]
+    },
+    {
+      "code": "PROVARA_E003",
+      "name": "INVALID_SIGNATURE",
+      "category": "core_integrity",
+      "spec_section": ["2"],
+      "message": "Ed25519 signature verification failed.",
+      "applies_to": ["event.sig"]
+    },
+    {
+      "code": "PROVARA_E004",
+      "name": "EVENT_ID_MISMATCH",
+      "category": "core_integrity",
+      "spec_section": ["4"],
+      "message": "The stored event_id does not match the deterministically computed hash of the event content.",
+      "applies_to": ["event.event_id"]
+    },
+    {
+      "code": "PROVARA_E005",
+      "name": "CROSS_ACTOR_CHAIN_REFERENCE",
+      "category": "core_integrity",
+      "spec_section": ["7"],
+      "message": "prev_event_hash references an event authored by a different actor.",
+      "applies_to": ["event.prev_event_hash"]
+    },
+    {
+      "code": "PROVARA_E006",
+      "name": "ORPHAN_CHAIN_REFERENCE",
+      "category": "core_integrity",
+      "spec_section": ["7"],
+      "message": "prev_event_hash is non-null but no event with that event_id exists in the log.",
+      "applies_to": ["event.prev_event_hash"]
+    },
+    {
+      "code": "PROVARA_E007",
+      "name": "DUPLICATE_EVENT_ID",
+      "category": "core_integrity",
+      "spec_section": ["4"],
+      "message": "The same event_id appears more than once in the event log.",
+      "applies_to": ["event.event_id"]
+    },
+    {
+      "code": "PROVARA_E008",
+      "name": "MERKLE_ROOT_MISMATCH",
+      "category": "core_integrity",
+      "spec_section": ["5"],
+      "message": "The Merkle root computed from current files does not match the stored merkle_root.txt.",
+      "applies_to": ["merkle_root.txt"]
+    },
+    {
+      "code": "PROVARA_E009",
+      "name": "STATE_HASH_DIVERGENCE",
+      "category": "core_integrity",
+      "spec_section": ["6"],
+      "message": "Two compliant reducer implementations produce different state_hash values for the same event sequence.",
+      "applies_to": ["reducer_output.metadata.state_hash"]
+    },
+    {
+      "code": "PROVARA_E010",
+      "name": "MANIFEST_FILE_MISSING",
+      "category": "core_integrity",
+      "spec_section": ["5"],
+      "message": "A file listed in manifest.json does not exist on disk.",
+      "applies_to": ["manifest.json"]
+    },
+    {
+      "code": "PROVARA_E011",
+      "name": "MANIFEST_SIZE_MISMATCH",
+      "category": "core_integrity",
+      "spec_section": ["5"],
+      "message": "A file's on-disk size does not match the size recorded in manifest.json.",
+      "applies_to": ["manifest.json"]
+    },
+    {
+      "code": "PROVARA_E012",
+      "name": "MANIFEST_HASH_MISMATCH",
+      "category": "core_integrity",
+      "spec_section": ["5"],
+      "message": "A file's SHA-256 does not match the hash recorded in manifest.json.",
+      "applies_to": ["manifest.json"]
+    },
+    {
+      "code": "PROVARA_E013",
+      "name": "FIRST_EVENT_PREV_NOT_NULL",
+      "category": "core_integrity",
+      "spec_section": ["7"],
+      "message": "An actor's first event has a non-null prev_event_hash. The first event in any per-actor chain MUST have prev_event_hash: null.",
+      "applies_to": ["event.prev_event_hash"]
+    },
+    {
+      "code": "PROVARA_E100",
+      "name": "HASH_FORMAT",
+      "category": "format",
+      "spec_section": ["1"],
+      "message": "A hash value is not exactly 64 lowercase hexadecimal characters.",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    {
+      "code": "PROVARA_E101",
+      "name": "EVENT_ID_FORMAT",
+      "category": "format",
+      "spec_section": ["4"],
+      "message": "An event_id does not match the pattern evt_ + 24 lowercase hex characters.",
+      "pattern": "^evt_[0-9a-f]{24}$"
+    },
+    {
+      "code": "PROVARA_E102",
+      "name": "KEY_ID_FORMAT",
+      "category": "format",
+      "spec_section": ["2"],
+      "message": "A key_id does not match the pattern bp1_ + 16 lowercase hex characters.",
+      "pattern": "^bp1_[0-9a-f]{16}$"
+    },
+    {
+      "code": "PROVARA_E103",
+      "name": "SIGNATURE_FORMAT",
+      "category": "format",
+      "spec_section": ["2"],
+      "message": "A signature is not valid Base64 encoding of exactly 64 bytes."
+    },
+    {
+      "code": "PROVARA_E104",
+      "name": "CANONICAL_FORMAT",
+      "category": "format",
+      "spec_section": ["3"],
+      "message": "Canonical JSON output violates RFC 8785: keys not sorted, whitespace present, numbers malformatted, or encoding not UTF-8."
+    },
+    {
+      "code": "PROVARA_E105",
+      "name": "TIMESTAMP_FORMAT",
+      "category": "format",
+      "spec_section": ["4"],
+      "message": "A timestamp is not ISO 8601 UTC format ending in Z.",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    },
+    {
+      "code": "PROVARA_E200",
+      "name": "KEY_ROTATION_SELF_SIGN",
+      "category": "key_management",
+      "spec_section": ["8"],
+      "message": "A new key authorized its own KEY_PROMOTION. Self-signing is prohibited."
+    },
+    {
+      "code": "PROVARA_E201",
+      "name": "KEY_ROTATION_WRONG_SEQUENCE",
+      "category": "key_management",
+      "spec_section": ["8"],
+      "message": "KEY_PROMOTION encountered without a preceding KEY_REVOCATION for the same key."
+    },
+    {
+      "code": "PROVARA_E202",
+      "name": "KEY_ROTATION_INVALID_SIGNER",
+      "category": "key_management",
+      "spec_section": ["8"],
+      "message": "The signer of KEY_REVOCATION or KEY_PROMOTION is not a surviving trusted authority."
+    },
+    {
+      "code": "PROVARA_E203",
+      "name": "KEY_ROTATION_BOUNDARY_MISSING",
+      "category": "key_management",
+      "spec_section": ["8"],
+      "message": "A KEY_REVOCATION event is missing the required trust_boundary_event_id field."
+    },
+    {
+      "code": "PROVARA_E204",
+      "name": "KEY_NOT_FOUND",
+      "category": "key_management",
+      "spec_section": ["2"],
+      "message": "A key_id referenced in an event signature cannot be matched to any known public key in the vault."
+    },
+    {
+      "code": "PROVARA_E300",
+      "name": "REQUIRED_FIELD_MISSING",
+      "category": "schema",
+      "spec_section": ["4"],
+      "message": "A required field is absent from an event object.",
+      "required_fields": ["event_id", "type", "timestamp", "actor", "key_id", "sig"]
+    },
+    {
+      "code": "PROVARA_E301",
+      "name": "INVALID_CUSTOM_EVENT_TYPE",
+      "category": "schema",
+      "spec_section": ["11"],
+      "message": "A custom (non-core) event type does not use a reverse-domain prefix.",
+      "core_types": ["OBSERVATION", "ATTESTATION", "RETRACTION", "GENESIS", "KEY_REVOCATION", "KEY_PROMOTION", "ASSERTION"]
+    },
+    {
+      "code": "PROVARA_E302",
+      "name": "VAULT_STRUCTURE_INVALID",
+      "category": "schema",
+      "spec_section": ["13"],
+      "message": "The vault is missing required directories or files.",
+      "required_paths": ["events/", "keys/", "identity.json", "manifest.json"]
+    },
+    {
+      "code": "PROVARA_E303",
+      "name": "SPEC_VERSION_MISMATCH",
+      "category": "schema",
+      "spec_section": ["12"],
+      "message": "The vault's backpack_spec_version does not equal '1.0'.",
+      "expected_value": "1.0"
+    },
+    {
+      "code": "PROVARA_E400",
+      "name": "SAFETY_TIER_LOOSENING",
+      "category": "safety_tier",
+      "spec_section": ["9"],
+      "message": "A merge operation would reduce the safety tier of a namespace without L3 authority. The merge ratchet rule (most_restrictive_wins) MUST be enforced."
+    }
+  ]
+}
