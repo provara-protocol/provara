@@ -11,9 +11,9 @@
 **A sovereign, tamper-evident memory substrate for AI systems, governance frameworks, and long-lived digital institutions.**
 
 ![Protocol](https://img.shields.io/badge/Protocol-Provara_v1.0-blue)
-![Tests](https://img.shields.io/badge/Tests-110_passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-222_passing-brightgreen)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-yellow)
-![Status](https://img.shields.io/badge/Status-Reference_Implementation-orange)
+![Status](https://img.shields.io/badge/Status-Stable_Release-green)
 ![License](https://img.shields.io/badge/License-Apache_2.0-blue)
 
 ---

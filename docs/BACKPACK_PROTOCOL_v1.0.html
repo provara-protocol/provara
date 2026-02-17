@@ -1,182 +1,836 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Provara Backpack Protocol v1.0 — Specification</title>
-<style>
-:root {
-  --bg: #0d1117;
-  --bg-raised: #161b22;
-  --border: #30363d;
-  --text: #e6edf3;
-  --text-dim: #8b949e;
-  --green: #3fb950;
-  --blue: #58a6ff;
-  --mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
-  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-}
-
-@media print {
-  :root {
-    --bg: #fff;
-    --text: #000;
-    --border: #ccc;
-    --green: #000;
-    --blue: #000;
-  }
-  body { font-size: 11pt; }
-  .no-print { display: none; }
-}
-
-body {
-  font-family: var(--sans);
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
-
-h1, h2, h3, h4 { font-family: var(--mono); color: var(--green); margin-top: 2em; }
-h1 { font-size: 2.5em; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
-h2 { font-size: 1.8em; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
-
-code, pre { font-family: var(--mono); background: var(--bg-raised); border-radius: 6px; }
-code { padding: 0.2em 0.4em; font-size: 0.9em; }
-pre { padding: 16px; overflow: auto; border: 1px solid var(--border); }
-
-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-th, td { border: 1px solid var(--border); padding: 12px; text-align: left; }
-th { background: var(--bg-raised); }
-
-.status-box {
-  background: rgba(63, 185, 80, 0.1);
-  border: 1px solid var(--green);
-  padding: 15px;
-  border-radius: 8px;
-  margin: 20px 0;
-}
-
-.toc {
-  background: var(--bg-raised);
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-}
-
-.toc ul { list-style: none; padding-left: 0; }
-.toc li { margin-bottom: 8px; }
-.toc a { color: var(--blue); text-decoration: none; }
-.toc a:hover { text-decoration: underline; }
-
-a { color: var(--blue); }
-
-footer {
-  margin-top: 100px;
-  border-top: 1px solid var(--border);
-  padding-top: 20px;
-  font-size: 0.9em;
-  color: var(--text-dim);
-  text-align: center;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backpack Protocol v1.0 — Provara</title>
+    <style>
+        /* Provara Protocol Spec — 50-year readable static HTML */
+        :root {
+            --bg: #ffffff;
+            --fg: #1a1a1a;
+            --muted: #666666;
+            --border: #e0e0e0;
+            --code-bg: #f5f5f5;
+            --link: #0066cc;
+            --link-hover: #004499;
+            --header-font: Georgia, "Times New Roman", serif;
+            --body-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --mono-font: "SF Mono", "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0d1117;
+                --fg: #e6edf3;
+                --muted: #8b949e;
+                --border: #30363d;
+                --code-bg: #161b22;
+                --link: #58a6ff;
+                --link-hover: #79c0ff;
+            }
+        }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            padding: 2rem;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            background: var(--bg);
+            color: var(--fg);
+            font-family: var(--body-font);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--header-font);
+            font-weight: 600;
+            line-height: 1.3;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        h1 { font-size: 2.25rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
+        h2 { font-size: 1.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; margin-top: 3rem; }
+        h3 { font-size: 1.25rem; }
+        h4 { font-size: 1rem; font-weight: 600; }
+        a { color: var(--link); text-decoration: none; }
+        a:hover { color: var(--link-hover); text-decoration: underline; }
+        p { margin: 1rem 0; }
+        ul, ol { margin: 1rem 0; padding-left: 2rem; }
+        li { margin: 0.5rem 0; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        th { background: var(--code-bg); font-weight: 600; }
+        code {
+            font-family: var(--mono-font);
+            font-size: 0.85em;
+            background: var(--code-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+        }
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: var(--mono-font);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            font-size: inherit;
+        }
+        blockquote {
+            border-left: 4px solid var(--border);
+            margin: 1.5rem 0;
+            padding: 0.5rem 0 0.5rem 1.5rem;
+            color: var(--muted);
+        }
+        .meta {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+        .meta strong { color: var(--fg); }
+        nav {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem 1.5rem;
+            margin: 2rem 0;
+        }
+        nav h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            border: none;
+            padding: 0;
+        }
+        nav ol { margin: 0; padding-left: 1.5rem; }
+        nav li { margin: 0.3rem 0; }
+        .section { margin: 3rem 0; }
+        .footnote {
+            font-size: 0.85rem;
+            color: var(--muted);
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+            margin-top: 3rem;
+        }
+        @media print {
+            body { max-width: none; padding: 0; }
+            a { color: var(--fg); text-decoration: none; }
+            a[href]::after { content: " (" attr(href) ")"; font-size: 0.8em; color: var(--muted); }
+            nav { break-inside: avoid; }
+            h2 { break-after: avoid; }
+            pre { break-inside: avoid; white-space: pre-wrap; word-wrap: break-word; }
+            table { break-inside: avoid; }
+        }
+        @media (max-width: 600px) {
+            body { padding: 1rem; font-size: 15px; }
+            h1 { font-size: 1.75rem; }
+            h2 { font-size: 1.4rem; }
+            table { font-size: 0.85rem; }
+            th, td { padding: 0.5rem; }
+        }
+    </style>
 </head>
 <body>
 
 <header>
-  <h1>Provara Backpack Protocol v1.0</h1>
-  <div class="status-box">
-    <strong>Profile:</strong> <code>PROVARA-1.0_PROFILE_A</code><br>
-    <strong>Status:</strong> Normative Reference Specification<br>
-    <strong>Date:</strong> 2026-02-16
-  </div>
+    <h1>Backpack Protocol v1.0</h1>
+    <div class="meta">
+        <p>
+            <strong>Profile:</strong> <code>PROVARA-1.0_PROFILE_A</code><br>
+            <strong>Status:</strong> Normative reference implementation specification<br>
+            <strong>Date:</strong> 2026-02-16<br>
+            <strong>Source of truth:</strong> <a href="../PROTOCOL_PROFILE.txt"><code>PROTOCOL_PROFILE.txt</code></a> — immutable after distribution. This document is the human-readable companion.<br>
+            <strong>Cite as:</strong> Provara Protocol v1.0, <code>provara.dev/spec/v1.0</code>
+        </p>
+    </div>
 </header>
 
-<section class="toc no-print">
-  <h3>Table of Contents</h3>
-  <ul>
-    <li><a href="#purpose">1. Purpose</a></li>
-    <li><a href="#concepts">2. Concepts and Vocabulary</a></li>
-    <li><a href="#crypto">3. Cryptographic Stack</a></li>
-    <li><a href="#canonical">4. Canonical JSON</a></li>
-    <li><a href="#identity">5. Event Identity</a></li>
-    <li><a href="#causal">6. Causal Chain</a></li>
-    <li><a href="#types">7. Event Types</a></li>
-    <li><a href="#reducer">8. The Reducer</a></li>
-    <li><a href="#keymgmt">9. Key Management</a></li>
-    <li><a href="#merkle">10. Merkle Tree</a></li>
-    <li><a href="#manifest">11. Manifest</a></li>
-    <li><a href="#safety">12. Safety Tiers</a></li>
-    <li><a href="#sync">13. Sync Protocol</a></li>
-    <li><a href="#permanence">14. Event Permanence</a></li>
-    <li><a href="#directory">15. Directory Structure</a></li>
-    <li><a href="#compliance">16. Compliance Requirements</a></li>
-    <li><a href="#security">17. Security Considerations</a></li>
-  </ul>
-</section>
+<nav>
+    <h2>Table of Contents</h2>
+    <ol>
+        <li><a href="#1-purpose">Purpose</a></li>
+        <li><a href="#2-concepts-and-vocabulary">Concepts and Vocabulary</a></li>
+        <li><a href="#3-cryptographic-stack">Cryptographic Stack</a></li>
+        <li><a href="#4-canonical-json">Canonical JSON</a></li>
+        <li><a href="#5-event-identity">Event Identity</a></li>
+        <li><a href="#6-causal-chain">Causal Chain</a></li>
+        <li><a href="#7-event-types">Event Types</a></li>
+        <li><a href="#8-the-reducer">The Reducer</a></li>
+        <li><a href="#9-key-management">Key Management</a></li>
+        <li><a href="#10-merkle-tree">Merkle Tree</a></li>
+        <li><a href="#11-manifest">Manifest</a></li>
+        <li><a href="#12-safety-tiers">Safety Tiers</a></li>
+        <li><a href="#13-sync-protocol">Sync Protocol</a></li>
+        <li><a href="#14-event-permanence">Event Permanence</a></li>
+        <li><a href="#15-directory-structure">Directory Structure</a></li>
+        <li><a href="#16-compliance-requirements">Compliance Requirements</a></li>
+        <li><a href="#17-reimplementation-guide">Reimplementation Guide</a></li>
+        <li><a href="#18-security-considerations">Security Considerations</a></li>
+    </ol>
+</nav>
 
 <main>
-  <h2 id="purpose">1. Purpose</h2>
-  <p>The Backpack Protocol defines a tamper-evident, append-only memory substrate for AI systems, sovereign identity, and long-lived digital institutions. A backpack (vault) is a directory of signed events. Given the same event log, any compliant implementation on any machine must produce byte-identical state.</p>
-  <p><strong>Design axiom:</strong> <em>Truth is not merged. Evidence is merged. Truth is recomputed.</em></p>
 
-  <h2 id="concepts">2. Concepts and Vocabulary</h2>
-  <table>
-    <tr><th>Term</th><th>Definition</th></tr>
-    <tr><td><strong>Vault / Backpack</strong></td><td>A directory containing a compliant event log, identity files, policies, and manifest.</td></tr>
-    <tr><td><strong>Event</strong></td><td>An immutable, content-addressed JSON record appended to the event log.</td></tr>
-    <tr><td><strong>Actor</strong></td><td>The identity that authored an event (identified by <code>actor_key_id</code>).</td></tr>
-    <tr><td><strong>Namespace</strong></td><td>One of four epistemic buckets: <code>canonical</code>, <code>local</code>, <code>contested</code>, <code>archived</code>.</td></tr>
-    <tr><td><strong>Reducer</strong></td><td>The pure function <code>f(events) → state</code> that deterministically produces beliefs.</td></tr>
-  </table>
+<section id="1-purpose" class="section">
+    <h2>1. Purpose</h2>
+    <p>The Backpack Protocol defines a tamper-evident, append-only memory substrate for AI systems, sovereign identity, and long-lived digital institutions. A <em>backpack</em> (vault) is a directory of signed events. Given the same event log, any compliant implementation on any machine must produce byte-identical state.</p>
+    <blockquote>
+        <strong>Design axiom:</strong> Truth is not merged. Evidence is merged. Truth is recomputed.
+    </blockquote>
+    <p>Events are cryptographic evidence — signed, hashed, and causally chained. Beliefs about the world are derived by replaying evidence through a deterministic reducer. No belief is ever directly merged; only the underlying evidence is combined, and conclusions are recomputed fresh each time.</p>
+</section>
 
-  <h2 id="crypto">3. Cryptographic Stack</h2>
-  <p>All Profile A implementations MUST use exactly this stack:</p>
-  <ul>
-    <li><strong>Hashing:</strong> SHA-256 (FIPS 180-4)</li>
-    <li><strong>Signing:</strong> Ed25519 (RFC 8032)</li>
-    <li><strong>Serialization:</strong> RFC 8785 Canonical JSON</li>
-  </ul>
+<section id="2-concepts-and-vocabulary" class="section">
+    <h2>2. Concepts and Vocabulary</h2>
+    <table>
+        <thead>
+            <tr><th>Term</th><th>Definition</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Vault / Backpack</strong></td><td>A directory containing a compliant event log, identity files, policies, and manifest</td></tr>
+            <tr><td><strong>Event</strong></td><td>An immutable, content-addressed JSON record appended to the event log</td></tr>
+            <tr><td><strong>Actor</strong></td><td>The identity that authored an event (identified by <code>actor_key_id</code>)</td></tr>
+            <tr><td><strong>Belief</strong></td><td>A derived conclusion about the world — never stored directly, always recomputed from events</td></tr>
+            <tr><td><strong>Namespace</strong></td><td>One of four epistemic buckets: <code>canonical</code>, <code>local</code>, <code>contested</code>, <code>archived</code></td></tr>
+            <tr><td><strong>Reducer</strong></td><td>The pure function <code>f(events) → state</code> that deterministically produces beliefs</td></tr>
+            <tr><td><strong>State hash</strong></td><td>A SHA-256 digest of reducer output — byte-identical across all compliant implementations</td></tr>
+            <tr><td><strong>Merkle root</strong></td><td>A SHA-256 Merkle tree root over all backpack files — seals vault integrity</td></tr>
+            <tr><td><strong>Manifest</strong></td><td>A JSON file enumerating every backpack file with its SHA-256 hash and size</td></tr>
+            <tr><td><strong>Fencing token</strong></td><td>A signed, content-addressed token that prevents stale writes during sync</td></tr>
+            <tr><td><strong>Key ID</strong></td><td><code>bp1_</code> + first 16 hex chars of <code>SHA-256(raw_ed25519_public_key_bytes)</code></td></tr>
+        </tbody>
+    </table>
+</section>
 
-  <h2 id="canonical">4. Canonical JSON</h2>
-  <p>All hashing and signing MUST use RFC 8785 canonical JSON. Rules include:</p>
-  <ol>
-    <li>Object keys sorted lexicographically by Unicode code point.</li>
-    <li>No whitespace between tokens.</li>
-    <li>Numbers formatted without leading zeros or positive signs.</li>
-    <li>UTF-8 encoding without BOM.</li>
-  </ol>
+<section id="3-cryptographic-stack" class="section">
+    <h2>3. Cryptographic Stack</h2>
+    <p>All Profile A implementations MUST use exactly this stack. No substitutions are permitted.</p>
+    <table>
+        <thead>
+            <tr><th>Function</th><th>Algorithm</th><th>Specification</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Hashing</td><td>SHA-256</td><td>FIPS 180-4</td></tr>
+            <tr><td>Signing</td><td>Ed25519</td><td>RFC 8032</td></tr>
+            <tr><td>Canonical JSON</td><td>JCS subset</td><td>RFC 8785</td></tr>
+        </tbody>
+    </table>
 
-  <h2 id="identity">5. Event Identity</h2>
-  <p>Events are content-addressed. Derivation rule:</p>
-  <pre>event_id = "evt_" + SHA-256(canonical_bytes(event_without_id_and_sig))[:24 hex chars]</pre>
+    <h3>SHA-256 Rules</h3>
+    <ul>
+        <li>Output: 64 lowercase hexadecimal characters</li>
+        <li>Input: UTF-8 encoded bytes</li>
+        <li>Used for: event IDs, file integrity, Merkle nodes, state hash, key ID derivation</li>
+    </ul>
 
-  <h2 id="causal">6. Causal Chain</h2>
-  <p>Each actor maintains a per-actor linked list via <code>prev_event_hash</code>. The first event MUST have <code>null</code> as the previous hash.</p>
+    <h3>Ed25519 Rules</h3>
+    <ul>
+        <li>Key size: 256-bit (32-byte public, 64-byte private with seed)</li>
+        <li>Signatures: 64 bytes, Base64-encoded (standard alphabet with padding)</li>
+        <li>Signing payload for events: <code>SHA-256(canonical_bytes(event_without_sig_field))</code>
+            <ul>
+                <li>The <code>sig</code> field MUST be excluded before signing</li>
+                <li>The <code>event_id</code> field MUST be included in the signing payload</li>
+            </ul>
+        </li>
+    </ul>
 
-  <h2 id="types">7. Event Types</h2>
-  <p>Core types include: <code>GENESIS</code>, <code>OBSERVATION</code>, <code>ASSERTION</code>, <code>ATTESTATION</code>, <code>RETRACTION</code>, <code>KEY_REVOCATION</code>, <code>KEY_PROMOTION</code>.</p>
+    <h3>Key ID Derivation</h3>
+    <pre><code>key_id = "bp1_" + SHA-256(raw_public_key_bytes)[:16 hex chars]</code></pre>
+    <p>Example: <code>bp1_27a6549d43046062</code></p>
+</section>
 
-  <h2 id="reducer">8. The Reducer</h2>
-  <p>The reducer is a pure function: <code>f(events) → state</code>. It populates four namespaces:</p>
-  <ul>
-    <li><code>canonical/</code>: Attested institutional truth.</li>
-    <li><code>local/</code>: Unverified observations.</li>
-    <li><code>contested/</code>: Conflicting evidence.</li>
-    <li><code>archived/</code>: Superseded beliefs.</li>
-  </ul>
+<section id="4-canonical-json" class="section">
+    <h2>4. Canonical JSON</h2>
+    <p>All hashing and signing MUST use RFC 8785 canonical JSON. Two compliant implementations serializing the same logical object MUST produce byte-identical output.</p>
 
-  <h2 id="compliance">16. Compliance Requirements</h2>
-  <p>A compliant implementation MUST pass the 17 core compliance tests covering directory structure, causal integrity, Merkle verification, and reducer determinism.</p>
+    <h3>Rules (all MUST apply)</h3>
+    <ol>
+        <li>Object keys MUST be sorted lexicographically by Unicode code point</li>
+        <li>No whitespace between tokens</li>
+        <li>No trailing commas</li>
+        <li>Numbers MUST NOT have leading zeros, positive signs, or trailing decimal zeros</li>
+        <li>Strings MUST use minimal escape sequences</li>
+        <li>Encoding MUST be UTF-8 without BOM</li>
+        <li>Null values MUST be preserved as <code>null</code> — MUST NOT be omitted</li>
+    </ol>
 
-  <h2 id="security">17. Security Considerations</h2>
-  <p>The protocol protects against data tampering and history re-ordering through cryptographic chaining. It provides integrity and authenticity, but confidentiality MUST be handled at the application layer via encryption.</p>
+    <h3>Example</h3>
+    <p>Input object (logical):</p>
+    <pre><code>{"z": 3, "a": 1, "m": {"y": 2, "b": null}}</code></pre>
+    <p>Canonical output:</p>
+    <pre><code>{"a":1,"m":{"b":null,"y":2},"z":3}</code></pre>
+
+    <h3>Reference Implementation</h3>
+    <pre><code>import json
+
+def canonical_bytes(obj):
+    return json.dumps(
+        obj,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")</code></pre>
+    <p>Cross-language note: For fractional values (floats), prefer integer encoding or string-wrapped decimals to guarantee byte-exact interoperability across languages.</p>
+</section>
+
+<section id="5-event-identity" class="section">
+    <h2>5. Event Identity</h2>
+    <p>Events are content-addressed. Their ID is derived from their content.</p>
+
+    <h3>Derivation Rule (MUST)</h3>
+    <ol>
+        <li>Remove <code>event_id</code> and <code>sig</code> fields from the event object</li>
+        <li>Compute canonical JSON bytes of the remaining object</li>
+        <li><code>event_id = "evt_" + SHA-256(canonical_bytes)[:24 hex chars]</code></li>
+    </ol>
+    <p>This rule is deterministic: identical event content always produces the same <code>event_id</code>.</p>
+
+    <h3>Example</h3>
+    <pre><code>def derive_event_id(event: dict) -> str:
+    hashable = {k: v for k, v in event.items() if k not in ("event_id", "sig")}
+    digest = hashlib.sha256(canonical_bytes(hashable)).hexdigest()
+    return f"evt_{digest[:24]}"</code></pre>
+</section>
+
+<section id="6-causal-chain" class="section">
+    <h2>6. Causal Chain</h2>
+    <p>Each actor maintains a per-actor linked list of events via <code>prev_event_hash</code>.</p>
+
+    <h3>Rules (all MUST apply)</h3>
+    <ol>
+        <li><strong>First event</strong> by an actor: <code>prev_event_hash</code> MUST be <code>null</code></li>
+        <li><strong>Subsequent events</strong>: <code>prev_event_hash</code> MUST equal the <code>event_id</code> of that actor's immediately preceding event</li>
+        <li><strong>Cross-actor</strong>: <code>prev_event_hash</code> MUST NOT reference another actor's events</li>
+    </ol>
+
+    <h3>Integrity Rule</h3>
+    <p>For any event E by actor A, if <code>E.prev_event_hash</code> is not null, there MUST exist an event P where:</p>
+    <ul>
+        <li><code>P.event_id == E.prev_event_hash</code></li>
+        <li><code>P.actor == A</code></li>
+    </ul>
+    <p>Any gap or forgery breaks the chain and fails compliance.</p>
+
+    <h3>Fork Detection</h3>
+    <p>A <em>fork</em> occurs when two events by the same actor share the same <code>prev_event_hash</code>. This indicates concurrent offline operation. Forks are preserved in the merged log and surface in the <code>contested/</code> namespace after reducer replay.</p>
+</section>
+
+<section id="7-event-types" class="section">
+    <h2>7. Event Types</h2>
+    <p>Machine-readable schema: <code>docs/schemas/provara_event_schema_v1.json</code></p>
+
+    <h3>Core Types (no prefix required)</h3>
+    <p>All core event types are reserved. Custom extensions MUST use reverse-domain prefixes (<code>com.example.my_type</code>).</p>
+
+    <h4>GENESIS</h4>
+    <p>The vault birth certificate. Every backpack has exactly one GENESIS event, written by <code>bootstrap_v0.py</code>.</p>
+    <pre><code>{
+  "event_id": "evt_...",
+  "type": "GENESIS",
+  "namespace": "canonical",
+  "actor": "&lt;actor_id&gt;",
+  "actor_key_id": "&lt;bp1_...&gt;",
+  "ts_logical": 1,
+  "prev_event_hash": null,
+  "timestamp_utc": "&lt;ISO 8601&gt;",
+  "payload": {
+    "uid": "&lt;vault_uuid&gt;",
+    "birth_timestamp": "&lt;ISO 8601&gt;",
+    "root_key_id": "&lt;bp1_...&gt;",
+    "protocol_version": "1.0",
+    "profile": "PROVARA-1.0_PROFILE_A"
+  },
+  "sig": "&lt;base64 ed25519&gt;"
+}</code></pre>
+
+    <h4>OBSERVATION</h4>
+    <p>A sensor, measurement, or belief claim with associated confidence.</p>
+    <pre><code>{
+  "type": "OBSERVATION",
+  "namespace": "local",
+  "payload": {
+    "subject": "&lt;entity&gt;",
+    "predicate": "&lt;property&gt;",
+    "value": "&lt;any JSON value&gt;",
+    "confidence": 0.9,
+    "timestamp": "&lt;ISO 8601&gt;"
+  }
+}</code></pre>
+    <p>The belief key is <code>subject:predicate</code>. The reducer places observations in <code>local/</code>, moving them to <code>contested/</code> if conflicting high-confidence evidence accumulates.</p>
+
+    <h4>ASSERTION</h4>
+    <p>Functionally equivalent to OBSERVATION but defaults to lower confidence (0.35). Used for inferred or deduced beliefs rather than direct sensor readings.</p>
+
+    <h4>ATTESTATION</h4>
+    <p>Promotes a belief to the <code>canonical/</code> namespace. Requires institutional authority.</p>
+    <pre><code>{
+  "type": "ATTESTATION",
+  "namespace": "canonical",
+  "payload": {
+    "subject": "&lt;entity&gt;",
+    "predicate": "&lt;property&gt;",
+    "value": "&lt;attested value&gt;",
+    "target_event_id": "&lt;event_id of source evidence&gt;",
+    "actor_key_id": "&lt;bp1_...&gt;"
+  }
+}</code></pre>
+    <p>When a canonical belief already exists for a key, it is moved to <code>archived/</code> with <code>superseded_by</code> set to the new attestation event ID.</p>
+
+    <h4>RETRACTION</h4>
+    <p>Removes a belief from active namespaces. Canonical entries are archived as retracted.</p>
+    <pre><code>{
+  "type": "RETRACTION",
+  "payload": {
+    "subject": "&lt;entity&gt;",
+    "predicate": "&lt;property&gt;"
+  }
+}</code></pre>
+    <p>Effect:</p>
+    <ul>
+        <li>Removes from <code>local/</code> and <code>contested/</code></li>
+        <li>If in <code>canonical/</code>: moves to <code>archived/</code> with <code>retracted: true</code> and <code>superseded_by: &lt;retraction_event_id&gt;</code></li>
+    </ul>
+
+    <h4>KEY_REVOCATION</h4>
+    <p>Part of the two-event key rotation protocol. Marks a key as revoked.</p>
+    <pre><code>{
+  "type": "KEY_REVOCATION",
+  "payload": {
+    "revoked_key_id": "&lt;bp1_...&gt;",
+    "trust_boundary_event_id": "&lt;last trusted event_id&gt;",
+    "reason": "compromised",
+    "revoked_by": "&lt;signing_key_id&gt;"
+  }
+}</code></pre>
+    <p>MUST be signed by a surviving trusted authority. The revoked key MUST NOT sign its own revocation.</p>
+
+    <h4>KEY_PROMOTION</h4>
+    <p>Second half of key rotation. Introduces the replacement key.</p>
+    <pre><code>{
+  "type": "KEY_PROMOTION",
+  "payload": {
+    "new_key_id": "&lt;bp1_...&gt;",
+    "new_public_key_b64": "&lt;base64&gt;",
+    "algorithm": "Ed25519",
+    "roles": ["root"],
+    "promoted_by": "&lt;signing_key_id&gt;",
+    "replaces_key_id": "&lt;revoked_key_id&gt;"
+  }
+}</code></pre>
+    <p>The new key MUST NOT sign its own promotion. A surviving authority signs both rotation events.</p>
+
+    <h4>REDUCER_EPOCH</h4>
+    <p>Records a reducer version transition for audit purposes.</p>
+    <pre><code>{
+  "type": "REDUCER_EPOCH",
+  "payload": {
+    "epoch_id": "&lt;epoch_identifier&gt;",
+    "reducer_hash": "sha256:&lt;hash_of_reducer_code&gt;",
+    "effective_from_event_id": "&lt;event_id&gt;",
+    "ontology_versions": {"perception": "v1"}
+  }
+}</code></pre>
+</section>
+
+<section id="8-the-reducer" class="section">
+    <h2>8. The Reducer</h2>
+    <p>The reducer is a pure function: <code>f(events) → state</code>. Given the same event sequence, any compliant implementation MUST produce a byte-identical <code>state_hash</code>.</p>
+
+    <h3>Four-Namespace State Model</h3>
+    <table>
+        <thead>
+            <tr><th>Namespace</th><th>Meaning</th><th>When Populated</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>canonical/</code></td><td>Institutionally attested truth</td><td>Via ATTESTATION event</td></tr>
+            <tr><td><code>local/</code></td><td>Node-local observations</td><td>Via OBSERVATION (no conflict)</td></tr>
+            <tr><td><code>contested/</code></td><td>Conflicting high-confidence evidence</td><td>When two conflicting observations both exceed the conflict threshold</td></tr>
+            <tr><td><code>archived/</code></td><td>Superseded canonical beliefs</td><td>When a canonical entry is overwritten by new ATTESTATION or RETRACTION</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Belief Keys</h3>
+    <p>Beliefs are indexed by <code>subject:predicate</code>. Example: <code>door_01:status</code>.</p>
+
+    <h3>Conflict Detection</h3>
+    <p>The default conflict confidence threshold is <code>0.50</code>. An incoming observation triggers conflict if:</p>
+    <ol>
+        <li><strong>Conflicts with canonical</strong>: existing canonical value differs AND incoming confidence ≥ threshold</li>
+        <li><strong>Conflicts with local</strong>: existing local value differs AND <code>max(existing_confidence, incoming_confidence)</code> ≥ threshold</li>
+    </ol>
+    <p>When conflict is detected, the key moves from <code>local/</code> to <code>contested/</code> with full evidence grouping.</p>
+
+    <h3>Agreeing Evidence</h3>
+    <p>If a new observation agrees with the existing local value:</p>
+    <ul>
+        <li>If incoming confidence ≤ existing: keep existing, record evidence (no state change)</li>
+        <li>If incoming confidence > existing: update local to show higher confidence source</li>
+    </ul>
+
+    <h3>State Hash</h3>
+    <pre><code>state_hash = SHA-256(canonical_bytes(state_without_metadata.state_hash))</code></pre>
+    <p>The hash covers all four namespaces plus non-hash metadata fields. It excludes <code>metadata.state_hash</code> itself (non-self-referential). An empty reducer (zero events) produces a valid, deterministic state hash.</p>
+
+    <h3>Reducer Invariants</h3>
+    <ol>
+        <li>Same event sequence → byte-identical <code>state_hash</code></li>
+        <li>Empty log → valid state hash, all namespaces empty, <code>event_count = 0</code></li>
+        <li>Unknown event types: counted, ignored for state, logged to <code>_ignored_types</code></li>
+        <li>Malformed events (non-dict, missing fields): skipped or handled gracefully — never crash</li>
+    </ol>
+</section>
+
+<section id="9-key-management" class="section">
+    <h2>9. Key Management</h2>
+
+    <h3>Key Registry (<code>identity/keys.json</code>)</h3>
+    <pre><code>{
+  "keys": [
+    {
+      "key_id": "bp1_27a6549d43046062",
+      "public_key_b64": "&lt;base64&gt;",
+      "algorithm": "Ed25519",
+      "roles": ["root", "attestation"],
+      "status": "active",
+      "created_at_utc": "2026-02-13T00:00:00Z"
+    }
+  ],
+  "revocations": []
+}</code></pre>
+
+    <h3>Key Rotation Protocol</h3>
+    <p>Key rotation is a two-event atomic operation:</p>
+    <ol>
+        <li><strong>KEY_REVOCATION</strong> — signed by a surviving trusted authority (MUST NOT be the key being revoked)</li>
+        <li><strong>KEY_PROMOTION</strong> — signed by the same surviving authority (MUST NOT be the new key)</li>
+    </ol>
+    <p><strong>Security invariant:</strong> A compromised key cannot authorize its own replacement. If an attacker could self-sign a KEY_PROMOTION, they could escalate from key compromise to permanent identity takeover.</p>
+
+    <h3>Trust hierarchy (for signing rotation)</h3>
+    <ol>
+        <li>Non-compromised root key → signs rotation</li>
+        <li>Root compromised, quorum keys survive → quorum signs</li>
+        <li>All keys compromised → catastrophic identity death (new genesis required)</li>
+    </ol>
+
+    <h3>Revoked Keys</h3>
+    <p>After revocation, a key's <code>status</code> changes to <code>"revoked"</code>. Revoked keys appear in the <code>revocations</code> list and MUST NOT be used to sign new events.</p>
+</section>
+
+<section id="10-merkle-tree" class="section">
+    <h2>10. Merkle Tree</h2>
+    <p>The Merkle tree seals the integrity of all backpack files.</p>
+
+    <h3>Construction</h3>
+    <ol>
+        <li><strong>Leaves:</strong> For each file entry in the manifest: <code>leaf_hash = SHA-256(canonical_bytes({"path": "...", "sha256": "...", "size": N}))</code></li>
+        <li><strong>Ordering:</strong> Leaves MUST be sorted lexicographically by file path</li>
+        <li><strong>Padding:</strong> If leaf count is odd, the last leaf is duplicated</li>
+        <li><strong>Nodes:</strong> <code>node_hash = SHA-256(left_child_bytes || right_child_bytes)</code> — raw byte concatenation (32 + 32 bytes), NOT hex string concatenation</li>
+        <li><strong>Root:</strong> A single 64-character lowercase hex string stored in <code>merkle_root.txt</code></li>
+    </ol>
+
+    <h3>Empty Tree</h3>
+    <p>An empty tree (no files) produces: <code>SHA-256(b"").hexdigest()</code></p>
+
+    <h3>Reference Implementation</h3>
+    <pre><code>def merkle_root_hex(leaves: list[bytes]) -> str:
+    if not leaves:
+        return hashlib.sha256(b"").hexdigest()
+    level = [hashlib.sha256(leaf).digest() for leaf in leaves]
+    while len(level) > 1:
+        next_level = []
+        for i in range(0, len(level), 2):
+            left = level[i]
+            right = level[i + 1] if i + 1 &lt; len(level) else level[i]
+            next_level.append(hashlib.sha256(left + right).digest())
+        level = next_level
+    return level[0].hex()</code></pre>
+</section>
+
+<section id="11-manifest" class="section">
+    <h2>11. Manifest</h2>
+    <p><code>manifest.json</code> inventories every file in the backpack with its SHA-256 hash, file size, and relative path.</p>
+
+    <h3>Format</h3>
+    <pre><code>{
+  "backpack_spec_version": "1.0",
+  "manifest_format": "manifest.v0",
+  "generated_at_utc": "2026-02-13T00:00:00Z",
+  "merkle_root": "&lt;64 hex chars&gt;",
+  "files": [
+    {
+      "path": "events/events.ndjson",
+      "sha256": "&lt;64 hex chars&gt;",
+      "size": 1234
+    }
+  ]
+}</code></pre>
+
+    <h3>Excluded Files</h3>
+    <p><code>manifest.json</code>, <code>manifest.sig</code>, and <code>merkle_root.txt</code> are excluded from the file list (they cannot hash themselves).</p>
+
+    <h3>Manifest Signature</h3>
+    <p><code>manifest.sig</code> is a detached Ed25519 signature over <code>SHA-256(merkle_root_bytes + canonical_bytes(manifest_header))</code>. It binds the manifest to a specific key and timestamp.</p>
+</section>
+
+<section id="12-safety-tiers" class="section">
+    <h2>12. Safety Tiers</h2>
+    <p>The safety tier system governs what actions a vault can authorize offline.</p>
+    <table>
+        <thead>
+            <tr><th>Tier</th><th>Risk</th><th>Offline Allowed</th><th>Gate</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>L0</strong></td><td>Data-only, reversible</td><td>Yes</td><td>Local reducer</td></tr>
+            <tr><td><strong>L1</strong></td><td>Low-kinetic</td><td>Yes (logged for review)</td><td>Reducer + policy</td></tr>
+            <tr><td><strong>L2</strong></td><td>High-kinetic</td><td>Lease window only</td><td>Multi-sensor + signed policy</td></tr>
+            <tr><td><strong>L3</strong></td><td>Critical / irreversible</td><td>No</td><td>Human MFA or remote signature</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Merge Ratchet</h3>
+    <p>Safety constraints only tighten automatically on merge (<code>most_restrictive_wins</code>). Loosening requires a signed <code>POLICY_UPDATE</code> by a key with L3 clearance. This is a one-way ratchet — you can always become more cautious, never less cautious without explicit authority.</p>
+</section>
+
+<section id="13-sync-protocol" class="section">
+    <h2>13. Sync Protocol</h2>
+    <p>The sync protocol is a union merge with causal chain verification.</p>
+
+    <h3>13.1 Chain Validation Algorithm</h3>
+    <p>To validate the causal integrity of a backpack, a conformant implementation MUST perform the following steps:</p>
+    <ol>
+        <li><strong>Initialize</strong>: Group all events by <code>actor</code>.</li>
+        <li><strong>Sort</strong>: For each actor's event set, sort events by <code>timestamp_utc</code> (primary) and <code>event_id</code> (secondary, lexicographical).</li>
+        <li><strong>Validate Links</strong>:
+            <ul>
+                <li>For the <strong>first event</strong> in the sorted set: Assert <code>prev_event_hash</code> is <code>null</code>.</li>
+                <li>For every <strong>subsequent event</strong> E<sub>i</sub> (where i &gt; 0): Identify the preceding event E<sub>i-1</sub> in the sorted set. Assert E<sub>i</sub>.prev_event_hash == E<sub>i-1</sub>.event_id.</li>
+            </ul>
+        </li>
+        <li><strong>Verify Content Identity</strong>: For every event E: Assert E.event_id matches the content-addressed derivation rule (see §5).</li>
+        <li><strong>Verify Signatures</strong>: For every event E: Assert E.sig is a valid Ed25519 signature over E's canonical form using the public key associated with E.actor_key_id.</li>
+    </ol>
+    <p>Any failure in steps 3, 4, or 5 MUST result in the chain being marked as invalid.</p>
+
+    <h3>13.2 Algorithm Pseudocode</h3>
+    <pre><code>function verify_vault(events):
+    actors = group_by(events, "actor")
+
+    for actor_id in actors:
+        actor_events = sort(actors[actor_id], by=["timestamp_utc", "event_id"])
+
+        for i from 0 to len(actor_events) - 1:
+            curr = actor_events[i]
+
+            # Linkage check
+            if i == 0:
+                assert curr.prev_event_hash == null
+            else:
+                prev = actor_events[i-1]
+                assert curr.prev_event_hash == prev.event_id
+
+            # Content identity check
+            assert curr.event_id == derive_event_id(curr)
+
+            # Signature check
+            pub_key = lookup_key(curr.actor_key_id)
+            assert verify_signature(curr, pub_key)
+
+    return true</code></pre>
+
+    <h3>13.3 Fencing Tokens</h3>
+    <p>Before writing to a backpack, generate a fencing token:</p>
+    <pre><code>token_hash = SHA-256(latest_event_id + ":" + timestamp + ":" + nonce)
+sig = Ed25519_sign(token_hash, active_key)</code></pre>
+    <p>Validation:</p>
+    <ol>
+        <li>Recompute <code>token_hash</code> from the fields</li>
+        <li>Verify signature against key registry</li>
+        <li>Verify <code>latest_event_id</code> still exists in the event log</li>
+    </ol>
+    <p>A stale token (referencing an event that was superseded by a merge) fails validation, preventing lost-update scenarios.</p>
+
+    <h3>Delta Export / Import</h3>
+    <p>Delta bundles enable partial sync (only events after a known hash):</p>
+    <pre><code>Header: {"type": "provara_delta_v1", "since_hash": "...", "event_count": N, "keys": [...]}
+Body:   One NDJSON line per event</code></pre>
+    <p>Unknown event types MUST be preserved in the merged log. They MUST NOT affect core reducer state.</p>
+</section>
+
+<section id="14-event-permanence" class="section">
+    <h2>14. Event Permanence</h2>
+    <p>Events MUST be permanent. Implementations MUST NOT delete events.</p>
+    <table>
+        <thead>
+            <tr><th>Data Type</th><th>Retention</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Events</td><td>Permanent</td></tr>
+            <tr><td>Checkpoints</td><td>Permanent</td></tr>
+            <tr><td>Perception raw data</td><td>30-day default, oldest-first eviction (MAY vary)</td></tr>
+            <tr><td>CAS artifacts</td><td>Permanent if referenced; 90-day if unreferenced (MAY vary)</td></tr>
+            <tr><td>State caches</td><td>MAY be evicted (regeneratable from events)</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<section id="15-directory-structure" class="section">
+    <h2>15. Directory Structure</h2>
+    <pre><code>My_Backpack/
+├── identity/
+│   ├── genesis.json              # Birth certificate
+│   └── keys.json                 # Public key registry
+├── events/
+│   └── events.ndjson             # THE source of truth (append-only NDJSON)
+├── policies/
+│   ├── safety_policy.json        # L0-L3 kinetic risk tiers
+│   ├── retention_policy.json     # Data permanence rules
+│   ├── sync_contract.json        # Governance + authority ladder
+│   └── ontology/
+│       └── perception_ontology_v1.json
+├── state/                        # Regeneratable cache (may be absent)
+│   └── current_state.json
+├── artifacts/
+│   └── cas/                      # Content-addressed storage
+├── manifest.json                 # File inventory with SHA-256 hashes
+├── manifest.sig                  # Ed25519 signature over manifest
+└── merkle_root.txt               # Integrity anchor (single hex string)</code></pre>
+
+    <h3>Path Safety</h3>
+    <p>All file paths in the manifest MUST:</p>
+    <ul>
+        <li>Be relative to the backpack root</li>
+        <li>Not contain <code>..</code> or symlinks pointing outside the root</li>
+        <li>Be lexicographically sorted in the manifest</li>
+    </ul>
+</section>
+
+<section id="16-compliance-requirements" class="section">
+    <h2>16. Compliance Requirements</h2>
+
+    <h3>16.1 Error Taxonomy</h3>
+    <p>Standardized error codes for validation failures. Implementations SHOULD use these codes to ensure interoperability and clear auditing.</p>
+    <table>
+        <thead>
+            <tr><th>Code</th><th>Label</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>PROVARA_E001</code></td><td><code>HASH_MISMATCH</code></td><td>Event ID does not match computed content hash</td></tr>
+            <tr><td><code>PROVARA_E002</code></td><td><code>BROKEN_CAUSAL_CHAIN</code></td><td><code>prev_event_hash</code> does not link to correct previous event</td></tr>
+            <tr><td><code>PROVARA_E003</code></td><td><code>INVALID_SIGNATURE</code></td><td>Signature verification failed for the given public key</td></tr>
+            <tr><td><code>PROVARA_E004</code></td><td><code>MISSING_FIELD</code></td><td>A required top-level or payload field is missing</td></tr>
+            <tr><td><code>PROVARA_E005</code></td><td><code>UNAUTHORIZED_SIGNER</code></td><td>The signing key does not have authority for the event type</td></tr>
+            <tr><td><code>PROVARA_E006</code></td><td><code>REVOKED_KEY_USE</code></td><td>Event signed by a key that was revoked at the time of signing</td></tr>
+            <tr><td><code>PROVARA_E007</code></td><td><code>MALFORMED_JSON</code></td><td>Event or file is not valid UTF-8 or standard JSON</td></tr>
+            <tr><td><code>PROVARA_E008</code></td><td><code>MERKLE_ROOT_MISMATCH</code></td><td>Recomputed Merkle root does not match <code>merkle_root.txt</code></td></tr>
+        </tbody>
+    </table>
+
+    <h3>16.2 Minimum Test Coverage</h3>
+    <table>
+        <thead>
+            <tr><th>Category</th><th>Tests</th><th>Requirement</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Directory structure</td><td>2</td><td>Required folders and files exist</td></tr>
+            <tr><td>Identity schema</td><td>2</td><td>Genesis event and key registry validity</td></tr>
+            <tr><td>Event schema + causal chain</td><td>3</td><td>Event format, uniqueness, causal ordering</td></tr>
+            <tr><td>Manifest integrity + Merkle</td><td>5</td><td>File hashes, Merkle computation, no phantoms, path safety</td></tr>
+            <tr><td>Safety policy structure</td><td>2</td><td>L0-L3 structure and ratchet constraints</td></tr>
+            <tr><td>Sync contract schema</td><td>1</td><td>Governance schema validity</td></tr>
+            <tr><td>Reducer determinism</td><td>1</td><td>Same events → identical state hash</td></tr>
+            <tr><td>Retention permanence</td><td>1</td><td>Events are never deleted</td></tr>
+        </tbody>
+    </table>
+    <p>Run against the reference backpack:</p>
+    <pre><code>cd SNP_Core/test && PYTHONPATH=../bin python backpack_compliance_v1.py ../examples/reference_backpack -v</code></pre>
+</section>
+
+<section id="17-reimplementation-guide" class="section">
+    <h2>17. Reimplementation Guide</h2>
+    <p>To implement Provara v1.0 in another language:</p>
+
+    <h3>Step 1 — Cryptographic Primitives</h3>
+    <p>Implement:</p>
+    <ul>
+        <li>SHA-256 (FIPS 180-4)</li>
+        <li>Ed25519 sign and verify (RFC 8032)</li>
+        <li>RFC 8785 canonical JSON</li>
+    </ul>
+
+    <h3>Step 2 — Validate Against Test Vectors</h3>
+    <p>Validate your implementations against <code>test_vectors/vectors.json</code>. The 7 vectors cover canonical JSON, SHA-256, event ID derivation, key ID derivation, Ed25519 sign/verify, Merkle root, and reducer determinism.</p>
+
+    <h3>Step 3 — Implement the Reducer</h3>
+    <p>Handle: <code>OBSERVATION</code>, <code>ASSERTION</code>, <code>ATTESTATION</code>, <code>RETRACTION</code>, <code>REDUCER_EPOCH</code>, <code>KEY_REVOCATION</code>, <code>KEY_PROMOTION</code></p>
+    <p>For unknown event types: count them, do not modify namespace state, preserve in event log on merge.</p>
+
+    <h3>Step 4 — Verify Determinism</h3>
+    <p>Run your reducer against the test vector event sequence. Compare your <code>state_hash</code> to the reference value. If they match, your implementation is correct. If they diverge, the canonical JSON or hash computation has a bug.</p>
+
+    <h3>Step 5 — Pass Compliance Tests</h3>
+    <p>Generate a backpack with your implementation and run the 17 compliance tests. If all pass, your implementation is conformant.</p>
+
+    <h3>If State Hashes Diverge</h3>
+    <p>Common causes:</p>
+    <ol>
+        <li><strong>Non-canonical JSON</strong> — check key sorting, whitespace, null handling</li>
+        <li><strong>Float serialization</strong> — JSON float encoding differs across languages; use integers or string-wrapped values for fractional confidence scores</li>
+        <li><strong>UTF-8 encoding</strong> — ensure no BOM, no alternate encodings</li>
+        <li><strong>Missing metadata fields</strong> — <code>state_hash</code> excludes <code>metadata.state_hash</code> but includes all other metadata fields</li>
+    </ol>
+    <p>The Python reference implementation is the canonical source of truth for any ambiguity.</p>
+</section>
+
+<section id="18-security-considerations" class="section">
+    <h2>18. Security Considerations</h2>
+
+    <h3>18.1 Threat Model</h3>
+    <table>
+        <thead>
+            <tr><th>Threat</th><th>Provara Defense</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Data Tampering</strong></td><td>Merkle tree seals the vault; Ed25519 signatures seal each event.</td></tr>
+            <tr><td><strong>History Re-ordering</strong></td><td>Causal hash-chaining enforces total order per actor.</td></tr>
+            <tr><td><strong>Silent Deletion</strong></td><td>Causal chain gaps and Merkle root mismatches detect missing files or events.</td></tr>
+            <tr><td><strong>Identity Takeover</strong></td><td>Key rotation protocol requires surviving authority; compromised keys cannot self-promote replacements.</td></tr>
+            <tr><td><strong>Stale Writes</strong></td><td>Fencing tokens ensure sync operations target the correct chain head.</td></tr>
+        </tbody>
+    </table>
+
+    <h3>18.2 Privacy</h3>
+    <p>Provara events are stored in plaintext JSON. This protocol provides <strong>integrity</strong> and <strong>authenticity</strong>, but not <strong>confidentiality</strong>. Sensitive data SHOULD be encrypted at the application layer before being placed in an event's <code>payload.value</code> field.</p>
+
+    <h3>18.3 Replay Attacks</h3>
+    <p>Events include unique content-addressed IDs and actor sequence numbers (<code>ts_logical</code>). Implementations MUST reject duplicate events and out-of-order causal chains.</p>
+</section>
+
 </main>
 
-<footer>
-  &copy; 2026 Hunt Information Systems LLC. Provara is an Apache 2.0 licensed open-source protocol.
+<footer class="footnote">
+    <p><em>Derived from PROTOCOL_PROFILE.txt. This HTML artifact is designed for 50-year readability. No JavaScript. No external dependencies. Printable.</em></p>
+    <p><strong>Provara Protocol v1.0</strong> · Apache 2.0 License · <a href="https://github.com/provara-protocol/provara">github.com/provara-protocol/provara</a></p>
 </footer>
 
 </body>

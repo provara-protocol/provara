@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "provara-protocol"
-version = "1.0.0rc1"
+version = "1.0.0"
 description = "Tamper-evident memory protocol for humans and AI agents. Ed25519 + SHA-256 + event sourcing."
 readme = "README.md"
 license = {text = "Apache-2.0"}
