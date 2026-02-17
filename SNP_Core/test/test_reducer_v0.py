@@ -365,5 +365,193 @@ class TestEvidenceExport(unittest.TestCase):
         self.assertEqual(len(evidence["mug:color"]), 3)
 
 
+class TestEmptyReplay(unittest.TestCase):
+    """Zero events through reducer — empty state must have a valid state hash."""
+
+    def test_all_namespaces_empty(self):
+        r = SovereignReducerV0()
+        state = r.export_state()
+        self.assertEqual(state["canonical"], {})
+        self.assertEqual(state["local"], {})
+        self.assertEqual(state["contested"], {})
+        self.assertEqual(state["archived"], {})
+
+    def test_initial_state_hash_not_none(self):
+        """Initial state (no events applied) must have a non-None state hash."""
+        r = SovereignReducerV0()
+        state_hash = r.state["metadata"]["state_hash"]
+        self.assertIsNotNone(state_hash, "Initial state hash must not be None")
+        self.assertIsInstance(state_hash, str)
+        self.assertEqual(len(state_hash), 64, "State hash must be 64 hex chars")
+
+    def test_initial_event_count_zero(self):
+        r = SovereignReducerV0()
+        self.assertEqual(r.state["metadata"]["event_count"], 0)
+
+    def test_empty_state_deterministic(self):
+        """Two fresh reducers must have identical initial state hashes."""
+        r1 = SovereignReducerV0()
+        r2 = SovereignReducerV0()
+        self.assertEqual(
+            r1.state["metadata"]["state_hash"],
+            r2.state["metadata"]["state_hash"],
+        )
+
+    def test_apply_events_empty_list_unchanged(self):
+        """apply_events([]) must not change the state from zero-event baseline."""
+        r = SovereignReducerV0()
+        initial_hash = r.state["metadata"]["state_hash"]
+        r.apply_events([])
+        self.assertEqual(r.state["metadata"]["state_hash"], initial_hash)
+        self.assertEqual(r.state["metadata"]["event_count"], 0)
+
+
+class TestNamespaceCollision(unittest.TestCase):
+    """Same subject:predicate from two different actors — deterministic resolution."""
+
+    def test_high_confidence_collision_goes_to_contested(self):
+        """Two actors with different high-confidence values → contested."""
+        r = SovereignReducerV0()
+        r.apply_event(_obs("e1", "robot_a", "door", "state", "open", 0.9,
+                           ts="2026-02-12T10:00:00Z"))
+        r.apply_event(_obs("e2", "robot_b", "door", "state", "closed", 0.9,
+                           ts="2026-02-12T10:00:00Z"))
+        state = r.export_state()
+        self.assertIn("door:state", state["contested"])
+        self.assertNotIn("door:state", state["local"])
+
+    def test_collision_state_hash_deterministic(self):
+        """Same conflicting events in same order must always produce same state hash."""
+        events = [
+            _obs("e1", "robot_a", "door", "state", "open", 0.9),
+            _obs("e2", "robot_b", "door", "state", "closed", 0.9),
+        ]
+        hashes = set()
+        for _ in range(3):
+            r = SovereignReducerV0()
+            r.apply_events(events)
+            hashes.add(r.state["metadata"]["state_hash"])
+        self.assertEqual(len(hashes), 1, "Identical inputs must produce identical state hash")
+
+    def test_both_below_threshold_no_contest(self):
+        """Both observations below conflict threshold → local updated, no contest."""
+        r = SovereignReducerV0()
+        r.apply_event(_obs("e1", "robot_a", "door", "state", "open", 0.3))
+        r.apply_event(_obs("e2", "robot_b", "door", "state", "closed", 0.2))
+        state = r.export_state()
+        # max(0.3, 0.2) = 0.3 < 0.5 default threshold — second observation overwrites first
+        self.assertNotIn("door:state", state["contested"])
+        self.assertIn("door:state", state["local"])
+
+    def test_contested_has_evidence_for_all_values(self):
+        """Contested record must contain evidence for every conflicting value."""
+        r = SovereignReducerV0()
+        r.apply_event(_obs("e1", "robot_a", "door", "state", "open", 0.9))
+        r.apply_event(_obs("e2", "robot_b", "door", "state", "closed", 0.9))
+        contested = r.state["contested"]["door:state"]
+        self.assertEqual(contested["total_evidence_count"], 2)
+        self.assertEqual(len(contested["evidence_by_value"]), 2)
+
+
+class TestRetractionEventType(unittest.TestCase):
+    """RETRACTION events (PROTOCOL_PROFILE.txt core type) remove active beliefs."""
+
+    def test_retract_local_belief(self):
+        r = SovereignReducerV0()
+        r.apply_event(_obs("e1", "robot_a", "mug", "color", "red"))
+        self.assertIn("mug:color", r.state["local"])
+
+        r.apply_event({
+            "event_id": "r1",
+            "type": "RETRACTION",
+            "actor": "robot_a",
+            "payload": {"subject": "mug", "predicate": "color"},
+        })
+        self.assertNotIn("mug:color", r.state["local"])
+        self.assertNotIn("mug:color", r.state["canonical"])
+        self.assertNotIn("mug:color", r.state["contested"])
+
+    def test_retract_canonical_belief_archives_it(self):
+        """Retracting a canonical belief moves it to archived/ with retracted=True."""
+        r = SovereignReducerV0()
+        r.apply_event(_attest("a1", "admin", "mug", "color", "red"))
+        self.assertIn("mug:color", r.state["canonical"])
+
+        r.apply_event({
+            "event_id": "r1",
+            "type": "RETRACTION",
+            "actor": "admin",
+            "payload": {"subject": "mug", "predicate": "color"},
+        })
+        self.assertNotIn("mug:color", r.state["canonical"])
+        archived = r.state["archived"].get("mug:color", [])
+        self.assertEqual(len(archived), 1)
+        self.assertTrue(archived[0].get("retracted"))
+        self.assertEqual(archived[0]["superseded_by"], "r1")
+
+    def test_retract_contested_belief(self):
+        r = SovereignReducerV0()
+        r.apply_event(_obs("e1", "robot_a", "mug", "color", "red", 0.9))
+        r.apply_event(_obs("e2", "robot_b", "mug", "color", "blue", 0.9))
+        self.assertIn("mug:color", r.state["contested"])
+
+        r.apply_event({
+            "event_id": "r1",
+            "type": "RETRACTION",
+            "actor": "admin",
+            "payload": {"subject": "mug", "predicate": "color"},
+        })
+        self.assertNotIn("mug:color", r.state["contested"])
+
+    def test_retract_nonexistent_belief_no_crash(self):
+        r = SovereignReducerV0()
+        r.apply_event({
+            "event_id": "r1",
+            "type": "RETRACTION",
+            "actor": "admin",
+            "payload": {"subject": "mug", "predicate": "color"},
+        })
+        self.assertEqual(r.state["local"], {})
+        self.assertEqual(r.state["canonical"], {})
+
+    def test_retraction_missing_subject_skipped(self):
+        r = SovereignReducerV0()
+        r.apply_event({
+            "event_id": "r1",
+            "type": "RETRACTION",
+            "actor": "admin",
+            "payload": {"predicate": "color"},  # missing subject
+        })
+        # Event still counted, but no state change
+        self.assertEqual(r.state["metadata"]["event_count"], 1)
+        self.assertEqual(r.state["local"], {})
+
+    def test_retraction_counted_in_event_count(self):
+        r = SovereignReducerV0()
+        r.apply_event(_obs("e1", "robot_a", "mug", "color", "red"))
+        r.apply_event({
+            "event_id": "r1",
+            "type": "RETRACTION",
+            "actor": "robot_a",
+            "payload": {"subject": "mug", "predicate": "color"},
+        })
+        self.assertEqual(r.state["metadata"]["event_count"], 2)
+
+    def test_retraction_state_hash_changes(self):
+        """State hash after retraction must differ from hash before."""
+        r = SovereignReducerV0()
+        r.apply_event(_obs("e1", "robot_a", "mug", "color", "red"))
+        hash_before = r.state["metadata"]["state_hash"]
+
+        r.apply_event({
+            "event_id": "r1",
+            "type": "RETRACTION",
+            "actor": "robot_a",
+            "payload": {"subject": "mug", "predicate": "color"},
+        })
+        hash_after = r.state["metadata"]["state_hash"]
+        self.assertNotEqual(hash_before, hash_after)
+
+
 if __name__ == "__main__":
     unittest.main()

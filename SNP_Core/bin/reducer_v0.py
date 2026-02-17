@@ -133,6 +133,9 @@ class SovereignReducerV0:
         # Track unknown event types seen (diagnostic, not exported)
         self._ignored_types: Set[str] = set()
 
+        # Compute initial state hash so the empty state is fully valid
+        self.state["metadata"]["state_hash"] = self._compute_state_hash()
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -159,6 +162,8 @@ class SovereignReducerV0:
             )
         elif e_type == "ATTESTATION":
             self._handle_attestation(event_id, actor, payload)
+        elif e_type == "RETRACTION":
+            self._handle_retraction(event_id, actor, payload)
         elif e_type == "REDUCER_EPOCH":
             self._handle_reducer_epoch(event_id, payload)
         else:
@@ -320,6 +325,36 @@ class SovereignReducerV0:
         }
 
         # Clean contested and local
+        self.state["local"].pop(key, None)
+        self.state["contested"].pop(key, None)
+
+    def _handle_retraction(
+        self, event_id: str, actor: str, payload: Dict[str, Any]
+    ) -> None:
+        """
+        Retract a belief (PROTOCOL_PROFILE.txt EXTENSION RULES — core event type).
+
+        Removes the key from local/ and contested/. If the key is in canonical/,
+        archives the entry as retracted before removing it.
+        """
+        subject = payload.get("subject")
+        predicate = payload.get("predicate")
+        if not subject or not predicate:
+            return
+
+        key = belief_key(str(subject), str(predicate))
+
+        # Archive canonical entry if present, marking it as retracted
+        existing_canonical = self.state["canonical"].get(key)
+        if existing_canonical is not None:
+            archived_list = self.state["archived"].setdefault(key, [])
+            archived_entry = copy.deepcopy(existing_canonical)
+            archived_entry["superseded_by"] = event_id
+            archived_entry["retracted"] = True
+            archived_list.append(archived_entry)
+            del self.state["canonical"][key]
+
+        # Remove from local and contested
         self.state["local"].pop(key, None)
         self.state["contested"].pop(key, None)
 
