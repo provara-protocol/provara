@@ -10,6 +10,31 @@ env:
   PIP_DISABLE_PIP_VERSION_CHECK: 1
 
 jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -e ".[dev]"
+          pip install mypy
+
+      - name: Run strict typing gate
+        run: python -m mypy --strict --ignore-missing-imports src/provara/
+
+      - name: Run focused protocol test gate
+        run: |
+          python -m pytest tests/test_reducer_v0.py tests/test_rekey.py tests/test_bootstrap.py tests/test_sync_v0.py -q
+          python -m pytest tests/test_cli.py tests/test_package.py -q
+
   test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -123,12 +148,13 @@ jobs:
 
   status:
     runs-on: ubuntu-latest
-    needs: [test, mypy, integrity, docs]
+    needs: [quality-gate, test, mypy, integrity, docs]
     if: always()
     steps:
       - name: Check job status
         run: |
           FAILED=""
+          [ "${{ needs.quality-gate.result }}" == "failure" ] && FAILED="$FAILED quality-gate"
           [ "${{ needs.test.result }}"      == "failure" ] && FAILED="$FAILED test"
           [ "${{ needs.mypy.result }}"      == "failure" ] && FAILED="$FAILED mypy"
           [ "${{ needs.integrity.result }}" == "failure" ] && FAILED="$FAILED integrity"
