@@ -19,10 +19,13 @@ Run:
   cd SNP_Core/test && python -m unittest test_sync_v0 -v
 """
 
+import argparse
+import io
 import json
 import shutil
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 from provara.bootstrap_v0 import bootstrap_backpack
@@ -39,6 +42,10 @@ from provara.sync_v0 import (
     ImportResult,
     MergeResult,
     SyncResult,
+    _cmd_check_forks,
+    _cmd_delta_export,
+    _cmd_delta_import,
+    _cmd_merge,
     create_fencing_token,
     detect_forks,
     export_delta,
@@ -49,6 +56,7 @@ from provara.sync_v0 import (
     sync_backpacks,
     validate_fencing_token,
     verify_all_causal_chains,
+    verify_all_signatures,
     verify_causal_chain,
     write_events,
 )
@@ -904,6 +912,200 @@ class TestLongChainPerformance(unittest.TestCase):
 
         self.assertLess(elapsed, 10.0, f"Merge of 2x5K events took {elapsed:.2f}s")
         self.assertEqual(len(result.merged_events), N * 2)
+
+
+# ---------------------------------------------------------------------------
+# Targeted coverage for previously uncovered sync_v0 paths
+# ---------------------------------------------------------------------------
+
+class TestSyncV0Coverage(unittest.TestCase):
+    """
+    Covers dataclass .to_dict() methods, detect_forks edge cases,
+    verify_all_signatures branches, and _cmd_* CLI functions.
+    """
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self._tmp.name)
+        self.vault = self.root / "vault_a"
+        result = bootstrap_backpack(
+            self.vault, uid="sync-cov-a", actor="cov_actor", quiet=True
+        )
+        self.assertTrue(result.success)
+        self.kp = BackpackKeypair.generate()
+
+    def tearDown(self) -> None:
+        self._tmp.cleanup()
+
+    # --- dataclass .to_dict() ---
+
+    def test_fork_to_dict(self) -> None:
+        ev_a = {"event_id": "evt_aaa", "type": "DATA"}
+        ev_b = {"event_id": "evt_bbb", "type": "DATA"}
+        fork = Fork(actor_id="alice", prev_hash="hash_prev", event_a=ev_a, event_b=ev_b)
+        d = fork.to_dict()
+        self.assertEqual(d["actor_id"], "alice")
+        self.assertEqual(d["event_a_id"], "evt_aaa")
+        self.assertEqual(d["event_b_id"], "evt_bbb")
+        self.assertEqual(d["prev_hash"], "hash_prev")
+
+    def test_merge_result_to_dict(self) -> None:
+        result = MergeResult(merged_events=[{"type": "X"}], new_count=1)
+        d = result.to_dict()
+        self.assertEqual(d["merged_event_count"], 1)
+        self.assertEqual(d["new_count"], 1)
+        self.assertEqual(d["conflict_count"], 0)
+        self.assertEqual(d["fork_count"], 0)
+
+    def test_sync_result_to_dict(self) -> None:
+        result = SyncResult(success=True, events_merged=5, new_state_hash="abc123")
+        d = result.to_dict()
+        self.assertTrue(d["success"])
+        self.assertEqual(d["events_merged"], 5)
+        self.assertEqual(d["new_state_hash"], "abc123")
+        self.assertIsNone(d["fencing_token"])
+
+    def test_import_result_to_dict(self) -> None:
+        result = ImportResult(
+            success=False, imported_count=2, rejected_count=1,
+            new_state_hash=None, errors=["bad sig"]
+        )
+        d = result.to_dict()
+        self.assertFalse(d["success"])
+        self.assertEqual(d["imported_count"], 2)
+        self.assertEqual(d["rejected_count"], 1)
+        self.assertEqual(d["error_count"], 1)
+
+    # --- detect_forks: actor=None edge case ---
+
+    def test_detect_forks_ignores_events_without_actor(self) -> None:
+        events = [
+            {"event_id": "e1", "prev_event_hash": None},  # no "actor" key
+            {"event_id": "e2", "actor": "alice", "prev_event_hash": None},
+        ]
+        forks = detect_forks(events)
+        self.assertEqual(len(forks), 0)
+
+    # --- verify_all_signatures ---
+
+    def test_verify_all_signatures_valid(self) -> None:
+        signed = sign_event(
+            {"type": "DATA", "actor": "alice", "payload": {}},
+            self.kp.private_key, self.kp.key_id,
+        )
+        registry = {
+            self.kp.key_id: {"public_key_b64": self.kp.public_key_b64, "status": "active"}
+        }
+        valid, invalid, errors = verify_all_signatures([signed], registry)
+        self.assertEqual(valid, 1)
+        self.assertEqual(invalid, 0)
+        self.assertEqual(errors, [])
+
+    def test_verify_all_signatures_unsigned_skipped(self) -> None:
+        event = {"type": "GENESIS", "actor": "root", "event_id": "evt_genesis"}
+        valid, invalid, errors = verify_all_signatures([event], {})
+        self.assertEqual(valid, 0)
+        self.assertEqual(invalid, 0)
+
+    def test_verify_all_signatures_missing_key_id(self) -> None:
+        event = {"type": "DATA", "sig": "abc123", "event_id": "evt_x"}
+        valid, invalid, errors = verify_all_signatures([event], {})
+        self.assertEqual(invalid, 1)
+        self.assertGreater(len(errors), 0)
+
+    def test_verify_all_signatures_unknown_key(self) -> None:
+        event = {
+            "type": "DATA", "sig": "abc123",
+            "actor_key_id": "bp1_unknown", "event_id": "evt_x"
+        }
+        valid, invalid, errors = verify_all_signatures([event], {})
+        self.assertEqual(invalid, 1)
+        self.assertIn("not found in registry", errors[0])
+
+    # --- _cmd_check_forks ---
+
+    def test_cmd_check_forks_success(self) -> None:
+        ns = argparse.Namespace(backpack=str(self.vault))
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = _cmd_check_forks(ns)
+        self.assertIn("Events:", buf.getvalue())
+        self.assertEqual(rc, 0)
+
+    def test_cmd_check_forks_missing_dir(self) -> None:
+        ns = argparse.Namespace(backpack="/no/such/path")
+        rc = _cmd_check_forks(ns)
+        self.assertEqual(rc, 1)
+
+    # --- _cmd_delta_export ---
+
+    def test_cmd_delta_export_to_file(self) -> None:
+        out_file = self.root / "delta.bin"
+        ns = argparse.Namespace(backpack=str(self.vault), since=None, output=str(out_file))
+        rc = _cmd_delta_export(ns)
+        self.assertEqual(rc, 0)
+        self.assertTrue(out_file.exists())
+
+    def test_cmd_delta_export_missing_dir(self) -> None:
+        ns = argparse.Namespace(backpack="/no/such", since=None, output=None)
+        rc = _cmd_delta_export(ns)
+        self.assertEqual(rc, 1)
+
+    # --- _cmd_delta_import ---
+
+    def test_cmd_delta_import_missing_backpack(self) -> None:
+        delta_file = self.root / "dummy.delta"
+        delta_file.write_bytes(b"empty")
+        ns = argparse.Namespace(backpack="/no/such", delta_file=str(delta_file))
+        rc = _cmd_delta_import(ns)
+        self.assertEqual(rc, 1)
+
+    def test_cmd_delta_import_missing_delta_file(self) -> None:
+        ns = argparse.Namespace(backpack=str(self.vault), delta_file="/no/such.delta")
+        rc = _cmd_delta_import(ns)
+        self.assertEqual(rc, 1)
+
+    # --- _cmd_merge ---
+
+    def test_cmd_merge_missing_local(self) -> None:
+        ns = argparse.Namespace(
+            local_backpack="/no/such", remote_backpack=str(self.vault)
+        )
+        rc = _cmd_merge(ns)
+        self.assertEqual(rc, 1)
+
+    def test_cmd_merge_missing_remote(self) -> None:
+        ns = argparse.Namespace(
+            local_backpack=str(self.vault), remote_backpack="/no/such"
+        )
+        rc = _cmd_merge(ns)
+        self.assertEqual(rc, 1)
+
+    def test_cmd_merge_two_vaults(self) -> None:
+        vault_b = self.root / "vault_b"
+        rb = bootstrap_backpack(vault_b, uid="sync-cov-b", actor="cov_b", quiet=True)
+        self.assertTrue(rb.success)
+
+        # Export vault_b delta and import into vault_a
+        out_file = self.root / "b.delta"
+        _cmd_delta_export(argparse.Namespace(
+            backpack=str(vault_b), since=None, output=str(out_file)
+        ))
+        buf_imp = io.StringIO()
+        with redirect_stdout(buf_imp):
+            rc_imp = _cmd_delta_import(argparse.Namespace(
+                backpack=str(self.vault), delta_file=str(out_file)
+            ))
+        self.assertIn("Imported:", buf_imp.getvalue())
+
+        # Full merge
+        buf_merge = io.StringIO()
+        with redirect_stdout(buf_merge):
+            rc_merge = _cmd_merge(argparse.Namespace(
+                local_backpack=str(self.vault), remote_backpack=str(vault_b)
+            ))
+        self.assertIn("SUCCESS", buf_merge.getvalue())
+        self.assertEqual(rc_merge, 0)
 
 
 if __name__ == "__main__":
