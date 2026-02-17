@@ -26,7 +26,7 @@ Branch: main
 ```
 Framework preset: None (static site)
 Build command: [leave blank]
-Build output directory: sites/dev
+Build output directory: sites/provara.dev
 Root directory: [leave blank]
 Environment variables: [none needed]
 ```
@@ -61,7 +61,7 @@ Branch: main
 ```
 Framework preset: None (static site)
 Build command: [leave blank]
-Build output directory: sites/app
+Build output directory: sites/provara.app
 Root directory: [leave blank]
 Environment variables: [none needed]
 ```
@@ -96,7 +96,7 @@ Branch: main
 ```
 Framework preset: None (static site)
 Build command: [leave blank]
-Build output directory: sites/his
+Build output directory: sites/huntinformationsystems.com
 Root directory: [leave blank]
 Environment variables: [none needed]
 ```
@@ -131,12 +131,6 @@ Add CNAME Record:
 - Name: @
 - Value: provara-dev.pages.dev
 - TTL: Default
-
-Add CNAME Record (optional, for www):
-- Type: CNAME
-- Name: www
-- Value: provara-dev.pages.dev
-- TTL: Default
 ```
 
 ### For provara.app
@@ -149,12 +143,6 @@ Add CNAME Record:
 - Name: @
 - Value: provara-app.pages.dev
 - TTL: Default
-
-Add CNAME Record (optional, for www):
-- Type: CNAME
-- Name: www
-- Value: provara-app.pages.dev
-- TTL: Default
 ```
 
 ### For huntinformationsystems.com
@@ -165,12 +153,6 @@ Log into GoDaddy → Domain Settings → DNS
 Add CNAME Record:
 - Type: CNAME
 - Name: @
-- Value: hunt-his.pages.dev
-- TTL: Default
-
-Add CNAME Record (optional, for www):
-- Type: CNAME
-- Name: www
 - Value: hunt-his.pages.dev
 - TTL: Default
 ```
