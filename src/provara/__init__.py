@@ -12,8 +12,9 @@ Usage:
     print(reducer.export_state())
 """
 
+from importlib import import_module
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from .canonical_json import canonical_dumps, canonical_hash, canonical_bytes
 from .backpack_signing import (
@@ -32,8 +33,6 @@ from .checkpoint_v0 import create_checkpoint, load_latest_checkpoint
 from .perception_v0 import emit_perception_event, PerceptionTier
 from .market import record_market_alpha, record_hedge_fund_sim
 from .oracle import validate_market_alpha
-from .resume import generate_resume
-from .wallet import export_to_solana, import_from_solana
 
 
 class Vault:
@@ -180,6 +179,30 @@ class Vault:
         
         # 1. New Identity
         new_kp = BackpackKeypair.generate()
+        
+        # 1b. Dedicated Encryption Key (X25519)
+        from cryptography.hazmat.primitives.asymmetric import x25519
+        from cryptography.hazmat.primitives import serialization
+        import base64
+        
+        enc_priv = x25519.X25519PrivateKey.generate()
+        enc_pub = enc_priv.public_key()
+        
+        enc_priv_b64 = base64.b64encode(
+            enc_priv.private_bytes(
+                encoding=serialization.Encoding.Raw,
+                format=serialization.PrivateFormat.Raw,
+                encryption_algorithm=serialization.NoEncryption()
+            )
+        ).decode("utf-8")
+        
+        enc_pub_b64 = base64.b64encode(
+            enc_pub.public_bytes(
+                encoding=serialization.Encoding.Raw,
+                format=serialization.PublicFormat.Raw
+            )
+        ).decode("utf-8")
+
         agent_uid = f"agent-{uuid.uuid4()}"
         agent_dir = self.path.parent / agent_name
         
@@ -199,7 +222,8 @@ class Vault:
             "predicate": "created",
             "value": {
                 "agent_uid": agent_uid,
-                "agent_root_key_id": res.root_key_id, # Use bootstrap result key ID
+                "agent_root_key_id": res.root_key_id,
+                "agent_encryption_pubkey_b64": enc_pub_b64,
                 "vault_path": str(agent_dir),
                 "created_at_utc": datetime.now(timezone.utc).isoformat(),
             },
@@ -221,6 +245,8 @@ class Vault:
             "vault_path": str(agent_dir),
             "root_key_id": res.root_key_id,
             "root_private_key": res.root_private_key_b64,
+            "encryption_private_key": enc_priv_b64,
+            "encryption_public_key": enc_pub_b64,
             "creation_event_id": event["event_id"]
         }
 
@@ -254,6 +280,88 @@ class Vault:
         }
         
         return self.append_event("OBSERVATION", payload, key_id, private_key_b64, actor=actor)
+
+    def send_message(
+        self,
+        sender_key_id: str,
+        sender_private_key_b64: str,
+        sender_encryption_private_key_b64: str,
+        recipient_encryption_public_key_b64: str,
+        message: Dict[str, Any],
+        subject: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Encrypt and append a P2P message to the vault."""
+        from .messaging import send_encrypted_message
+
+        wrapper = send_encrypted_message(
+            sender_encryption_private_key_b64, 
+            recipient_encryption_public_key_b64, 
+            message
+        )
+        
+        # Determine recipient key_id (for indexing) 
+        # (This remains the Ed25519 key ID for identifying the actor)
+        
+        payload = {
+            "recipient_encryption_pubkey_b64": recipient_encryption_public_key_b64,
+            "sender_pubkey_b64": wrapper["sender_pubkey_b64"],
+            "nonce": wrapper["nonce"],
+            "ciphertext": wrapper["ciphertext"],
+            "subject": subject or "P2P Message",
+            "extension": "provara.messaging.encrypted_v1"
+        }
+        
+        return self.append_event("OBSERVATION", payload, sender_key_id, sender_private_key_b64, actor="p2p_messenger")
+
+    def get_messages(
+        self,
+        my_encryption_private_key_b64: str,
+    ) -> List[Dict[str, Any]]:
+        """Scan vault for messages intended for me and decrypt them."""
+        from .sync_v0 import iter_events
+        
+        events_file = self.path / "events" / "events.ndjson"
+        messages = []
+        
+        # Derive my public key to filter messages
+        from cryptography.hazmat.primitives.asymmetric import x25519
+        from cryptography.hazmat.primitives import serialization
+        import base64
+        priv_bytes = base64.b64decode(my_encryption_private_key_b64)
+        my_pub_b64 = base64.b64encode(
+            x25519.X25519PrivateKey.from_private_bytes(priv_bytes).public_key().public_bytes(
+                encoding=serialization.Encoding.Raw,
+                format=serialization.PublicFormat.Raw
+            )
+        ).decode("utf-8")
+        
+        for e in iter_events(events_file):
+            payload = e.get("payload", {})
+            if payload.get("extension") == "provara.messaging.encrypted_v1":
+                if payload.get("recipient_encryption_pubkey_b64") == my_pub_b64:
+                    # Found a message for me!
+                    sender_pub_b64 = payload.get("sender_pubkey_b64")
+                    
+                    try:
+                        from .messaging import receive_encrypted_message
+
+                        decrypted = receive_encrypted_message(
+                            my_encryption_private_key_b64,
+                            sender_pub_b64,
+                            payload
+                        )
+                        messages.append({
+                            "from_actor": e.get("actor"),
+                            "from_key_id": e.get("actor_key_id"),
+                            "subject": payload.get("subject"),
+                            "timestamp": e.get("timestamp_utc"),
+                            "body": decrypted
+                        })
+                    except Exception:
+                        # Failed to decrypt
+                        continue
+                        
+        return messages
 
     def check_safety(self, action_type: str) -> Dict[str, Any]:
         """
@@ -306,6 +414,37 @@ class Vault:
 # Backward-compatible alias while public API transitions.
 SovereignReducerV0 = SovereignReducer
 
+_OPTIONAL_EXPORTS = {
+    "generate_resume": (".resume", "generate_resume"),
+    "export_to_solana": (".wallet", "export_to_solana"),
+    "import_from_solana": (".wallet", "import_from_solana"),
+    "PrivacyWrapper": (".privacy", "PrivacyWrapper"),
+    "send_encrypted_message": (".messaging", "send_encrypted_message"),
+    "receive_encrypted_message": (".messaging", "receive_encrypted_message"),
+}
+
+
+def __getattr__(name: str) -> Any:
+    """Lazy-load optional exports so core imports remain stable."""
+    if name in _OPTIONAL_EXPORTS:
+        module_name, attr_name = _OPTIONAL_EXPORTS[name]
+        try:
+            module = import_module(module_name, __name__)
+            value = getattr(module, attr_name)
+        except Exception as exc:
+            raise ImportError(
+                f"Optional Provara export '{name}' is unavailable: {exc}"
+            ) from exc
+        globals()[name] = value
+        return value
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
+
+def check_safety(vault_path: str | Path, action_type: str) -> Dict[str, Any]:
+    """Module-level compatibility wrapper for Vault.check_safety()."""
+    return Vault(vault_path).check_safety(action_type)
+
+
 __version__ = "1.0.0"
 __all__ = [
     "Vault",
@@ -335,4 +474,7 @@ __all__ = [
     "check_safety",
     "export_to_solana",
     "import_from_solana",
+    "PrivacyWrapper",
+    "send_encrypted_message",
+    "receive_encrypted_message",
 ]
