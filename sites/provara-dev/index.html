@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>provara.dev | Protocol v1.0 Docs</title>
+  <meta name="description" content="Provara Protocol v1.0 developer portal: specification, threat model, and conformance kit.">
+  <meta property="og:title" content="Provara Protocol v1.0 Docs">
+  <meta property="og:description" content="Self-sovereign tamper-evident memory protocol. Spec, threat model, and compliance tooling.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://provara.dev/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary">
+      <div class="brand">provara.dev <small>protocol docs</small></div>
+      <div class="nav-links">
+        <a href="index.html" aria-current="page">Home</a>
+        <a href="spec.html">Spec v1.0</a>
+        <a href="threat-model.html">Threat Model</a>
+        <a href="compliance-kit.html">Compliance Kit</a>
+        <a href="https://github.com/provara-protocol/provara">GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="container">
+    <section class="hero">
+      <h1>Provara Protocol v1.0</h1>
+      <p>Open specification for an append-only, tamper-evident event log system. Provara combines Ed25519 signatures, SHA-256 hashing, and deterministic replay so independent implementations reach byte-identical state.</p>
+      <div class="tag-row" aria-label="Protocol profile">
+        <span class="tag">RFC 8032 (Ed25519)</span>
+        <span class="tag">FIPS 180-4 (SHA-256)</span>
+        <span class="tag">RFC 8785 (Canonical JSON)</span>
+        <span class="tag">Apache 2.0</span>
+      </div>
+    </section>
+
+    <section class="grid" aria-label="Entry points">
+      <article class="card">
+        <h2>Start Here</h2>
+        <p>The frozen normative source is <span class="mono">PROTOCOL_PROFILE.txt</span>. Use the companion docs below for implementation flow, verification details, and security posture.</p>
+        <ul>
+          <li><a href="spec.html">Specification page</a> sourced from <span class="mono">docs/spec/v1.0</span></li>
+          <li><a href="threat-model.html">Threat model</a> derived from Security Considerations in v1.0</li>
+          <li><a href="compliance-kit.html">Conformance kit</a> from <span class="mono">tools/conformance/verify_impl.py</span></li>
+        </ul>
+      </article>
+      <aside class="card" aria-label="Current implementation status">
+        <h3>Reference Status</h3>
+        <ul>
+          <li><span class="status-ok">Strict typing:</span> <span class="mono">mypy --strict</span> green</li>
+          <li><span class="status-ok">Unit suite:</span> 143 tests passing</li>
+          <li><span class="status-ok">Compliance suite:</span> 17 tests passing</li>
+          <li><span class="status-ok">Vectors:</span> cross-language vectors present</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section>
+      <h2 class="section-title">Core Invariants</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Invariant</th><th>Requirement</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Chain integrity</td><td><span class="mono">prev_hash</span> must match SHA-256 over canonical previous event.</td></tr>
+            <tr><td>Signature validity</td><td>Each event signature must verify against active key authority.</td></tr>
+            <tr><td>Deterministic replay</td><td>Same event log -> same reduced state hash on any implementation.</td></tr>
+            <tr><td>Append-only evidence</td><td>Events are never modified or deleted; truth is recomputed from evidence.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Canonical citation URL: <a href="https://provara.dev/spec/v1.0">https://provara.dev/spec/v1.0</a></p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <div>Provara Protocol v1.0 documentation</div>
+      <div>&copy; <span id="year"></span> Provara</div>
+    </div>
+  </footer>
+  <script src="assets/site.js"></script>
+</body>
+</html>

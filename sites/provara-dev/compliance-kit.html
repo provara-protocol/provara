@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Compliance Kit | provara.dev</title>
+  <meta name="description" content="Conformance Kit v1 usage and expected checks for Provara-compatible implementations.">
+  <meta property="og:title" content="Provara Compliance Kit">
+  <meta property="og:description" content="Run deterministic verification against vectors, chain checks, and compliance suite.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://provara.dev/compliance-kit">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary">
+      <div class="brand">provara.dev <small>conformance</small></div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="spec.html">Spec v1.0</a>
+        <a href="threat-model.html">Threat Model</a>
+        <a href="compliance-kit.html" aria-current="page">Compliance Kit</a>
+        <a href="https://github.com/provara-protocol/provara">GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="container">
+    <section class="hero">
+      <h1>Conformance Kit v1</h1>
+      <p>The Conformance Kit verifies whether a candidate Provara-compatible vault is conformant to v1.0 behavior. Source: <span class="mono">docs/CONFORMANCE_KIT.md</span>.</p>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Single-command verification</h2>
+        <div class="code"><pre>python tools/conformance/verify_impl.py --vault /path/to/vault</pre></div>
+        <p>Checks include structure, event chain and signatures, reducer determinism, vectors, and optional 17-test compliance execution.</p>
+      </article>
+      <aside class="card">
+        <h3>Useful flags</h3>
+        <ul>
+          <li><span class="mono">--skip-vectors</span></li>
+          <li><span class="mono">--skip-compliance</span></li>
+          <li><span class="mono">--json</span></li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="card">
+      <h2>Expected verification stages</h2>
+      <ol>
+        <li>Vault layout and required files</li>
+        <li>Event schema and causal chain integrity</li>
+        <li>Signature and key authority validation</li>
+        <li>Reducer replay determinism</li>
+        <li>Vector alignment with <span class="mono">test_vectors/vectors.json</span></li>
+        <li>Compliance suite (optional but required for full conformance)</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h3>Reference links</h3>
+      <ul>
+        <li><a href="https://github.com/provara-protocol/provara/blob/main/tools/conformance/verify_impl.py">tools/conformance/verify_impl.py</a></li>
+        <li><a href="https://github.com/provara-protocol/provara/blob/main/docs/CONFORMANCE_KIT.md">docs/CONFORMANCE_KIT.md</a></li>
+        <li><a href="https://github.com/provara-protocol/provara/blob/main/tests/backpack_compliance_v1.py">tests/backpack_compliance_v1.py</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner"><div>Conformance workflow for Provara v1.0</div><div>&copy; <span id="year"></span> Provara</div></div>
+  </footer>
+  <script src="assets/site.js"></script>
+</body>
+</html>
