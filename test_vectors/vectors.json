@@ -1,0 +1,106 @@
+{
+  "version": "1.0",
+  "vectors": [
+    {
+      "id": "canonical_json_01",
+      "description": "RFC 8785 canonicalization of a mixed object",
+      "input": {
+        "z": null,
+        "a": true,
+        "m": {
+          "inner": 42
+        },
+        "b": [
+          1,
+          2,
+          3
+        ]
+      },
+      "expected": "7b2261223a747275652c2262223a5b312c322c335d2c226d223a7b22696e6e6572223a34327d2c227a223a6e756c6c7d"
+    },
+    {
+      "id": "sha256_hash_01",
+      "description": "SHA-256 hash of a standard string",
+      "input": "Provara Protocol v1.0",
+      "expected": "725c9b749cc2b74e2c5c3ebf87a7181245602075827d5677f0f3ddecd8aa9e55"
+    },
+    {
+      "id": "event_id_derivation_01",
+      "description": "Content-addressed event ID derivation",
+      "input": {
+        "type": "OBSERVATION",
+        "actor": "bp1_actor_id",
+        "prev_event_hash": "evt_previous_id",
+        "payload": {
+          "subject": "test",
+          "predicate": "status",
+          "value": "ok"
+        }
+      },
+      "expected": "evt_f641d47f9c7b4846a11c9db8"
+    },
+    {
+      "id": "key_id_derivation_01",
+      "description": "Backpack v1 key ID derivation (bp1_ prefix)",
+      "input": "42e47a04929e14ec37c1a9bedf7107030c22804f39908456b96562a81bc2e5c7",
+      "expected": "bp1_5c99599d178e7632"
+    },
+    {
+      "id": "ed25519_sign_verify_01",
+      "description": "Ed25519 signature over canonical JSON",
+      "input": {
+        "public_key_b64": "QuR6BJKeFOw3wam+33EHAwwigE85kIRWuWViqBvC5cc=",
+        "message": {
+          "data": "sign me"
+        },
+        "key_id": "bp1_5c99599d178e7632"
+      },
+      "expected": "zmlzkV9TcCasfJS4iira1q784Oxi4uZoIaoa8jMg8cQ1EoxwS69nEHcTRUSWVwHjaSWg2RqReyaU/MoNBm67Aw=="
+    },
+    {
+      "id": "merkle_root_01",
+      "description": "Binary balanced Merkle root from file entries",
+      "input": [
+        {
+          "path": "a.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size": 0
+        },
+        {
+          "path": "b.txt",
+          "sha256": "315f5bdb76d078c43b8ac00c33e22F06d20353842d059013e96196a84f33161",
+          "size": 1
+        }
+      ],
+      "expected": "fa577a0bb290df978337de3342ebc17fcd3ad261f9ece7ce41622c36ccc2ed03"
+    },
+    {
+      "id": "reducer_determinism_01",
+      "description": "State hash after a sequence of events",
+      "input": [
+        {
+          "type": "OBSERVATION",
+          "event_id": "evt_1",
+          "actor": "bot",
+          "payload": {
+            "subject": "door",
+            "predicate": "state",
+            "value": "open"
+          }
+        },
+        {
+          "type": "ATTESTATION",
+          "event_id": "evt_2",
+          "actor": "admin",
+          "payload": {
+            "subject": "door",
+            "predicate": "state",
+            "value": "open",
+            "actor_key_id": "admin_key"
+          }
+        }
+      ],
+      "expected": "3e62dfa0a4472310c00adcb5c054cfa8a580986555c50c8fa0b3e392374fd09a"
+    }
+  ]
+}
