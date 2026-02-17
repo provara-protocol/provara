@@ -29,6 +29,7 @@ import sys
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Provara core imports (shared cryptographic primitives)
@@ -39,7 +40,8 @@ if str(_snp_core_bin) not in sys.path:
     sys.path.insert(0, str(_snp_core_bin))
 
 from canonical_json import canonical_dumps, canonical_hash  # noqa: E402
-from backpack_signing import key_id_from_public_bytes  # noqa: E402
+from backpack_signing import key_id_from_public_bytes, sign_event  # noqa: E402
+from reducer_v0 import SovereignReducerV0  # noqa: E402
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import (  # noqa: E402
     Ed25519PrivateKey,
@@ -55,6 +57,116 @@ VERSION = "1.0.0"
 HASH_ALGO = "sha256"
 SIG_ALGO = "ed25519"
 GENESIS_PREV = "0" * 64  # null hash for first event
+
+
+def _get_provara_prev_hash(vault: Path) -> str | None:
+    """Read the last event_id from provara.ndjson."""
+    provara_file = vault_path(vault, "events", "provara.ndjson")
+    if not provara_file.exists():
+        return None
+    last_line = ""
+    with open(provara_file, "r", encoding="utf-8") as f:
+        for line in f:
+            stripped = line.strip()
+            if stripped:
+                last_line = stripped
+    if not last_line:
+        return None
+    try:
+        entry = json.loads(last_line)
+        return entry.get("event_id")
+    except json.JSONDecodeError:
+        return None
+
+
+def emit_provara_event(vault: Path, psmc_event: dict):
+    """Create and append a Provara-native event reflecting the PSMC event."""
+    # 1. Map PSMC type to Provara type
+    p_type = "OBSERVATION"
+    if psmc_event["type"] in ["belief", "decision", "reflection"]:
+        p_type = "ASSERTION"
+
+    # 2. Prepare payload
+    data = psmc_event["data"]
+    subject = data.get("subject") or data.get("title") or data.get("name") or "psmc_node"
+    
+    # 3. Load keys
+    priv = load_private_key(vault)
+    pub = priv.public_key()
+    pub_bytes = pub.public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
+    kid = key_id_from_public_bytes(pub_bytes)
+
+    # 4. Build Provara event (without event_id and sig)
+    prev_hash = _get_provara_prev_hash(vault)
+    
+    event = {
+        "type": p_type,
+        "actor": kid,
+        "prev_event_hash": prev_hash,
+        "payload": {
+            "subject": str(subject),
+            "predicate": psmc_event["type"],
+            "value": data,
+            "timestamp": psmc_event["timestamp"],
+            "confidence": _safe_float(data.get("confidence"), 0.5 if p_type == "ASSERTION" else 1.0)
+        }
+    }
+
+    # 5. Compute event_id (evt_ + SHA256(canonical_json(event_without_id_sig))[:24])
+    # Note: canonical_hash uses canonical_dumps internally
+    eid_hash = canonical_hash(event)
+    event["event_id"] = f"evt_{eid_hash[:24]}"
+    
+    # 6. Sign it (adds actor_key_id and sig)
+    # backpack_signing.sign_event expects (event, private_key, key_id)
+    signed_event = sign_event(event, priv, kid)
+
+    # 7. Write to provara.ndjson
+    provara_file = vault_path(vault, "events", "provara.ndjson")
+    _append_line(provara_file, canonical_dumps(signed_event))
+
+
+def run_provara_reducer(vault: Path) -> dict:
+    """Run SovereignReducerV0 over all Provara events and write state to disk."""
+    provara_file = vault_path(vault, "events", "provara.ndjson")
+    
+    # Read all Provara events
+    if not provara_file.exists():
+        # No provara events yet, return empty state
+        reducer = SovereignReducerV0()
+        state = reducer.export_state()
+    else:
+        events = []
+        with open(provara_file, "r", encoding="utf-8") as f:
+            for line in f:
+                stripped = line.strip()
+                if stripped:
+                    try:
+                        events.append(json.loads(stripped))
+                    except json.JSONDecodeError:
+                        # Skip malformed lines
+                        continue
+        
+        # Run reducer
+        reducer = SovereignReducerV0()
+        reducer.apply_events(events)
+        state = reducer.export_state()
+    
+    # Write state to disk
+    state_dir = vault_path(vault, "state")
+    state_dir.mkdir(exist_ok=True)
+    state_file = state_dir / "current_state.json"
+    state_file.write_text(canonical_dumps(state) + "\n", encoding="utf-8")
+    
+    return state
+
+
+def _safe_float(val: Any, default: float) -> float:
+    try:
+        return float(val) if val is not None else default
+    except (ValueError, TypeError):
+        return default
+
 
 VALID_TYPES = [
     "identity", "decision", "belief", "promotion", "note",
@@ -273,7 +385,7 @@ def count_events(vault: Path) -> int:
     return count
 
 
-def append_event(vault: Path, event_type: str, data: dict, tags: list[str] | None = None) -> dict:
+def append_event(vault: Path, event_type: str, data: dict, tags: list[str] | None = None, emit_provara: bool = False) -> dict:
     """Create, sign, and append a new event."""
     prev_hash = get_last_hash(vault)
     seq = count_events(vault)
@@ -318,6 +430,12 @@ def append_event(vault: Path, event_type: str, data: dict, tags: list[str] | Non
 
     _append_line(events_file, canonical_dumps(event))
     _append_line(chain_file, canonical_dumps(chain_entry))
+
+    # Also emit Provara-native event if requested
+    if emit_provara:
+        emit_provara_event(vault, event)
+        # Run reducer to update state
+        run_provara_reducer(vault)
 
     return event
 
@@ -612,6 +730,124 @@ def rotate_key(vault: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Reducer Integration
+# ---------------------------------------------------------------------------
+def compute_vault_state(vault: Path) -> dict:
+    """Run the Provara reducer over PSMC events to derive current state."""
+    events_file = vault_path(vault, "events", "events.ndjson")
+    if not events_file.exists():
+        return {}
+
+    psmc_events = _read_ndjson(events_file)
+    provara_events = []
+
+    for pe in psmc_events:
+        # Map PSMC types to Provara types
+        p_type = "OBSERVATION"
+        if pe["type"] in ["belief", "decision", "reflection"]:
+            p_type = "ASSERTION"
+        elif pe["type"] == "correction":
+            p_type = "ASSERTION"
+
+        data = pe.get("data", {})
+        subject = data.get("subject") or data.get("title") or data.get("name") or "psmc_node"
+
+        provara_events.append({
+            "type": p_type,
+            "event_id": pe.get("hash") or pe.get("id"),
+            "actor": "psmc_user",
+            "payload": {
+                "subject": str(subject),
+                "predicate": pe["type"],
+                "value": data,
+                "timestamp": pe.get("timestamp"),
+                "confidence": _safe_float(data.get("confidence"), 0.5 if p_type == "ASSERTION" else 1.0)
+            }
+        })
+
+    reducer = SovereignReducerV0()
+    reducer.apply_events(provara_events)
+    return reducer.export_state()
+
+
+# ---------------------------------------------------------------------------
+# Sync Integration
+# ---------------------------------------------------------------------------
+def sync_vaults(local_vault: Path, remote_vault: Path) -> dict:
+    """
+    Sync events and chain entries from a remote vault.
+    Uses a union-merge strategy with deduplication by event ID.
+    """
+    local_events_file = vault_path(local_vault, "events", "events.ndjson")
+    remote_events_file = vault_path(remote_vault, "events", "events.ndjson")
+    local_chain_file = vault_path(local_vault, "chain", "chain.ndjson")
+    remote_chain_file = vault_path(remote_vault, "chain", "chain.ndjson")
+
+    if not remote_events_file.exists():
+        return {"error": f"Remote vault events not found: {remote_events_file}"}
+
+    # Load all
+    local_events = _read_ndjson(local_events_file)
+    remote_events = _read_ndjson(remote_events_file)
+    local_chain = _read_ndjson(local_chain_file)
+    remote_chain = _read_ndjson(remote_chain_file)
+
+    # Dedup by PSMC 'id' (UUID)
+    seen_ids = {e.get("id") for e in local_events if e.get("id")}
+    
+    new_events = []
+    new_chain_map = {} # hash -> chain_entry
+    
+    # Map all chain entries by hash for easy lookup
+    for c in local_chain + remote_chain:
+        h = c.get("hash")
+        if h:
+            new_chain_map[h] = c
+
+    for e in remote_events:
+        eid = e.get("id")
+        if eid and eid not in seen_ids:
+            new_events.append(e)
+            seen_ids.add(eid)
+
+    if not new_events:
+        return {"success": True, "merged": 0}
+
+    # Combine and sort by timestamp
+    all_events = local_events + new_events
+    all_events.sort(key=lambda e: e.get("timestamp", ""))
+
+    # Re-sequence
+    for i, e in enumerate(all_events):
+        e["seq"] = i
+
+    # Build updated chain
+    all_chain = []
+    for i, e in enumerate(all_events):
+        h = e.get("hash")
+        chain_entry = new_chain_map.get(h)
+        if chain_entry:
+            chain_entry["seq"] = i
+            all_chain.append(chain_entry)
+        else:
+            # Should not happen if vaults are healthy
+            pass
+
+    # Write back
+    _write_ndjson(local_events_file, all_events)
+    _write_ndjson(local_chain_file, all_chain)
+
+    return {"success": True, "merged": len(new_events)}
+
+
+def _write_ndjson(filepath: Path, entries: list[dict]) -> None:
+    """Write list of dicts to NDJSON file."""
+    with open(filepath, "w", encoding="utf-8") as f:
+        for entry in entries:
+            f.write(canonical_dumps(entry) + "\n")
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 def main():
@@ -630,6 +866,7 @@ def main():
     p_append.add_argument("--type", required=True, choices=VALID_TYPES, help="Event type")
     p_append.add_argument("--data", required=True, help="JSON object for event data")
     p_append.add_argument("--tags", nargs="*", help="Optional tags")
+    p_append.add_argument("--provara", action="store_true", help="Also emit Provara-native event")
 
     # verify
     p_verify = sub.add_parser("verify", help="Verify full chain integrity")
@@ -647,6 +884,13 @@ def main():
     # export
     p_export = sub.add_parser("export", help="Export as Markdown")
     p_export.add_argument("--format", default="markdown", choices=["markdown"])
+
+    # state
+    sub.add_parser("state", help="Compute and show derived belief state")
+
+    # sync
+    p_sync = sub.add_parser("sync", help="Sync with another PSMC vault")
+    p_sync.add_argument("remote_vault", help="Path to remote vault directory")
 
     # rotate-key
     sub.add_parser("rotate-key", help="Rotate signing key")
@@ -666,7 +910,7 @@ def main():
         except json.JSONDecodeError as e:
             print(f"ERROR: Invalid JSON: {e}", file=sys.stderr)
             sys.exit(1)
-        event = append_event(vault, args.type, data, args.tags)
+        event = append_event(vault, args.type, data, args.tags, emit_provara=args.provara)
         print(f"Appended seq={event['seq']} type={event['type']} hash={event['hash'][:16]}...")
 
     elif args.command == "verify":
@@ -685,6 +929,18 @@ def main():
         out = vault / "export.md"
         out.write_text(text, encoding="utf-8")
         print(f"Exported to: {out}")
+
+    elif args.command == "state":
+        state = compute_vault_state(vault)
+        print(json.dumps(state, indent=2))
+
+    elif args.command == "sync":
+        remote_vault = Path(args.remote_vault).resolve()
+        result = sync_vaults(vault, remote_vault)
+        if "error" in result:
+            print(f"ERROR: {result['error']}", file=sys.stderr)
+            sys.exit(1)
+        print(f"Sync complete. Merged {result['merged']} new events.")
 
     elif args.command == "rotate-key":
         rotate_key(vault)
