@@ -58,3 +58,4 @@ hunt-mcp/
 
 # Claude Code local MCP config (machine-specific paths)
 .mcp.json
+tools/mcp_server/test_vault/
