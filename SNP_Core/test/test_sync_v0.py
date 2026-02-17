@@ -558,6 +558,72 @@ class TestSyncBackpacksIntegration(unittest.TestCase):
         self.assertFalse(result.success)
         self.assertGreater(len(result.errors), 0)
 
+    def test_sync_conflicting_beliefs_to_contested(self):
+        """Two backpacks write different values for same subject:predicate offline, then sync. Contested namespace must catch it."""
+        # Load keypairs for signing
+        kp1 = BackpackKeypair.generate()
+        kp2 = BackpackKeypair.generate()
+        
+        # bp1: door_01 status = "open" (high confidence)
+        bp1_event = _make_event(
+            event_id="evt_bp1_door_open",
+            actor="device_alpha",
+            event_type="OBSERVATION",
+            prev_hash=None,
+            subject="door_01",
+            predicate="status",
+            value="open",
+            confidence=0.95,
+            timestamp="2026-02-16T10:00:00Z",
+            namespace="local",
+            keypair=kp1,
+        )
+        bp1_events_path = self.bp1 / "events" / "events.ndjson"
+        existing_bp1 = load_events(bp1_events_path)
+        _write_ndjson(bp1_events_path, existing_bp1 + [bp1_event])
+
+        # bp2: door_01 status = "closed" (high confidence, conflicting)
+        bp2_event = _make_event(
+            event_id="evt_bp2_door_closed",
+            actor="device_beta",
+            event_type="OBSERVATION",
+            prev_hash=None,
+            subject="door_01",
+            predicate="status",
+            value="closed",
+            confidence=0.95,
+            timestamp="2026-02-16T10:00:00Z",
+            namespace="local",
+            keypair=kp2,
+        )
+        bp2_events_path = self.bp2 / "events" / "events.ndjson"
+        existing_bp2 = load_events(bp2_events_path)
+        _write_ndjson(bp2_events_path, existing_bp2 + [bp2_event])
+
+        # Sync bp1 <- bp2
+        result = sync_backpacks(self.bp1, self.bp2)
+        self.assertTrue(result.success, f"Sync failed: {result.errors}")
+
+        # Load the resulting state
+        state_file = self.bp1 / "state" / "current_state.json"
+        self.assertTrue(state_file.exists())
+        state = json.loads(state_file.read_text(encoding="utf-8"))
+
+        # Assert: door_01:status is in contested/, not local/
+        belief_key = "door_01:status"
+        self.assertIn(belief_key, state["contested"], "Conflicting beliefs must be contested")
+        self.assertNotIn(belief_key, state["local"], "Contested beliefs must not remain in local")
+
+        # Verify contested record structure
+        contested_entry = state["contested"][belief_key]
+        self.assertEqual(contested_entry["status"], "AWAITING_RESOLUTION")
+        self.assertIn("evidence_by_value", contested_entry)
+        self.assertEqual(contested_entry["total_evidence_count"], 2, "Should have evidence from both devices")
+
+        # Verify both values are captured in evidence groups
+        evidence_groups = contested_entry["evidence_by_value"]
+        self.assertEqual(len(evidence_groups), 2, "Should have two distinct value groups (open vs closed)")
+
 
 # ---------------------------------------------------------------------------
 # Tests: Edge Cases
