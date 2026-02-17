@@ -8,12 +8,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import provara
 
 class TestProvaraPackage(unittest.TestCase):
+    def test_optional_exports_are_lazy(self):
+        """Optional modules should not be imported eagerly at package import time."""
+        self.assertNotIn("generate_resume", provara.__dict__)
+        fn = provara.generate_resume
+        self.assertTrue(callable(fn))
+
     def test_package_structure(self):
         """Test that the package exposes the expected API."""
         self.assertTrue(hasattr(provara, "SovereignReducer"))
         self.assertTrue(hasattr(provara, "bootstrap_backpack"))
         self.assertTrue(hasattr(provara, "sign_event"))
         self.assertTrue(hasattr(provara, "BackpackKeypair"))
+        self.assertTrue(hasattr(provara, "check_safety"))
 
     def test_basic_flow(self):
         """Test a basic sign-and-reduce flow using the public API."""
