@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>provara.dev | Protocol v1.0 Docs</title>
-  <meta name="description" content="Provara Protocol v1.0 developer portal: specification, threat model, and conformance kit.">
+  <meta name="description" content="Developer portal for Provara v1.0: specification, threat model, and conformance tooling.">
   <meta property="og:title" content="Provara Protocol v1.0 Docs">
-  <meta property="og:description" content="Self-sovereign tamper-evident memory protocol. Spec, threat model, and compliance tooling.">
+  <meta property="og:description" content="Evidence-first protocol docs: spec, threat model, and conformance tooling.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://provara.dev/">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -30,7 +30,7 @@
   <main id="main" class="container">
     <section class="hero">
       <h1>Provara Protocol v1.0</h1>
-      <p>Open specification for an append-only, tamper-evident event log system. Provara combines Ed25519 signatures, SHA-256 hashing, and deterministic replay so independent implementations reach byte-identical state.</p>
+      <p>Open specification for append-only cryptographic evidence. Provara combines Ed25519 signatures, SHA-256 hashing, and deterministic replay so independent implementations reach byte-identical state.</p>
       <div class="tag-row" aria-label="Protocol profile">
         <span class="tag">RFC 8032 (Ed25519)</span>
         <span class="tag">FIPS 180-4 (SHA-256)</span>
@@ -42,7 +42,7 @@
     <section class="grid" aria-label="Entry points">
       <article class="card">
         <h2>Start Here</h2>
-        <p>The frozen normative source is <span class="mono">PROTOCOL_PROFILE.txt</span>. Use the companion docs below for implementation flow, verification details, and security posture.</p>
+        <p>The frozen normative source is <span class="mono">PROTOCOL_PROFILE.txt</span>. Use companion docs below for implementation flow, verification steps, and security boundaries.</p>
         <ul>
           <li><a href="spec.html">Specification page</a> sourced from <span class="mono">docs/spec/v1.0</span></li>
           <li><a href="threat-model.html">Threat model</a> derived from Security Considerations in v1.0</li>
@@ -71,7 +71,7 @@
             <tr><td>Chain integrity</td><td><span class="mono">prev_hash</span> must match SHA-256 over canonical previous event.</td></tr>
             <tr><td>Signature validity</td><td>Each event signature must verify against active key authority.</td></tr>
             <tr><td>Deterministic replay</td><td>Same event log -> same reduced state hash on any implementation.</td></tr>
-            <tr><td>Append-only evidence</td><td>Events are never modified or deleted; truth is recomputed from evidence.</td></tr>
+            <tr><td>Append-only evidence</td><td>Events are not silently rewritten; state is recomputed from the full evidence record.</td></tr>
           </tbody>
         </table>
       </div>

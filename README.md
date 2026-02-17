@@ -8,7 +8,7 @@
          Provara Protocol v1.0 — Reference Implementation
 </pre>
 
-**A sovereign, tamper-evident memory substrate for AI systems, governance frameworks, and long-lived digital institutions.**
+**A protocol for preserving signed evidence with deterministic replay across humans, agents, and institutions.**
 
 ![Protocol](https://img.shields.io/badge/Protocol-Provara_v1.0-blue)
 ![Tests](https://img.shields.io/badge/Tests-232_passing-brightgreen)
@@ -57,11 +57,11 @@
 
 Your memories, your identity, your cognitive continuity should not depend on any company surviving, any server staying online, or any platform deciding to keep your data. Every cloud service is a promise that can be broken. Every proprietary export is a format that can be abandoned. Every account is a dependency on someone else's infrastructure.
 
-The Provara Legacy Kit is a self-sovereign, cryptographically-signed event log that anyone can verify, no one can silently tamper with, and that can be read with nothing but Python and a text editor for the next 50 years. It treats identity not as a model checkpoint or a database dump, but as a verifiable chain of evidence.
+Provara is an append-only, cryptographically signed event log that anyone can verify and no one can silently rewrite. It treats memory as evidence first: signed observations that can be replayed into state, audited independently, and preserved in plain files for long-horizon readability.
 
 > **Golden Rule:** Truth is not merged. Evidence is merged. Truth is recomputed.
 
-This system is built for individuals preserving family records, AI agents maintaining cognitive continuity across embodied robotic systems, organizations requiring tamper-evident audit trails, AI governance frameworks enforcing policy compliance, and anyone who needs to prove what they knew, when they knew it, with cryptographic certainty. If your memories matter — or your AI decisions require an auditable chain of evidence — they deserve better than a terms-of-service agreement.
+This system is built for people and organizations that need accountable records: families preserving history, AI teams logging model decisions, and regulated operators proving chain-of-custody. Provara does not claim truth. It preserves evidence so truth can be recomputed.
 
 ---
 

@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Provara | Verifiable Memory Infrastructure</title>
-  <meta name="description" content="Provara is a self-sovereign, tamper-evident event memory system for humans and AI agents. Signed, chained, replayable.">
+  <meta name="description" content="Provara is an append-only protocol for signed evidence: cryptographic events that stay verifiable over time.">
   <meta property="og:title" content="Provara">
-  <meta property="og:description" content="Signed, chained, deterministic memory infrastructure for AI and human systems.">
+  <meta property="og:description" content="Evidence-first protocol: signed events, causal chains, deterministic replay.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://provara.app/">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -32,8 +32,8 @@
       <div class="container hero-grid">
         <div>
           <p class="eyebrow">Provara Protocol v1.0</p>
-          <h1>Verifiable memory for long-lived systems.</h1>
-          <p class="lead">Provara is an append-only cryptographic event log. Every event is signed, causally chained, and replayable into deterministic state.</p>
+          <h1>Preserve evidence. Recompute truth.</h1>
+          <p class="lead">Provara is an append-only protocol for cryptographic evidence. Every event is signed, causally chained, and replayable into deterministic state.</p>
           <div class="cta-row">
             <a class="btn btn-primary" href="https://provara.dev/spec/v1.0">Read the spec</a>
             <a class="btn btn-ghost" href="https://github.com/provara-protocol/provara">View source</a>
@@ -68,15 +68,15 @@
         <div class="cards">
           <article class="card">
             <h3>Tamper-evident by design</h3>
-            <p>Merkle integrity, signature verification, and chain validation detect mutation, deletion, and reordering.</p>
+            <p>Merkle integrity, signature verification, and chain validation expose mutation, deletion, and reordering.</p>
           </article>
           <article class="card">
             <h3>Deterministic replay</h3>
-            <p>Same evidence in means same state hash out. Audits are reproducible across implementations.</p>
+            <p>Same evidence in means same state hash out. Audits remain reproducible across implementations.</p>
           </article>
           <article class="card">
             <h3>Local-first sovereignty</h3>
-            <p>No cloud dependency required. Vaults remain valid as plain JSON plus cryptographic proofs.</p>
+            <p>No cloud dependency required. Vaults remain portable as plain JSON plus cryptographic proofs.</p>
           </article>
         </div>
       </div>
@@ -89,7 +89,7 @@
           <li><strong>Append evidence</strong><span>Write signed events to append-only NDJSON logs.</span></li>
           <li><strong>Verify chain</strong><span>Validate hash links, signatures, and key authority.</span></li>
           <li><strong>Reduce state</strong><span>Run deterministic reducer across canonical/local/contested/archived namespaces.</span></li>
-          <li><strong>Prove output</strong><span>Publish state hash and conformance results.</span></li>
+          <li><strong>Prove output</strong><span>Publish state hashes and conformance evidence.</span></li>
         </ol>
       </div>
     </section>
