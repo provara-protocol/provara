@@ -491,7 +491,7 @@ class TestValidation:
 class TestKeyFingerprint:
     def test_fingerprint_uses_provara_format(self, vault):
         """Fingerprint matches Provara's key_id_from_public_bytes output."""
-        from backpack_signing import key_id_from_public_bytes
+        from provara.backpack_signing import key_id_from_public_bytes
         from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
         pk = psmc.load_public_key(vault)
