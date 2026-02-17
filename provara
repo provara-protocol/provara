@@ -2,8 +2,8 @@
 # provara — Provara Protocol CLI wrapper
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-CORE_BIN="$SCRIPT_DIR/SNP_Core/bin"
-export PYTHONPATH="$CORE_BIN"
+SRC_DIR="$SCRIPT_DIR/src"
+export PYTHONPATH="$SRC_DIR"
 
 if command -v python3 &>/dev/null; then
     PY=python3
@@ -14,4 +14,4 @@ else
     exit 1
 fi
 
-$PY "$CORE_BIN/provara.py" "$@"
+$PY -m provara.cli "$@"

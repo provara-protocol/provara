@@ -1,8 +1,8 @@
 @echo off
 setlocal
 set "SCRIPT_DIR=%~dp0"
-set "CORE_BIN=%SCRIPT_DIR%SNP_Core\bin"
-set "PYTHONPATH=%CORE_BIN%"
+set "SRC_DIR=%SCRIPT_DIR%src"
+set "PYTHONPATH=%SRC_DIR%"
 
 python --version >nul 2>&1
 if errorlevel 1 (
@@ -16,4 +16,4 @@ if errorlevel 1 (
     set "PY=python"
 )
 
-%PY% "%CORE_BIN%\provara.py" %*
+%PY% -m provara.cli %*

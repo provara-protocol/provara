@@ -166,14 +166,14 @@ pip install provara-protocol
 git clone https://github.com/provara-protocol/provara
 
 # Create a vault
-python SNP_Core/bin/provara.py init --vault /path/to/vault
+provara init /path/to/vault
 
 # Verify integrity
-python SNP_Core/bin/provara.py verify --vault /path/to/vault
+provara verify /path/to/vault
 
 # Run tests
-cd SNP_Core/test && PYTHONPATH=../bin python -m unittest test_reducer_v0 test_rekey test_bootstrap test_sync_v0 -v
-cd SNP_Core/test && PYTHONPATH=../bin python backpack_compliance_v1.py ../examples/reference_backpack -v
+python -m pytest tests/
+PYTHONPATH=src python tests/backpack_compliance_v1.py tests/fixtures/reference_backpack -v
 python -m pytest tools/psmc/test_psmc.py tools/mcp_server/test_server.py -v
 
 # MCP server (connect any AI agent to a Provara vault)
@@ -502,12 +502,13 @@ Provara_Legacy_Kit/
 │   ├── README.md                   # About the demo
 │   └── Demo_Backpack/              # A working vault you can explore and verify
 │
-├── SNP_Core/                       # The reference implementation
-│   ├── bin/                        # 7 Python modules (~2,016 lines)
-│   ├── test/                       # 4 test suites, 110 tests (~2,037 lines)
-│   ├── deploy/templates/           # Policy templates (safety, retention, sync)
-│   ├── examples/reference_backpack/# Known-good test fixture
-│   └── docs/README.md              # Technical architecture documentation
+├── src/provara/                    # The reference implementation package
+│   ├── cli.py                      # CLI entry point
+│   └── ...                         # Core modules (crypto, reducer, sync)
+│
+├── tests/                          # Test suites (unit, compliance, integration)
+│   ├── fixtures/reference_backpack/# Known-good test fixture
+│   └── ...
 │
 ├── init_backpack.sh / .bat         # Create your vault
 ├── check_backpack.sh / .bat        # Verify vault integrity

@@ -35,19 +35,19 @@ from typing import Any, Dict, List, Optional
 # Provara core imports (shared cryptographic primitives)
 # ---------------------------------------------------------------------------
 _project_root = Path(__file__).resolve().parent.parent.parent
-_snp_core_bin = _project_root / "SNP_Core" / "bin"
-if str(_snp_core_bin) not in sys.path:
-    sys.path.insert(0, str(_snp_core_bin))
+_src_dir = _project_root / "src"
+if str(_src_dir) not in sys.path:
+    sys.path.insert(0, str(_src_dir))
 
-from canonical_json import canonical_dumps, canonical_hash  # noqa: E402
-from backpack_signing import (  # noqa: E402
+from provara.canonical_json import canonical_dumps, canonical_hash  # noqa: E402
+from provara.backpack_signing import (  # noqa: E402
     key_id_from_public_bytes,
     sign_event,
     resolve_public_key,
     load_keys_registry,
 )
-from reducer_v0 import SovereignReducerV0  # noqa: E402
-from checkpoint_v0 import (  # noqa: E402
+from provara.reducer_v0 import SovereignReducerV0  # noqa: E402
+from provara.checkpoint_v0 import (  # noqa: E402
     create_checkpoint,
     save_checkpoint,
     load_latest_checkpoint,

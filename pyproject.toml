@@ -45,6 +45,9 @@ dev = [
     "pytest>=7.0",
 ]
 
+[project.scripts]
+provara = "provara.cli:main"
+
 [project.urls]
 Homepage = "https://provara.dev"
 Documentation = "https://provara.dev"
@@ -55,33 +58,26 @@ Changelog = "https://github.com/provara-protocol/provara/releases"
 # ---------------------------------------------------------------------------
 # Package discovery
 # ---------------------------------------------------------------------------
-# Current layout: modules live in SNP_Core/bin/ with flat imports
-# (e.g., `from canonical_json import canonical_dumps`).
+# Standard src-layout: modules live in src/provara
 #
-# For local development, use PYTHONPATH:
-#   PYTHONPATH=SNP_Core/bin python -m pytest
-#   PYTHONPATH=SNP_Core/bin python -c "from canonical_json import canonical_dumps"
-#
-# Phase 5 (PyPI publish) will restructure to a proper package layout:
-#   src/provara_protocol/__init__.py
-#   src/provara_protocol/canonical_json.py
-#   ...
-# At that point, update this section for real package discovery.
+# For local development:
+#   pip install -e .
+#   or
+#   PYTHONPATH=src python -m provara.cli ...
 
 [tool.setuptools.packages.find]
-where = ["SNP_Core"]
-include = ["bin*"]
+where = ["src"]
+include = ["provara*"]
 
 # ---------------------------------------------------------------------------
 # Test configuration
 # ---------------------------------------------------------------------------
 
 [tool.pytest.ini_options]
-testpaths = ["SNP_Core/test"]
+testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-# PYTHONPATH must include SNP_Core/bin for imports to resolve.
-# Run with: PYTHONPATH=SNP_Core/bin python -m pytest
-# Or:       cd SNP_Core/test && PYTHONPATH=../bin python -m pytest
+# PYTHONPATH must include src for imports to resolve.
+# Run with: PYTHONPATH=src python -m pytest
 addopts = "-v --tb=short"
