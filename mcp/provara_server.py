@@ -28,8 +28,17 @@ Or via Claude Desktop / MCP clients:
 
 import json
 import sys
+import logging
 from pathlib import Path
 from typing import Any
+
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler(sys.stderr)]  # Log to stderr (stdout is for MCP)
+)
+logger = logging.getLogger("provara-mcp")
 
 # Add SNP_Core/bin to path for Provara primitives
 _project_root = Path(__file__).resolve().parent.parent
@@ -178,6 +187,9 @@ class ProvaraMCPServer:
     def handle_request(self, request: dict) -> dict:
         """Process an MCP request and return response."""
         method = request.get("method")
+        request_id = request.get("id")
+        
+        logger.info(f"Received request: method={method}, id={request_id}")
         
         if method == "initialize":
             return self._handle_initialize(request)
@@ -186,9 +198,10 @@ class ProvaraMCPServer:
         elif method == "tools/call":
             return self._handle_call_tool(request)
         else:
+            logger.warning(f"Unknown method: {method}")
             return {
                 "jsonrpc": "2.0",
-                "id": request.get("id"),
+                "id": request_id,
                 "error": {
                     "code": -32601,
                     "message": f"Method not found: {method}"
@@ -231,6 +244,8 @@ class ProvaraMCPServer:
         tool_name = params.get("name")
         args = params.get("arguments", {})
 
+        logger.info(f"Calling tool: {tool_name} with args: {list(args.keys())}")
+
         try:
             if tool_name == "bootstrap_vault":
                 result = self._bootstrap_vault(args)
@@ -247,8 +262,11 @@ class ProvaraMCPServer:
             elif tool_name == "import_delta":
                 result = self._import_delta(args)
             else:
+                logger.error(f"Unknown tool: {tool_name}")
                 raise ValueError(f"Unknown tool: {tool_name}")
 
+            logger.info(f"Tool {tool_name} completed successfully")
+            
             return {
                 "jsonrpc": "2.0",
                 "id": request.get("id"),
@@ -262,6 +280,7 @@ class ProvaraMCPServer:
                 }
             }
         except Exception as e:
+            logger.error(f"Tool {tool_name} failed: {str(e)}")
             return {
                 "jsonrpc": "2.0",
                 "id": request.get("id"),
@@ -408,16 +427,18 @@ def main():
     """Run MCP server on stdin/stdout."""
     server = ProvaraMCPServer()
     
-    # Write startup message to stderr (stdout is for MCP protocol)
-    print("Provara MCP Server started (stdio transport)", file=sys.stderr)
+    logger.info("Provara MCP Server started (stdio transport)")
+    logger.info("Logging to stderr, MCP protocol on stdout")
     
     for line in sys.stdin:
         try:
             request = json.loads(line)
             response = server.handle_request(request)
             print(json.dumps(response), flush=True)
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in request: {e}")
         except Exception as e:
-            print(f"Error processing request: {e}", file=sys.stderr)
+            logger.error(f"Error processing request: {e}")
 
 
 if __name__ == "__main__":
