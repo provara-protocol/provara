@@ -13,7 +13,7 @@ import json
 import base64
 import sqlite3
 from pathlib import Path
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, cast
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
@@ -23,7 +23,7 @@ class PrivacyKeyStore:
         self.db_path = vault_path / "identity" / "privacy_keys.db"
         self._init_db()
 
-    def _init_db(self):
+    def _init_db(self) -> None:
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS keys (
@@ -33,7 +33,7 @@ class PrivacyKeyStore:
                 )
             """)
 
-    def store_key(self, key_id: str, key_bytes: bytes):
+    def store_key(self, key_id: str, key_bytes: bytes) -> None:
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("INSERT INTO keys (key_id, key_bytes) VALUES (?, ?)", (key_id, key_bytes))
 
@@ -41,7 +41,7 @@ class PrivacyKeyStore:
         with sqlite3.connect(self.db_path) as conn:
             cur = conn.execute("SELECT key_bytes FROM keys WHERE key_id = ?", (key_id,))
             row = cur.fetchone()
-            return row[0] if row else None
+            return bytes(row[0]) if row else None
 
     def shred_key(self, key_id: str) -> bool:
         """The 'Erasure' operation."""
@@ -102,7 +102,10 @@ class PrivacyWrapper:
         
         try:
             plaintext = aesgcm.decrypt(nonce, ciphertext, None)
-            return json.loads(plaintext)
+            parsed = json.loads(plaintext)
+            if isinstance(parsed, dict):
+                return cast(Dict[str, Any], parsed)
+            return None
         except Exception:
             return None
 

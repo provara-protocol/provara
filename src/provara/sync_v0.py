@@ -44,7 +44,7 @@ import secrets
 import sys
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 from .canonical_json import canonical_bytes, canonical_dumps, canonical_hash
 from .backpack_signing import (
