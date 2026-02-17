@@ -103,13 +103,39 @@ python test_http_server.py
 
 Tests cover: initialize handshake, tool listing, error handling, and batch requests.
 
+## CLI Wrapper
+
+For common operations without MCP, use the CLI wrapper:
+
+```bash
+# Create a new vault
+python provara_cli.py init ./my_vault --quorum
+
+# Check vault integrity
+python provara_cli.py verify ./my_vault
+
+# Show state summary
+python provara_cli.py state ./my_vault
+
+# Sync two vaults
+python provara_cli.py sync ./vault1 ./vault2
+
+# Export delta
+python provara_cli.py export ./vault1 --output delta.ndjson --since evt_abc123
+
+# Import delta
+python provara_cli.py import ./vault2 --delta delta.ndjson
+```
+
 ## Next Steps
 
 - [x] Add HTTP/SSE transport for Smithery.ai compatibility ✅
-- [ ] Add more Provara tools (key rotation, delta export/import, etc.)
+- [x] Add delta export/import tools ✅
+- [x] Add CLI wrapper for common operations ✅
+- [x] Add logging/observability ✅
 - [ ] Add request validation schemas
-- [ ] Add logging/observability
 - [ ] Add authentication/authorization for HTTP transport
+- [ ] Add key rotation tool (requires private key handling)
 
 ## Dependencies
 

@@ -46,7 +46,7 @@ def test_server():
         response = send_request(proc, init_req)
         assert response.get("result", {}).get("protocolVersion") == "2024-11-05"
         assert response.get("result", {}).get("serverInfo", {}).get("name") == "provara"
-        print("✓ Initialize test passed")
+        print("[OK] Initialize test passed")
         
         # Test 2: List tools
         list_req = {
