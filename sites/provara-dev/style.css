@@ -1,0 +1,202 @@
+:root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #3fb950;
+    --code: #79c0ff;
+    --mono: 'JetBrains Mono', 'Fira Code', 'Roboto Mono', monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+header {
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: rgba(13, 17, 23, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+}
+
+.logo {
+    font-family: var(--mono);
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--accent);
+    text-decoration: none;
+}
+
+nav a {
+    color: var(--muted);
+    text-decoration: none;
+    margin-left: 1.5rem;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+nav a:hover, nav a.active {
+    color: var(--text);
+}
+
+main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+}
+
+h1, h2, h3, h4 {
+    font-family: var(--mono);
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--text);
+}
+
+h1 { font-size: 2.5rem; margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+h2 { font-size: 1.8rem; border-left: 4px solid var(--accent); padding-left: 1rem; }
+h3 { font-size: 1.3rem; color: var(--accent); }
+
+p { margin-bottom: 1.5rem; color: var(--text); }
+
+ul, ol {
+    margin-bottom: 1.5rem;
+    margin-left: 1.5rem;
+}
+
+li { margin-bottom: 0.5rem; }
+
+code {
+    font-family: var(--mono);
+    background: var(--surface);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: var(--code);
+}
+
+pre {
+    background: var(--surface);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    margin-bottom: 2rem;
+}
+
+pre code {
+    background: none;
+    padding: 0;
+    color: var(--text);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+}
+
+th, td {
+    text-align: left;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+th {
+    color: var(--muted);
+    font-family: var(--mono);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05rem;
+}
+
+.hero {
+    text-align: center;
+    padding: 6rem 0;
+}
+
+.hero h1 {
+    border: none;
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.hero p {
+    font-size: 1.25rem;
+    color: var(--muted);
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+.btn {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--bg);
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-family: var(--mono);
+    font-weight: bold;
+    transition: transform 0.1s, opacity 0.2s;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+footer {
+    border-top: 1px solid var(--border);
+    padding: 4rem 2rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-family: var(--mono);
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: 8px;
+    transition: border-color 0.2s;
+}
+
+.card:hover {
+    border-color: var(--accent);
+}
+
+.card h3 {
+    margin-top: 0;
+}
+
+@media (max-width: 600px) {
+    h1 { font-size: 2rem; }
+    .hero h1 { font-size: 2.5rem; }
+    header { flex-direction: column; gap: 1rem; }
+    nav a { margin: 0 0.75rem; }
+}

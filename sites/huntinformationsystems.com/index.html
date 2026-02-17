@@ -1,1290 +1,442 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hunt Information Systems — Sovereign Memory Infrastructure</title>
-<meta name="description" content="Hunt Information Systems builds sovereign, verifiable, inheritable memory infrastructure for humans, families, and AI agents. AI systems architecture and consulting.">
-<meta name="theme-color" content="#0a0a0a">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9670;</text></svg>">
-<style>
-*, *::before, *::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-:root {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #0f0f0f;
-  --bg-tertiary: #141414;
-  --bg-card: #111111;
-  --border: #1e1e1e;
-  --border-light: #2a2a2a;
-  --text-primary: #e8e8e8;
-  --text-secondary: #999999;
-  --text-tertiary: #666666;
-  --accent: #00d4ff;
-  --accent-dim: rgba(0, 212, 255, 0.08);
-  --accent-glow: rgba(0, 212, 255, 0.15);
-  --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'Consolas', monospace;
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, Helvetica, Arial, sans-serif;
-  --max-width: 1200px;
-  --section-padding: clamp(80px, 12vh, 140px);
-}
-
-html {
-  scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-  font-family: var(--font-sans);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  line-height: 1.7;
-  font-size: 16px;
-  overflow-x: hidden;
-}
-
-::selection {
-  background: rgba(0, 212, 255, 0.25);
-  color: #fff;
-}
-
-a {
-  color: var(--accent);
-  text-decoration: none;
-  transition: opacity 0.2s ease;
-}
-
-a:hover {
-  opacity: 0.8;
-}
-
-.container {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 clamp(20px, 5vw, 48px);
-}
-
-/* ========================================
-   NAVIGATION
-   ======================================== */
-
-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background: rgba(10, 10, 10, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  transition: background 0.3s ease;
-}
-
-.nav-inner {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 clamp(20px, 5vw, 48px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 64px;
-}
-
-.nav-logo {
-  font-family: var(--font-mono);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-}
-
-.nav-logo span {
-  color: var(--accent);
-}
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 32px;
-  list-style: none;
-}
-
-.nav-links a {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  transition: color 0.2s ease;
-  position: relative;
-}
-
-.nav-links a:hover {
-  color: var(--text-primary);
-  opacity: 1;
-}
-
-.nav-links a::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background: var(--accent);
-  transition: width 0.3s ease;
-}
-
-.nav-links a:hover::after {
-  width: 100%;
-}
-
-.hamburger {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  margin-right: -8px;
-}
-
-.hamburger span {
-  display: block;
-  width: 22px;
-  height: 1.5px;
-  background: var(--text-primary);
-  transition: all 0.3s ease;
-  transform-origin: center;
-}
-
-.hamburger.active span:nth-child(1) {
-  transform: translateY(6.5px) rotate(45deg);
-}
-
-.hamburger.active span:nth-child(2) {
-  opacity: 0;
-}
-
-.hamburger.active span:nth-child(3) {
-  transform: translateY(-6.5px) rotate(-45deg);
-}
-
-@media (max-width: 768px) {
-  .hamburger {
-    display: flex;
-  }
-
-  .nav-links {
-    position: fixed;
-    top: 64px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(10, 10, 10, 0.98);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    flex-direction: column;
-    justify-content: flex-start;
-    padding-top: 48px;
-    gap: 0;
-    transform: translateX(100%);
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .nav-links.open {
-    transform: translateX(0);
-  }
-
-  .nav-links a {
-    font-size: 18px;
-    padding: 16px 48px;
-    display: block;
-    width: 100%;
-    text-align: left;
-  }
-
-  .nav-links a::after {
-    display: none;
-  }
-}
-
-/* ========================================
-   HERO
-   ======================================== */
-
-.hero {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  padding-top: 64px;
-  overflow: hidden;
-}
-
-.hero-grid {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  opacity: 0.35;
-}
-
-.hero-grid::before {
-  content: '';
-  position: absolute;
-  inset: -50%;
-  background-image:
-    linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
-  animation: grid-drift 40s linear infinite;
-}
-
-.hero-grid::after {
-  content: '';
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 800px;
-  height: 800px;
-  background: radial-gradient(ellipse, rgba(0, 212, 255, 0.06) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-@keyframes grid-drift {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(60px, 60px); }
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
-  max-width: 800px;
-}
-
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--accent);
-  border: 1px solid rgba(0, 212, 255, 0.2);
-  background: var(--accent-dim);
-  padding: 6px 14px;
-  border-radius: 2px;
-  margin-bottom: 32px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.hero h1 {
-  font-family: var(--font-mono);
-  font-size: clamp(32px, 5.5vw, 64px);
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
-  margin-bottom: 24px;
-  color: #ffffff;
-}
-
-.hero h1 em {
-  font-style: normal;
-  color: var(--accent);
-}
-
-.hero-sub {
-  font-size: clamp(16px, 2vw, 19px);
-  color: var(--text-secondary);
-  line-height: 1.7;
-  max-width: 600px;
-  margin-bottom: 16px;
-}
-
-.hero-tagline {
-  font-family: var(--font-mono);
-  font-size: clamp(13px, 1.5vw, 15px);
-  color: var(--text-tertiary);
-  margin-bottom: 40px;
-  letter-spacing: 0.01em;
-}
-
-.hero-tagline span {
-  color: var(--accent);
-  opacity: 0.7;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  padding: 14px 28px;
-  border: 1px solid var(--border-light);
-  border-radius: 2px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  text-transform: uppercase;
-  text-decoration: none;
-}
-
-.btn-primary {
-  background: var(--accent);
-  color: var(--bg-primary);
-  border-color: var(--accent);
-}
-
-.btn-primary:hover {
-  background: #00bde0;
-  border-color: #00bde0;
-  opacity: 1;
-  box-shadow: 0 0 30px rgba(0, 212, 255, 0.15);
-}
-
-.btn-secondary {
-  background: transparent;
-  color: var(--text-secondary);
-}
-
-.btn-secondary:hover {
-  color: var(--text-primary);
-  border-color: var(--text-tertiary);
-  opacity: 1;
-}
-
-/* ========================================
-   SECTIONS COMMON
-   ======================================== */
-
-section {
-  padding: var(--section-padding) 0;
-}
-
-.section-label {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.section-label::before {
-  content: '';
-  width: 24px;
-  height: 1px;
-  background: var(--accent);
-  opacity: 0.5;
-}
-
-.section-title {
-  font-family: var(--font-mono);
-  font-size: clamp(26px, 3.5vw, 42px);
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
-  margin-bottom: 20px;
-  color: #ffffff;
-}
-
-.section-subtitle {
-  font-size: clamp(16px, 1.8vw, 18px);
-  color: var(--text-secondary);
-  max-width: 640px;
-  line-height: 1.7;
-  margin-bottom: 56px;
-}
-
-.divider {
-  height: 1px;
-  background: var(--border);
-  border: none;
-}
-
-/* ========================================
-   FADE-IN ANIMATIONS
-   ======================================== */
-
-.reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.reveal-delay-1 { transition-delay: 0.1s; }
-.reveal-delay-2 { transition-delay: 0.2s; }
-.reveal-delay-3 { transition-delay: 0.3s; }
-.reveal-delay-4 { transition-delay: 0.4s; }
-.reveal-delay-5 { transition-delay: 0.5s; }
-.reveal-delay-6 { transition-delay: 0.6s; }
-
-/* ========================================
-   ABOUT
-   ======================================== */
-
-#about {
-  border-top: 1px solid var(--border);
-}
-
-.about-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 64px;
-  align-items: start;
-}
-
-.about-text p {
-  color: var(--text-secondary);
-  margin-bottom: 20px;
-  font-size: 16px;
-}
-
-.about-text p strong {
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
-.about-principles {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.principle {
-  padding: 24px;
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  background: var(--bg-card);
-  transition: border-color 0.3s ease;
-}
-
-.principle:hover {
-  border-color: var(--border-light);
-}
-
-.principle-label {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 8px;
-  opacity: 0.8;
-}
-
-.principle h3 {
-  font-family: var(--font-mono);
-  font-size: 15px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: var(--text-primary);
-}
-
-.principle p {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-@media (max-width: 768px) {
-  .about-grid {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-}
-
-/* ========================================
-   SERVICES
-   ======================================== */
-
-#services {
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-}
-
-.service-card {
-  background: var(--bg-primary);
-  padding: clamp(28px, 3vw, 40px);
-  transition: background 0.3s ease;
-  position: relative;
-}
-
-.service-card:hover {
-  background: var(--bg-tertiary);
-}
-
-.service-card:hover .service-icon {
-  color: var(--accent);
-}
-
-.service-icon {
-  font-size: 28px;
-  margin-bottom: 20px;
-  color: var(--text-tertiary);
-  display: block;
-  transition: color 0.3s ease;
-  line-height: 1;
-}
-
-.service-card h3 {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-}
-
-.service-card p {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.65;
-}
-
-@media (max-width: 1024px) {
-  .services-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
-  .services-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ========================================
-   PROJECTS
-   ======================================== */
-
-#projects {
-  border-bottom: 1px solid var(--border);
-}
-
-.project-featured {
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  padding: clamp(32px, 5vw, 56px);
-  background: var(--bg-card);
-  margin-bottom: 32px;
-  position: relative;
-  overflow: hidden;
-}
-
-.project-featured::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border-light), transparent);
-  opacity: 0.4;
-}
-
-.project-status {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #22c55e;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.project-status::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  display: inline-block;
-}
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-.project-featured h3 {
-  font-family: var(--font-mono);
-  font-size: clamp(24px, 3vw, 32px);
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: #ffffff;
-  letter-spacing: -0.02em;
-}
-
-.project-featured > p {
-  font-size: clamp(15px, 1.6vw, 17px);
-  color: var(--text-secondary);
-  max-width: 700px;
-  margin-bottom: 24px;
-  line-height: 1.7;
-}
-
-.project-tech {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 32px;
-}
-
-.project-tech span {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-tertiary);
-  border: 1px solid var(--border);
-  padding: 4px 12px;
-  border-radius: 2px;
-  letter-spacing: 0.03em;
-}
-
-.project-link {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  color: var(--accent);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.project-link:hover {
-  opacity: 1;
-}
-
-.project-link:hover .arrow {
-  transform: translateX(4px);
-}
-
-.arrow {
-  transition: transform 0.2s ease;
-  display: inline-block;
-}
-
-.projects-upcoming {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-}
-
-.project-small {
-  background: var(--bg-primary);
-  padding: clamp(24px, 3vw, 36px);
-}
-
-.project-small-status {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  margin-bottom: 12px;
-}
-
-.project-small h4 {
-  font-family: var(--font-mono);
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: var(--text-primary);
-}
-
-.project-small p {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-@media (max-width: 600px) {
-  .projects-upcoming {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ========================================
-   CONTACT
-   ======================================== */
-
-#contact {
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border);
-}
-
-.contact-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 64px;
-  align-items: start;
-}
-
-.contact-info p {
-  color: var(--text-secondary);
-  margin-bottom: 32px;
-  font-size: 16px;
-  max-width: 440px;
-}
-
-.contact-method {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 32px;
-}
-
-.contact-method a {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: color 0.2s ease;
-}
-
-.contact-method a:hover {
-  color: var(--accent);
-  opacity: 1;
-}
-
-.contact-method-icon {
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  color: var(--text-tertiary);
-  flex-shrink: 0;
-}
-
-.contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-group label {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-}
-
-.form-group input,
-.form-group textarea {
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  padding: 12px 16px;
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: 15px;
-  transition: border-color 0.2s ease;
-  outline: none;
-}
-
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-  color: var(--text-tertiary);
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.1);
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 120px;
-  line-height: 1.6;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-@media (max-width: 600px) {
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-}
-
-.btn-submit {
-  align-self: flex-start;
-  background: var(--accent);
-  color: var(--bg-primary);
-  border: 1px solid var(--accent);
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 14px 32px;
-  border-radius: 2px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.btn-submit:hover {
-  background: #00bde0;
-  border-color: #00bde0;
-  box-shadow: 0 0 24px rgba(0, 212, 255, 0.15);
-}
-
-@media (max-width: 768px) {
-  .contact-grid {
-    grid-template-columns: 1fr;
-    gap: 48px;
-  }
-}
-
-/* ========================================
-   FOOTER
-   ======================================== */
-
-footer {
-  padding: 40px 0;
-  border-top: 1px solid var(--border);
-  background: var(--bg-primary);
-}
-
-.footer-inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.footer-copy {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--text-tertiary);
-  letter-spacing: 0.02em;
-}
-
-.footer-links {
-  display: flex;
-  gap: 24px;
-  list-style: none;
-}
-
-.footer-links a {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--text-tertiary);
-  letter-spacing: 0.02em;
-  transition: color 0.2s ease;
-}
-
-.footer-links a:hover {
-  color: var(--text-secondary);
-  opacity: 1;
-}
-
-/* ========================================
-   UTILITIES & POLISH
-   ======================================== */
-
-.text-gradient {
-  background: linear-gradient(135deg, var(--accent), #00ffcc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-@media (max-width: 768px) {
-  :root {
-    --section-padding: clamp(60px, 10vh, 100px);
-  }
-}
-
-/* Subtle noise texture overlay */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.015;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 200px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunt Information Systems LLC — Sovereign Memory Infrastructure</title>
+    <meta name="description" content="Hunt Information Systems builds sovereign, verifiable, inheritable memory infrastructure for humans, families, and AI agents.">
+    <meta property="og:title" content="Hunt Information Systems LLC">
+    <meta property="og:description" content="Sovereign memory infrastructure for the next 50 years.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://huntinformationsystems.com">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◈</text></svg>">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #0f0f0f;
+            --bg-tertiary: #141414;
+            --bg-card: #111111;
+            --border: #1e1e1e;
+            --border-light: #2a2a2a;
+            --text-primary: #e8e8e8;
+            --text-secondary: #999999;
+            --text-tertiary: #666666;
+            --accent: #00d4ff;
+            --accent-dim: rgba(0, 212, 255, 0.08);
+            --accent-glow: rgba(0, 212, 255, 0.15);
+            --mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+            --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: var(--sans);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 16px;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: #fff; }
+
+        /* Nav */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 1.25rem 2rem;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-family: var(--mono);
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.05em;
+            color: var(--text-primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .nav-links a { color: var(--text-secondary); }
+        .nav-links a:hover { color: var(--accent); }
+
+        /* Hero */
+        .hero {
+            padding: 12rem 2rem 8rem;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .hero-logo {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            opacity: 0.8;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 300;
+            letter-spacing: 0.02em;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.75rem;
+            background: var(--accent-dim);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            font-family: var(--mono);
+            font-size: 0.9rem;
+            color: var(--accent);
+            transition: all 0.2s;
+        }
+
+        .hero-cta:hover {
+            background: var(--accent-glow);
+            border-color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 4rem auto;
+            max-width: 600px;
+        }
+
+        /* Sections */
+        section {
+            padding: 4rem 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        section h2 {
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        section h3 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin: 2rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        section p {
+            color: var(--text-secondary);
+            margin-bottom: 1.25rem;
+            line-height: 1.8;
+        }
+
+        section ul {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        section li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        /* Cards */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: var(--border-light);
+        }
+
+        .card h4 {
+            font-family: var(--mono);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* Projects */
+        .project {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .project h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .project-link {
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .project p {
+            margin: 0;
+        }
+
+        /* Contact */
+        .contact-grid {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        .contact-label {
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .contact-value {
+            color: var(--text-secondary);
+        }
+
+        .contact-value a {
+            color: var(--accent);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 3rem 2rem;
+            text-align: center;
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+            margin-top: 4rem;
+        }
+
+        footer a { color: var(--text-secondary); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav { padding: 1rem; }
+            .nav-links { gap: 1rem; }
+            .hero { padding: 8rem 1rem 4rem; }
+            .project-header { flex-direction: column; }
+        }
+    </style>
 </head>
 <body>
-
-<!-- ============================================
-     NAVIGATION
-     ============================================ -->
-<nav>
-  <div class="nav-inner">
-    <a href="#home" class="nav-logo">Hunt Information Systems<span>.</span></a>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="#about">About</a></li>
-      <li><a href="#services">Services</a></li>
-      <li><a href="#projects">Projects</a></li>
-      <li><a href="#contact">Contact</a></li>
-    </ul>
-    <button class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-  </div>
-</nav>
-
-<!-- ============================================
-     HERO
-     ============================================ -->
-<section class="hero" id="home">
-  <div class="hero-grid"></div>
-  <div class="container">
-    <div class="hero-content">
-      <div class="hero-badge reveal">Sovereign Memory Infrastructure</div>
-      <h1 class="reveal reveal-delay-1">Build systems that <em>remember</em>,<br>verify, and endure.</h1>
-      <p class="hero-sub reveal reveal-delay-2">We architect tamper-evident memory infrastructure for humans, families, and AI agents. Cryptographic guarantees, not corporate promises.</p>
-      <p class="hero-tagline reveal reveal-delay-3"><span>$</span> Your memory belongs to you. Prove it.</p>
-      <div class="hero-actions reveal reveal-delay-4">
-        <a href="#services" class="btn btn-primary">View Services</a>
-        <a href="#projects" class="btn btn-secondary">Open Source</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================
-     ABOUT
-     ============================================ -->
-<section id="about">
-  <div class="container">
-    <div class="section-label reveal">About</div>
-    <h2 class="section-title reveal">We build infrastructure<br>that outlasts companies.</h2>
-    <p class="section-subtitle reveal">Hunt Information Systems is a founder-led firm at the intersection of cryptography, AI orchestration, and human legacy. We don't chase trends. We build what lasts.</p>
-
-    <div class="about-grid">
-      <div class="about-text">
-        <p class="reveal">Memory is the foundation of intelligence&mdash;human or artificial. But most memory systems are locked behind proprietary APIs, vulnerable to silent mutation, and impossible to audit. <strong>We think that's a structural failure, not a feature gap.</strong></p>
-        <p class="reveal">We design sovereign memory architectures: systems where every event is cryptographically chained, independently verifiable, and owned by the people who created it. No blockchain required. No buzzwords. Just Ed25519 signatures, SHA-256 hashes, and deterministic event sourcing.</p>
-        <p class="reveal">Our clients range from AI startups building multi-agent systems to families preserving generational knowledge. The common thread: <strong>they need memory infrastructure they can trust without trusting us.</strong></p>
-      </div>
-
-      <div class="about-principles">
-        <div class="principle reveal">
-          <div class="principle-label">01</div>
-          <h3>Verify, don't trust</h3>
-          <p>Every system we build produces cryptographic proof of its own integrity. Clients can audit independently, without our involvement or permission.</p>
+    <nav>
+        <span class="nav-brand">HUNT INFORMATION SYSTEMS LLC</span>
+        <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#projects">Projects</a>
+            <a href="#contact">Contact</a>
         </div>
-        <div class="principle reveal reveal-delay-1">
-          <div class="principle-label">02</div>
-          <h3>Outlive the vendor</h3>
-          <p>We design for the scenario where we no longer exist. Open protocols, documented formats, zero vendor lock-in. Your data survives our company.</p>
-        </div>
-        <div class="principle reveal reveal-delay-2">
-          <div class="principle-label">03</div>
-          <h3>Revenue through craft</h3>
-          <p>We publish our protocols as open source. We earn through deep expertise, implementation quality, and the kind of systems thinking that takes years to develop.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+    </nav>
 
-<!-- ============================================
-     SERVICES
-     ============================================ -->
-<section id="services">
-  <div class="container">
-    <div class="section-label reveal">Services</div>
-    <h2 class="section-title reveal">What we build.</h2>
-    <p class="section-subtitle reveal">Deep technical consulting for organizations building systems that need to remember correctly, prove it, and survive the long term.</p>
-  </div>
-
-  <div class="container">
-    <div class="services-grid">
-      <div class="service-card reveal">
-        <span class="service-icon">&loz;</span>
-        <h3>AI Memory Architecture</h3>
-        <p>Design sovereign memory layers for AI agents and multi-agent systems. Structured recall, context management, and long-term knowledge persistence.</p>
-      </div>
-      <div class="service-card reveal reveal-delay-1">
-        <span class="service-icon">&#x2693;</span>
-        <h3>Tamper-Evident Audit Trails</h3>
-        <p>Implement cryptographically chained event logs that detect unauthorized modification. Every mutation signed, every hash linked, every chain verifiable.</p>
-      </div>
-      <div class="service-card reveal reveal-delay-2">
-        <span class="service-icon">&para;</span>
-        <h3>Provara Protocol Integration</h3>
-        <p>Integrate the Provara Protocol into existing systems. Event sourcing, deterministic state, and tamper-evident chains in your stack.</p>
-      </div>
-      <div class="service-card reveal reveal-delay-3">
-        <span class="service-icon">&lambda;</span>
-        <h3>Custom Event Reducers</h3>
-        <p>Build domain-specific reducers and compliance test suites. Deterministic state reconstruction from event streams with full auditability.</p>
-      </div>
-      <div class="service-card reveal reveal-delay-4">
-        <span class="service-icon">&oplus;</span>
-        <h3>Key Management Strategy</h3>
-        <p>Ed25519 key lifecycle management, rotation policies, recovery procedures, and multi-party signing architectures for production systems.</p>
-      </div>
-      <div class="service-card reveal reveal-delay-5">
-        <span class="service-icon">&#x2261;</span>
-        <h3>Fleet Memory Management</h3>
-        <p>Memory coordination across multi-agent AI fleets. Shared context protocols, conflict resolution, and distributed memory synchronization.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================
-     PROJECTS
-     ============================================ -->
-<section id="projects">
-  <div class="container">
-    <div class="section-label reveal">Projects</div>
-    <h2 class="section-title reveal">Open work.</h2>
-    <p class="section-subtitle reveal">We build in the open. Our protocols are public, our tests are public, our reasoning is public. Revenue comes from expertise, not from hiding how things work.</p>
-
-    <div class="project-featured reveal">
-      <div class="project-status" style="color: var(--text-tertiary);">Coming Soon</div>
-      <h3>Provara Protocol</h3>
-      <p>An open protocol for tamper-evident, deterministic memory systems. Every event signed with Ed25519, every state transition hashed with SHA-256, every chain independently verifiable. Event sourcing as cryptographic infrastructure.</p>
-      <div class="project-tech">
-        <span>Ed25519</span>
-        <span>SHA-256</span>
-        <span>Event Sourcing</span>
-        <span>110 Tests</span>
-        <span>1 Dependency</span>
-        <span>Python</span>
-      </div>
-      <span class="project-link" style="color: var(--text-tertiary); cursor: default;">
-        provara.dev &mdash; launching soon
-      </span>
+    <div class="hero">
+        <div class="hero-logo">◈</div>
+        <h1>Sovereign Memory Infrastructure</h1>
+        <p>We build verifiable, inheritable memory systems for humans, families, and AI agents. Designed for 50-year durability. Built on cryptographic truth.</p>
+        <a href="#projects" class="hero-cta">
+            View Our Work
+            <span>→</span>
+        </a>
     </div>
 
-    <div class="projects-upcoming">
-      <div class="project-small reveal">
-        <div class="project-small-status">Coming Soon</div>
-        <h4>Provara Legacy Kit</h4>
-        <p>Tools for inheritable memory vaults. Cryptographic key inheritance, dead-man switches, and long-term archival formats designed to survive decades.</p>
-      </div>
-      <div class="project-small reveal reveal-delay-1">
-        <div class="project-small-status">Coming Soon</div>
-        <h4>Family Vault</h4>
-        <p>Private, verifiable family memory infrastructure. Multi-generational knowledge preservation with granular access control and offline verification.</p>
-      </div>
-    </div>
-  </div>
-</section>
+    <div class="divider"></div>
 
-<!-- ============================================
-     CONTACT
-     ============================================ -->
-<section id="contact">
-  <div class="container">
-    <div class="section-label reveal">Contact</div>
-    <h2 class="section-title reveal">Start a conversation.</h2>
-    <p class="section-subtitle reveal">Building something that needs to remember, verify, or endure? We should talk.</p>
-
-    <div class="contact-grid">
-      <div class="contact-info reveal">
-        <p>We work with a small number of clients at a time. If you're building AI infrastructure, compliance systems, or anything that demands verifiable memory, reach out. No sales decks. Real technical conversations.</p>
-
-        <div class="contact-method">
-          <a href="mailto:hello@huntinformationsystems.com">
-            <span class="contact-method-icon">&#9993;</span>
-            hello@huntinformationsystems.com
-          </a>
-          <a href="#" target="_blank" rel="noopener noreferrer">
-            <span class="contact-method-icon">&#9741;</span>
-            LinkedIn
-          </a>
-          <a href="https://github.com/provara-protocol" target="_blank" rel="noopener noreferrer">
-            <span class="contact-method-icon">&#10094;&#10095;</span>
-            GitHub
-          </a>
+    <section id="about">
+        <h2>About</h2>
+        <p>Hunt Information Systems LLC is a technology company focused on sovereign memory infrastructure. We believe that digital continuity should not depend on any single company surviving, any server staying online, or any platform deciding to keep your data.</p>
+        <p>Our approach is fundamentally different from cloud-based solutions: we build systems that are self-sovereign, cryptographically verifiable, and designed to outlive their creators.</p>
+        
+        <h3>Design Philosophy</h3>
+        <div class="cards">
+            <div class="card">
+                <h4>SOVEREIGN</h4>
+                <p>Your data lives in your files, not on our servers. You control the keys. You control the data.</p>
+            </div>
+            <div class="card">
+                <h4>VERIFIABLE</h4>
+                <p>Cryptographic signatures and hash chains provide tamper-evidence. Trust through verification, not promises.</p>
+            </div>
+            <div class="card">
+                <h4>INHERITABLE</h4>
+                <p>Systems designed for 50-year durability. Your digital legacy should outlive you.</p>
+            </div>
+            <div class="card">
+                <h4>OPEN</h4>
+                <p>Apache 2.0 licensed. Specifications are public. Implementations are portable across languages.</p>
+            </div>
         </div>
-      </div>
+    </section>
 
-      <form class="contact-form reveal" action="#" method="post">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" placeholder="Your name" autocomplete="name">
-          </div>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" placeholder="you@company.com" autocomplete="email">
-          </div>
+    <div class="divider"></div>
+
+    <section id="projects">
+        <h2>Projects</h2>
+        
+        <div class="project">
+            <div class="project-header">
+                <h3>Provara Protocol</h3>
+                <a href="https://provara.dev" class="project-link">provara.dev</a>
+            </div>
+            <p>Tamper-evident memory substrate for AI systems and long-lived digital institutions. Ed25519 signatures, SHA-256 hashing, event-sourced architecture. 232 tests passing. One external dependency. Apache 2.0 licensed.</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-tertiary);">
+                <strong>Stack:</strong> Python 3.10+, cryptography≥41.0<br>
+                <strong>Status:</strong> v1.0.0 Stable Release<br>
+                <strong>Repository:</strong> github.com/provara-protocol/provara
+            </p>
         </div>
-        <div class="form-group">
-          <label for="subject">Subject</label>
-          <input type="text" id="subject" name="subject" placeholder="What are you building?">
+
+        <div class="project">
+            <div class="project-header">
+                <h3>Provara Family Vault</h3>
+                <a href="https://provara.app" class="project-link">provara.app</a>
+            </div>
+            <p>Consumer-facing application for family memory preservation. Store documents, photos, and important records with cryptographic verification. Designed for non-technical users who want sovereign control over their family's digital legacy.</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-tertiary);">
+                <strong>Status:</strong> Beta<br>
+                <strong>Platform:</strong> Cross-platform (Windows, macOS, Linux)
+            </p>
         </div>
-        <div class="form-group">
-          <label for="message">Message</label>
-          <textarea id="message" name="message" placeholder="Tell us about your project, the problem you're solving, and the kind of memory infrastructure you need."></textarea>
+
+        <div class="project">
+            <div class="project-header">
+                <h3>MCP Server</h3>
+                <a href="https://github.com/provara-protocol/provara/tree/main/tools/mcp_server" class="project-link">GitHub</a>
+            </div>
+            <p>Model Context Protocol server enabling AI agents to write to Provara vaults. Any MCP-compatible AI assistant can maintain cryptographic memory without understanding the underlying protocol. 8 tools including append_event, verify_chain, generate_digest, and snapshot_state.</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-tertiary);">
+                <strong>Transport:</strong> stdio + SSE (HTTP)<br>
+                <strong>Tests:</strong> 22 passing
+            </p>
         </div>
-        <button type="submit" class="btn-submit">Send Message</button>
-      </form>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- ============================================
-     FOOTER
-     ============================================ -->
-<footer>
-  <div class="container">
-    <div class="footer-inner">
-      <div class="footer-copy">&copy; 2026 Hunt Information Systems</div>
-      <ul class="footer-links">
-        <li><a href="https://github.com/provara-protocol" target="_blank" rel="noopener noreferrer">GitHub</a></li>
-      </ul>
-    </div>
-  </div>
-</footer>
+    <div class="divider"></div>
 
-<!-- ============================================
-     SCRIPTS
-     ============================================ -->
-<script>
-(function() {
-  'use strict';
+    <section id="contact">
+        <h2>Contact</h2>
+        <p>Hunt Information Systems LLC operates with a remote-first, privacy-focused approach. We respond to all inquiries within 48 hours.</p>
+        
+        <div class="contact-grid">
+            <div class="contact-item">
+                <div>
+                    <div class="contact-label">Business Inquiries</div>
+                    <div class="contact-value"><a href="mailto:contact@huntinformationsystems.com">contact@huntinformationsystems.com</a></div>
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <div>
+                    <div class="contact-label">Regulatory / Compliance</div>
+                    <div class="contact-value"><a href="mailto:compliance@huntinformationsystems.com">compliance@huntinformationsystems.com</a></div>
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <div>
+                    <div class="contact-label">Security / Vulnerabilities</div>
+                    <div class="contact-value"><a href="https://github.com/provara-protocol/provara/security">github.com/provara-protocol/provara/security</a></div>
+                </div>
+            </div>
+        </div>
 
-  // Mobile navigation toggle
-  var hamburger = document.getElementById('hamburger');
-  var navLinks = document.getElementById('navLinks');
+        <h3 style="margin-top: 2rem;">Legal</h3>
+        <p style="font-size: 0.9rem;">
+            <strong>Hunt Information Systems LLC</strong><br>
+            A limited liability company organized under applicable law.<br>
+            All software is provided "as is" under the Apache 2.0 License unless otherwise specified.
+        </p>
+    </section>
 
-  hamburger.addEventListener('click', function() {
-    var isOpen = navLinks.classList.toggle('open');
-    hamburger.classList.toggle('active');
-    hamburger.setAttribute('aria-expanded', isOpen);
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-  });
-
-  // Close mobile nav on link click
-  var links = navLinks.querySelectorAll('a');
-  for (var i = 0; i < links.length; i++) {
-    links[i].addEventListener('click', function() {
-      navLinks.classList.remove('open');
-      hamburger.classList.remove('active');
-      hamburger.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
-    });
-  }
-
-  // Intersection Observer for reveal animations
-  var revealElements = document.querySelectorAll('.reveal');
-
-  if ('IntersectionObserver' in window) {
-    var observer = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, {
-      threshold: 0.1,
-      rootMargin: '0px 0px -40px 0px'
-    });
-
-    revealElements.forEach(function(el) {
-      observer.observe(el);
-    });
-  } else {
-    // Fallback: show everything
-    revealElements.forEach(function(el) {
-      el.classList.add('visible');
-    });
-  }
-
-  // Smooth scroll for anchor links (fallback for browsers without CSS scroll-behavior)
-  document.addEventListener('click', function(e) {
-    var target = e.target.closest('a[href^="#"]');
-    if (!target) return;
-
-    var id = target.getAttribute('href');
-    if (id === '#') return;
-
-    var section = document.querySelector(id);
-    if (section) {
-      e.preventDefault();
-      section.scrollIntoView({ behavior: 'smooth' });
-
-      // Update URL without jump
-      if (history.pushState) {
-        history.pushState(null, null, id);
-      }
-    }
-  });
-
-  // Prevent form submission (static site)
-  var form = document.querySelector('.contact-form');
-  if (form) {
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-    });
-  }
-})();
-</script>
+    <footer>
+        <p>
+            <a href="https://provara.dev">Provara Protocol</a> ·
+            <a href="https://provara.app">Family Vault</a> ·
+            <a href="https://github.com/provara-protocol/provara">GitHub</a>
+        </p>
+        <p style="margin-top: 1rem;">
+            © 2026 Hunt Information Systems LLC · All Rights Reserved
+        </p>
+    </footer>
 </body>
 </html>

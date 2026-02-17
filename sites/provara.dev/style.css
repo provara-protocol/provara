@@ -1,0 +1,230 @@
+/* Provara.dev specific styles */
+
+.pv-hero {
+  margin-bottom: var(--pv-space-16);
+}
+
+.pv-ctas {
+  display: flex;
+  gap: var(--pv-space-4);
+  flex-wrap: wrap;
+  margin-top: var(--pv-space-8);
+}
+
+.pv-btn {
+  display: inline-block;
+  padding: var(--pv-space-3) var(--pv-space-6);
+  font-family: var(--pv-font-sans);
+  font-size: var(--pv-text-sm);
+  border: 1px solid var(--pv-rule);
+  border-radius: 2px;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pv-btn-primary {
+  background: var(--pv-accent);
+  color: white;
+  border-color: var(--pv-accent);
+}
+
+.pv-btn-primary:hover {
+  background: #153546;
+}
+
+.pv-btn-secondary {
+  background: var(--pv-surface);
+  color: var(--pv-accent);
+}
+
+.pv-btn-secondary:hover {
+  background: var(--pv-bg);
+}
+
+.pv-callout {
+  max-width: var(--pv-max-prose);
+  padding: var(--pv-space-6);
+  border-left: 3px solid var(--pv-accent);
+  background: var(--pv-surface);
+  margin-bottom: var(--pv-space-12);
+  line-height: 1.7;
+}
+
+.pv-normative {
+  border-left-color: var(--pv-success);
+}
+
+.pv-normative strong {
+  color: var(--pv-success);
+}
+
+.pv-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--pv-space-8);
+  margin-top: var(--pv-space-6);
+}
+
+.pv-feature {
+  padding: var(--pv-space-6);
+  border: 1px solid var(--pv-rule);
+  background: var(--pv-surface);
+}
+
+.pv-feature h3 {
+  margin: 0 0 var(--pv-space-3) 0;
+  font-size: var(--pv-text-lg);
+  font-family: var(--pv-font-sans);
+}
+
+.pv-feature p {
+  margin: 0;
+  color: var(--pv-ink-muted);
+  font-size: var(--pv-text-sm);
+  line-height: 1.6;
+}
+
+.pv-facts {
+  margin: var(--pv-space-12) 0;
+}
+
+.pv-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--pv-space-4);
+  font-size: var(--pv-text-sm);
+}
+
+.pv-table tr {
+  border-bottom: 1px solid var(--pv-rule);
+}
+
+.pv-table tr:last-child {
+  border-bottom: none;
+}
+
+.pv-table td,
+.pv-table th {
+  padding: var(--pv-space-3) var(--pv-space-4);
+  text-align: left;
+}
+
+.pv-table th {
+  background: var(--pv-bg);
+  font-family: var(--pv-font-sans);
+  font-weight: bold;
+  font-size: var(--pv-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pv-table code {
+  font-family: var(--pv-font-mono);
+  font-size: var(--pv-text-xs);
+  background: var(--pv-bg);
+  padding: 2px 4px;
+  border-radius: 1px;
+}
+
+.pv-use-cases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--pv-space-8);
+  margin-top: var(--pv-space-6);
+}
+
+.pv-use-case {
+  padding: var(--pv-space-6);
+  border: 1px solid var(--pv-rule);
+  background: var(--pv-surface);
+}
+
+.pv-use-case h3 {
+  margin: 0 0 var(--pv-space-3) 0;
+  font-size: var(--pv-text-md);
+  font-family: var(--pv-font-sans);
+}
+
+.pv-use-case p {
+  margin: 0;
+  color: var(--pv-ink-muted);
+  font-size: var(--pv-text-sm);
+  line-height: 1.6;
+}
+
+.pv-definition-list {
+  margin: var(--pv-space-6) 0;
+}
+
+.pv-definition-list dt {
+  margin-top: var(--pv-space-6);
+  font-family: var(--pv-font-sans);
+  font-weight: bold;
+  font-size: var(--pv-text-sm);
+}
+
+.pv-definition-list dd {
+  margin: var(--pv-space-2) 0 0 var(--pv-space-4);
+  color: var(--pv-ink-muted);
+  font-size: var(--pv-text-sm);
+  line-height: 1.6;
+}
+
+.pv-cta-section {
+  margin: var(--pv-space-16) 0 var(--pv-space-12) 0;
+  padding: var(--pv-space-8);
+  background: var(--pv-surface);
+  border: 1px solid var(--pv-rule);
+  max-width: var(--pv-max-prose);
+}
+
+.pv-cta-section h2 {
+  margin-top: 0;
+}
+
+.pv-footer {
+  margin-top: var(--pv-space-16);
+  padding: var(--pv-space-8) 0;
+  border-top: 1px solid var(--pv-rule);
+  background: var(--pv-bg);
+  font-size: var(--pv-text-sm);
+  color: var(--pv-ink-muted);
+}
+
+.pv-footer p {
+  margin: var(--pv-space-2) 0;
+}
+
+.pv-footer a {
+  color: var(--pv-accent);
+}
+
+.pv-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pv-ctas {
+    flex-direction: column;
+  }
+  
+  .pv-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .pv-feature-grid,
+  .pv-use-cases {
+    grid-template-columns: 1fr;
+  }
+
+  .pv-table {
+    font-size: var(--pv-text-xs);
+  }
+
+  .pv-table td,
+  .pv-table th {
+    padding: var(--pv-space-2) var(--pv-space-3);
+  }
+}
