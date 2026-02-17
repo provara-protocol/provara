@@ -39,7 +39,7 @@ if str(_snp_core_bin) not in sys.path:
 
 from bootstrap_v0 import bootstrap_backpack, BootstrapResult
 from reducer_v0 import SovereignReducerV0
-from sync_v0 import sync_backpacks, verify_causal_chain, load_events
+from sync_v0 import sync_backpacks, verify_causal_chain, load_events, export_delta, import_delta
 from backpack_signing import BackpackKeypair
 
 
@@ -134,6 +134,44 @@ class ProvaraMCPServer:
                     },
                     "required": ["path"]
                 }
+            },
+            "export_delta": {
+                "description": "Export events since a given hash as a portable delta bundle",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "path": {
+                            "type": "string",
+                            "description": "Path to the vault directory"
+                        },
+                        "since_hash": {
+                            "type": "string",
+                            "description": "Export events after this event_id (if None, export all)"
+                        },
+                        "output_file": {
+                            "type": "string",
+                            "description": "Path to write delta bundle"
+                        }
+                    },
+                    "required": ["path", "output_file"]
+                }
+            },
+            "import_delta": {
+                "description": "Import a delta bundle into a vault (union merge)",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "path": {
+                            "type": "string",
+                            "description": "Path to the vault directory"
+                        },
+                        "delta_file": {
+                            "type": "string",
+                            "description": "Path to delta bundle file"
+                        }
+                    },
+                    "required": ["path", "delta_file"]
+                }
             }
         }
 
@@ -204,6 +242,10 @@ class ProvaraMCPServer:
                 result = self._sync_vaults(args)
             elif tool_name == "verify_chain":
                 result = self._verify_chain(args)
+            elif tool_name == "export_delta":
+                result = self._export_delta(args)
+            elif tool_name == "import_delta":
+                result = self._import_delta(args)
             else:
                 raise ValueError(f"Unknown tool: {tool_name}")
 
@@ -314,6 +356,47 @@ class ProvaraMCPServer:
             "success": all(results.values()),
             "actors_checked": len(results),
             "chain_results": results
+        }
+
+    def _export_delta(self, args: dict) -> dict:
+        """Export events as a delta bundle."""
+        path = Path(args["path"])
+        since_hash = args.get("since_hash")
+        output_file = Path(args["output_file"])
+        
+        delta_bytes = export_delta(path, since_hash=since_hash)
+        output_file.write_bytes(delta_bytes)
+        
+        # Count events in delta
+        lines = delta_bytes.decode("utf-8").strip().split("\n")
+        # First line is header, rest are events
+        event_count = len(lines) - 1 if len(lines) > 1 else 0
+        
+        return {
+            "success": True,
+            "output_file": str(output_file),
+            "size_bytes": len(delta_bytes),
+            "event_count": event_count,
+            "since_hash": since_hash
+        }
+
+    def _import_delta(self, args: dict) -> dict:
+        """Import a delta bundle into a vault."""
+        path = Path(args["path"])
+        delta_file = Path(args["delta_file"])
+        
+        if not delta_file.exists():
+            raise FileNotFoundError(f"Delta file not found: {delta_file}")
+        
+        delta_bytes = delta_file.read_bytes()
+        result = import_delta(path, delta_bytes)
+        
+        return {
+            "success": result.success,
+            "imported_count": result.imported_count,
+            "rejected_count": result.rejected_count,
+            "new_state_hash": result.new_state_hash,
+            "errors": result.errors
         }
 
 

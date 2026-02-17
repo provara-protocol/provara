@@ -10,6 +10,8 @@ Model Context Protocol server exposing Provara Protocol operations.
 - `export_state` — Export belief state from event log
 - `sync_vaults` — Sync two vaults (union merge + state recomputation)
 - `verify_chain` — Verify causal chain integrity for all actors
+- `export_delta` — Export events since a given hash as portable delta bundle
+- `import_delta` — Import a delta bundle into a vault (union merge)
 
 **Transports:**
 - **stdio** — JSON-RPC over stdin/stdout (standard MCP)
