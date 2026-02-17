@@ -1,0 +1,9 @@
+{
+  "uid": "reference-backpack-v1",
+  "birth_timestamp": "2026-02-17T04:21:30.528266+00:00",
+  "root_key_id": "bp1_1040deeec9ebc79a",
+  "governance_model": "policies/sync_contract.json",
+  "initial_ontology_versions": {
+    "perception": "perception_ontology_v1.json"
+  }
+}

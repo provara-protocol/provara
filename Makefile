@@ -2,26 +2,29 @@
 # Works in Git Bash (Windows), macOS, and Linux
 
 SHELL := /bin/bash
-PYTHONPATH := SNP_Core/bin
+PYTHONPATH := src:.
 PYTHON := python
-TEST_DIR := SNP_Core/test
-REF_BACKPACK := SNP_Core/examples/reference_backpack
+TEST_DIR := tests
+REF_BACKPACK := tests/fixtures/reference_backpack
 
 .PHONY: test test-unit test-comply bootstrap verify manifest checksums clean help
 
 ## ── Testing ──────────────────────────────────────────────
 
-test: test-unit test-comply ## Run all 110 tests (unit + compliance)
+test: test-unit test-vectors test-comply ## Run core suites (unit + vectors + compliance)
 
-test-unit: ## Run 93 unit tests
-	cd $(TEST_DIR) && PYTHONPATH=../bin $(PYTHON) -m unittest test_reducer_v0 test_rekey test_bootstrap test_sync_v0 -v
+test-unit: ## Run unit tests in tests/
+	cd $(TEST_DIR) && PYTHONPATH=../src:.. $(PYTHON) -m unittest test_reducer_v0 test_rekey test_bootstrap test_sync_v0 -v
+
+test-vectors: ## Run normative vectors
+	cd $(TEST_DIR) && PYTHONPATH=../src:.. $(PYTHON) test_vectors.py
 
 test-comply: ## Run 17 compliance tests against reference backpack
-	cd $(TEST_DIR) && PYTHONPATH=../bin $(PYTHON) backpack_compliance_v1.py ../examples/reference_backpack -v
+	$(PYTHON) tests/backpack_compliance_v1.py $(REF_BACKPACK) -v
 
 test-vault: ## Run compliance tests against My_Backpack (if exists)
 	@if [ -d "My_Backpack" ]; then \
-		cd $(TEST_DIR) && PYTHONPATH=../bin $(PYTHON) backpack_compliance_v1.py ../../My_Backpack -v; \
+		$(PYTHON) tests/backpack_compliance_v1.py My_Backpack -v; \
 	else \
 		echo "No My_Backpack/ directory found. Run 'make bootstrap' first."; \
 	fi

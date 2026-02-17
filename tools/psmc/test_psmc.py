@@ -178,7 +178,7 @@ class TestHashing:
 
     def test_uses_provara_canonical_json(self):
         """Verify PSMC uses Provara's canonical_json module."""
-        from canonical_json import canonical_dumps as provara_canonical
+        from provara.canonical_json import canonical_dumps as provara_canonical
         obj = {"b": 2, "a": 1}
         assert psmc.canonical_dumps(obj) == provara_canonical(obj)
 

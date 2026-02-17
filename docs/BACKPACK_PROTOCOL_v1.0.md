@@ -5,6 +5,17 @@
 **Date:** 2026-02-16
 **Source of truth:** [`PROTOCOL_PROFILE.txt`](../PROTOCOL_PROFILE.txt) — immutable after distribution. This document is the human-readable companion.
 
+## Normative Precedence
+
+When materials disagree, use this precedence order:
+
+1. `PROTOCOL_PROFILE.txt` (frozen normative profile, highest authority)
+2. `docs/BACKPACK_PROTOCOL_v1.0.md` (human-readable protocol companion)
+3. `docs/OPEN_DECISIONS.md` (resolved ambiguities and implementation choices)
+4. Reference implementation code and tests (`SNP_Core/bin`, `SNP_Core/test`)
+
+If a conflict exists between this document and the profile, the profile wins.
+
 ---
 
 ## Table of Contents
@@ -26,6 +37,9 @@
 15. [Directory Structure](#15-directory-structure)
 16. [Compliance Requirements](#16-compliance-requirements)
 17. [Reimplementation Guide](#17-reimplementation-guide)
+18. [Security Considerations](#18-security-considerations)
+19. [Extension Registry Process](#19-extension-registry-process)
+20. [IANA-Style Considerations](#20-iana-style-considerations)
 
 ---
 
@@ -821,6 +835,26 @@ Malformed input MUST be rejected or quarantined deterministically, never silentl
 ### 18.9 Cryptographic Agility
 
 Profile A fixes SHA-256 and Ed25519 for interoperability. Future profiles SHOULD define migration events and dual-signing windows for algorithm transition (including post-quantum profiles) without breaking append-only verification semantics.
+
+---
+
+## 19. Extension Registry Process
+
+Custom event type and future core-type promotion workflow is defined in:
+
+- `docs/EXTENSION_REGISTRY.md`
+
+This process is the canonical governance path for extension naming, acceptance, and promotion.
+
+---
+
+## 20. IANA-Style Considerations
+
+A standards-track stub (media type, URN, registry concepts) is maintained in:
+
+- `docs/IANA_CONSIDERATIONS.md`
+
+This is informational for future interoperability and does not override v1.0 profile authority.
 
 ---
 

@@ -26,6 +26,14 @@ Every event in a Provara vault is cryptographic evidence — signed, hashed, cha
 | **Repo** | https://github.com/provara-protocol/provara |
 | **Design Horizon** | 50-year readability and tamper-evidence |
 
+### Strategic Mandate: The Frontier Edge
+
+Provara is not just a protocol; it is a hedge against obsolescence in the most aggressive technology markets on earth. All agents must operate with the following strategic priorities:
+
+1. **Stay Ahead of the Curve:** We do not just react to trends; we anticipate shifts in emerging tech (AI agents, DePIN, ZK-proofs) and frontier markets (Crypto, AI-Hedge-Funds).
+2. **Crypto-Native by Design:** Provara is built on Ed25519 and SHA-256. It is designed to be compatible with modern L1/L2 state requirements. Every vault is a potential "state root" for an on-chain verification.
+3. **Market Intelligence:** We build with a focus on "Decisive Wins" in high-volatility, high-alpha domains. If a technology provides a distribution hack or a 10x leverage move, we prioritize its integration.
+
 ### Two-Brand Architecture
 
 ```
@@ -119,9 +127,9 @@ make test-comply   # 17 compliance tests only
 
 | Path | Purpose | Mutable? |
 |------|---------|----------|
-| `SNP_Core/bin/` | 7 operational Python modules | ✅ — the codebase |
-| `SNP_Core/test/` | 4 test suites + compliance verifier | ⚠️ — add tests, never weaken |
-| `SNP_Core/examples/reference_backpack/` | Known-good test fixture | ❌ — frozen unless regenerating |
+| `src/provara/` | 7 operational Python modules | ✅ — the codebase |
+| `tests/` | 4 test suites + compliance verifier | ⚠️ — add tests, never weaken |
+| `tests/fixtures/reference_backpack/` | Known-good test fixture | ❌ — frozen unless regenerating |
 | `SNP_Core/deploy/templates/` | Policy templates (safety, retention, sync) | ✅ |
 | `PROTOCOL_PROFILE.txt` | Frozen protocol spec | ❌ — **NEVER MODIFY** |
 | `README.md` | Primary public documentation | ✅ — Provara branding only |
