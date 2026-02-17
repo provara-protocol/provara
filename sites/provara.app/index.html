@@ -1,372 +1,563 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Provara — Sovereign Memory for Everyone</title>
-  <meta name="description" content="Provara: self-sovereign memory that never depends on a company, a server, or a password. Own your data forever. No vendor lock-in. No accounts. Just truth.">
-  <meta property="og:title" content="Provara — Sovereign Memory">
-  <meta property="og:description" content="Self-sovereign, tamper-evident memory for families, organizations, and AI agents.">
-  <meta property="og:url" content="https://provara.app/">
-  <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Provara">
-  <meta name="twitter:description" content="Sovereign memory. Verifiable continuity.">
-  
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text x='0' y='14' font-size='14' font-family='monospace' font-weight='bold' fill='%231d4e63'>∑</text></svg>">
-  <link rel="stylesheet" href="../shared/tokens.css">
-  <link rel="stylesheet" href="../shared/components.css">
-  <style>
-    .pv-app-hero {
-      max-width: var(--pv-max-prose);
-      margin-bottom: var(--pv-space-16);
-      text-align: center;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provara Family Vault — Your Family's Legacy, Secured Forever</title>
+    <meta name="description" content="Provara Family Vault is a secure, tamper-proof family memory vault. Store documents, memories, and important records with cryptographic verification. Designed to last 50 years.">
+    <meta name="theme-color" content="#5b4dc7">
+    <meta property="og:title" content="Provara Family Vault">
+    <meta property="og:description" content="Your family's legacy, secured forever.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://provara.app">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --primary: #5b4dc7;
+            --primary-light: #7c6fd4;
+            --primary-dark: #4a3da6;
+            --primary-bg: #f0edf9;
+            --secondary: #10b981;
+            --secondary-dark: #0d9668;
+            --text: #1e1b33;
+            --text-muted: #5c5775;
+            --text-light: #8a849d;
+            --bg: #fafaf9;
+            --bg-white: #ffffff;
+            --bg-warm: #f5f3f0;
+            --border: #e8e5e0;
+            --border-light: #f0ede8;
+            --shadow-sm: 0 1px 3px rgba(91, 77, 199, 0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 16px rgba(91, 77, 199, 0.08), 0 2px 6px rgba(0,0,0,0.04);
+            --shadow-lg: 0 12px 40px rgba(91, 77, 199, 0.12), 0 4px 12px rgba(0,0,0,0.04);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            --max-width: 1140px;
+            --nav-height: 72px;
+        }
 
-    .pv-app-title {
-      font-size: clamp(2rem, 4vw, 3.5rem);
-      margin-bottom: var(--pv-space-4);
-      font-family: var(--pv-font-serif);
-    }
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+        
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
 
-    .pv-app-subtitle {
-      font-size: var(--pv-text-xl);
-      color: var(--pv-ink-muted);
-      max-width: var(--pv-max-prose);
-      margin: 0 auto var(--pv-space-8) auto;
-      line-height: 1.6;
-    }
+        a { color: var(--primary); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: var(--primary-dark); }
 
-    .pv-app-ctas {
-      display: flex;
-      gap: var(--pv-space-4);
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-top: var(--pv-space-8);
-    }
+        /* Nav */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-height);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 1000;
+        }
 
-    .pv-app-btn {
-      display: inline-block;
-      padding: var(--pv-space-3) var(--pv-space-8);
-      font-family: var(--pv-font-sans);
-      font-size: var(--pv-text-md);
-      font-weight: bold;
-      border: 2px solid var(--pv-accent);
-      background: var(--pv-accent);
-      color: white;
-      border-radius: 2px;
-      text-decoration: none;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
+        .nav-brand {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-    .pv-app-btn:hover {
-      background: #153546;
-      border-color: #153546;
-    }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
 
-    .pv-app-btn-secondary {
-      background: transparent;
-      color: var(--pv-accent);
-    }
+        .nav-links a {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
 
-    .pv-app-btn-secondary:hover {
-      background: var(--pv-bg);
-    }
+        .nav-links a:hover { color: var(--primary); }
 
-    .pv-app-problem {
-      max-width: var(--pv-max-prose);
-      margin: var(--pv-space-12) auto;
-      padding: var(--pv-space-8);
-      background: var(--pv-surface);
-      border: 1px solid var(--pv-rule);
-      border-left: 4px solid var(--pv-warning);
-    }
+        .nav-cta {
+            background: var(--primary);
+            color: #fff !important;
+            padding: 0.625rem 1.25rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            transition: all 0.2s;
+        }
 
-    .pv-app-problem h2 {
-      margin-top: 0;
-      color: var(--pv-warning);
-    }
+        .nav-cta:hover {
+            background: var(--primary-dark);
+            color: #fff;
+        }
 
-    .pv-app-solution {
-      max-width: var(--pv-max-prose);
-      margin: var(--pv-space-12) auto;
-      padding: var(--pv-space-8);
-      background: var(--pv-surface);
-      border: 1px solid var(--pv-rule);
-      border-left: 4px solid var(--pv-success);
-    }
+        /* Hero */
+        .hero {
+            padding: calc(var(--nav-height) + 6rem) 2rem 6rem;
+            background: linear-gradient(180deg, var(--primary-bg) 0%, var(--bg) 100%);
+            text-align: center;
+        }
 
-    .pv-app-solution h2 {
-      margin-top: 0;
-      color: var(--pv-success);
-    }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
 
-    .pv-app-features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: var(--pv-space-8);
-      margin: var(--pv-space-12) 0;
-      max-width: 1000px;
-      margin-left: auto;
-      margin-right: auto;
-    }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
 
-    .pv-app-feature {
-      padding: var(--pv-space-6);
-      background: var(--pv-surface);
-      border: 1px solid var(--pv-rule);
-      text-align: center;
-    }
+        .hero h1 span {
+            color: var(--primary);
+        }
 
-    .pv-app-feature-icon {
-      font-size: 2.5rem;
-      margin-bottom: var(--pv-space-4);
-    }
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+        }
 
-    .pv-app-feature h3 {
-      margin: 0 0 var(--pv-space-3) 0;
-      font-size: var(--pv-text-lg);
-      font-family: var(--pv-font-sans);
-    }
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
 
-    .pv-app-feature p {
-      margin: 0;
-      color: var(--pv-ink-muted);
-      font-size: var(--pv-text-sm);
-      line-height: 1.6;
-    }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.75rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
 
-    .pv-app-works {
-      max-width: var(--pv-max-prose);
-      margin: var(--pv-space-12) auto;
-      line-height: 1.8;
-    }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: var(--shadow-md);
+        }
 
-    .pv-app-works ol {
-      counter-reset: step-counter;
-      list-style: none;
-      padding: 0;
-      margin: var(--pv-space-6) 0;
-    }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: #fff;
+        }
 
-    .pv-app-works li {
-      counter-increment: step-counter;
-      margin-bottom: var(--pv-space-8);
-      padding-left: var(--pv-space-8);
-      position: relative;
-    }
+        .btn-secondary {
+            background: var(--bg-white);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
 
-    .pv-app-works li::before {
-      content: counter(step-counter);
-      position: absolute;
-      left: 0;
-      top: 0;
-      background: var(--pv-accent);
-      color: white;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-family: var(--pv-font-sans);
-      font-size: var(--pv-text-sm);
-    }
+        .btn-secondary:hover {
+            background: var(--bg-warm);
+            border-color: var(--primary);
+        }
 
-    .pv-app-works strong {
-      display: block;
-      margin-bottom: var(--pv-space-2);
-      font-family: var(--pv-font-sans);
-    }
+        /* Sections */
+        section {
+            padding: 5rem 2rem;
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
 
-    .pv-app-footer {
-      margin-top: var(--pv-space-16);
-      padding: var(--pv-space-8) 0;
-      border-top: 1px solid var(--pv-rule);
-      background: var(--pv-bg);
-      font-size: var(--pv-text-sm);
-      color: var(--pv-ink-muted);
-    }
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 4rem;
+        }
 
-    .pv-app-footer a {
-      color: var(--pv-accent);
-    }
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: block;
+        }
 
-    .pv-app-footer a:hover {
-      text-decoration: underline;
-    }
+        .section-header h2 {
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
 
-    @media (max-width: 768px) {
-      .pv-app-ctas {
-        flex-direction: column;
-        align-items: center;
-      }
+        .section-header p {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+        }
 
-      .pv-app-btn {
-        width: 100%;
-        max-width: 300px;
-      }
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
 
-      .pv-app-hero {
-        text-align: left;
-      }
+        .feature {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            transition: all 0.3s;
+        }
 
-      .pv-app-feature-icon {
-        font-size: 2rem;
-      }
-    }
-  </style>
+        .feature:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+        }
+
+        .feature p {
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        /* How it works */
+        .steps {
+            display: grid;
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .step {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 56px;
+            height: 56px;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .step-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .step-content p {
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        /* Use cases */
+        .use-cases {
+            background: var(--bg-warm);
+            border-radius: var(--radius-xl);
+            padding: 4rem;
+        }
+
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .use-case {
+            text-align: center;
+        }
+
+        .use-case-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .use-case h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .use-case p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* CTA */
+        .cta {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: var(--radius-xl);
+            padding: 5rem 3rem;
+            text-align: center;
+            color: #fff;
+        }
+
+        .cta h2 {
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .cta p {
+            font-size: 1.125rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .cta .btn {
+            background: #fff;
+            color: var(--primary);
+        }
+
+        .cta .btn:hover {
+            background: var(--bg-warm);
+            color: var(--primary-dark);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 3rem 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        footer a { color: var(--text-muted); }
+        footer a:hover { color: var(--primary); }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav { padding: 0 1rem; }
+            .nav-links { display: none; }
+            .hero { padding: calc(var(--nav-height) + 4rem) 1rem 3rem; }
+            .use-cases { padding: 2rem; }
+            .step { flex-direction: column; align-items: center; text-align: center; }
+        }
+    </style>
 </head>
 <body>
-  <header class="pv-topbar">
-    <div class="pv-branding">
-      <a href="./" style="text-decoration: none; color: var(--pv-ink); font-family: var(--pv-font-mono); font-weight: bold;">provara.app</a>
-    </div>
-    <nav style="display: flex; gap: var(--pv-space-6); font-family: var(--pv-font-sans); font-size: var(--pv-text-sm);">
-      <a href="./">Home</a>
-      <a href="#how">How It Works</a>
-      <a href="https://provara.dev/">Specification</a>
-      <a href="https://github.com/provara-protocol/provara">GitHub</a>
+    <nav>
+        <a href="/" class="nav-brand">
+            <span>🔐</span>
+            Provara
+        </a>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#use-cases">Use Cases</a>
+            <a href="https://provara.dev" class="nav-cta">For Developers</a>
+        </div>
     </nav>
-  </header>
 
-  <div class="pv-shell">
-    <main>
-      <!-- Hero -->
-      <section class="pv-app-hero">
-        <h1 class="pv-app-title">Sovereign Memory</h1>
-        <p class="pv-app-subtitle">
-          Your memories, your family records, your decisions shouldn't disappear when a company changes its terms. 
-          Provara is self-sovereign, cryptographically-verified, and designed to last 50 years or more.
-        </p>
-        <div class="pv-app-ctas">
-          <a href="https://github.com/provara-protocol/provara" class="pv-app-btn">Get Started on GitHub</a>
-          <a href="https://provara.dev/" class="pv-app-btn pv-app-btn-secondary">Read the Technical Spec</a>
+    <div class="hero">
+        <div class="hero-badge">
+            <span>✨</span>
+            Now in Public Beta
         </div>
-      </section>
-
-      <!-- The Problem -->
-      <section class="pv-app-problem">
-        <h2>The Problem</h2>
-        <p><strong>Every cloud service is a promise that can be broken.</strong> Your photos are on Google Photos until Google decides they're not. Your emails are on Gmail until a payment bounces. Your memories are on Facebook until the company pivots, gets acquired, or disappears. And when they do, your data goes with them.</p>
-        <p>Or you spend months manually exporting files in proprietary formats that tomorrow's software may not understand.</p>
-        <p>Your memories — and your family's continuity — deserve better than a terms-of-service agreement.</p>
-      </section>
-
-      <!-- The Solution -->
-      <section class="pv-app-solution">
-        <h2>The Solution</h2>
-        <p><strong>Own your data forever.</strong> Provara creates a self-contained, cryptographically-signed vault on your machine. No cloud. No accounts. No passwords. Your data is plain JSON — readable with any text editor in 2074.</p>
-        <p>Every event is digitally signed. Every edit is timestamped and chained. Anyone with your vault can verify that nothing has been tampered with since the day you wrote it.</p>
-      </section>
-
-      <!-- Features -->
-      <section>
-        <h2 style="text-align: center; margin-bottom: var(--pv-space-8);">Why Provara?</h2>
-        <div class="pv-app-features">
-          <div class="pv-app-feature">
-            <div class="pv-app-feature-icon">🔐</div>
-            <h3>Cryptographically Signed</h3>
-            <p>Every memory is signed with Ed25519. Prove to anyone that you wrote it, when you wrote it, and that it hasn't changed.</p>
-          </div>
-
-          <div class="pv-app-feature">
-            <div class="pv-app-feature-icon">🖥️</div>
-            <h3>No Servers</h3>
-            <p>Your vault lives on your machine. No internet required. No account. No password. No company watching your data.</p>
-          </div>
-
-          <div class="pv-app-feature">
-            <div class="pv-app-feature-icon">📖</div>
-            <h3>Human Readable</h3>
-            <p>Your data is JSON. Open it with any text editor. In 2024 or 2074, you can read your vault. No proprietary software needed.</p>
-          </div>
-
-          <div class="pv-app-feature">
-            <div class="pv-app-feature-icon">⛓️</div>
-            <h3>Tamper Evident</h3>
-            <p>Events form a causal chain. A single bit flipped triggers a verification failure. You'll know if something changed.</p>
-          </div>
-
-          <div class="pv-app-feature">
-            <div class="pv-app-feature-icon">🤝</div>
-            <h3>Easy to Sync</h3>
-            <p>Copy your vault to USB, to the cloud, to another machine. Merge changes intelligently. Truth is recomputed from evidence, not merged.</p>
-          </div>
-
-          <div class="pv-app-feature">
-            <div class="pv-app-feature-icon">∞</div>
-            <h3>Built to Last</h3>
-            <p>JSON, SHA-256, and Ed25519 are 50-year standards. Your vault won't be locked in by tomorrow's framework or language.</p>
-          </div>
+        <h1>Your Family's Legacy,<br><span>Secured Forever</span></h1>
+        <p>A secure, tamper-proof vault for your family's most important memories. Cryptographic verification. Designed to last 50 years. No cloud dependency.</p>
+        <div class="hero-buttons">
+            <a href="https://github.com/provara-protocol/provara" class="btn btn-primary">
+                Get Started Free
+                <span>→</span>
+            </a>
+            <a href="#how-it-works" class="btn btn-secondary">
+                Learn More
+            </a>
         </div>
-      </section>
-
-      <!-- How It Works -->
-      <section class="pv-app-works" id="how">
-        <h2>How It Works</h2>
-        <ol>
-          <li>
-            <strong>Create Your Vault</strong>
-            You run a command: <code style="background: var(--pv-bg); padding: 2px 4px; border-radius: 2px; font-family: var(--pv-font-mono); font-size: var(--pv-text-sm);">provara init</code>. This generates Ed25519 signing keys and creates a genesis event — your vault's birth certificate.
-          </li>
-          <li>
-            <strong>Write Memories</strong>
-            You add entries to your vault: family events, decisions, observations. Each entry is timestamped and cryptographically signed.
-          </li>
-          <li>
-            <strong>Verify Integrity</strong>
-            Run <code style="background: var(--pv-bg); padding: 2px 4px; border-radius: 2px; font-family: var(--pv-font-mono); font-size: var(--pv-text-sm);">provara verify</code>. The system checks every signature, every hash, every causal chain. Any tampering is detected immediately.
-          </li>
-          <li>
-            <strong>Backup and Sync</strong>
-            Copy your vault anywhere: USB drive, cloud storage, another machine. Provara can merge changes intelligently because truth is recomputed from events, not merged directly.
-          </li>
-          <li>
-            <strong>Read Forever</strong>
-            Your vault is JSON. Open it with a text editor in 2024 or 2074. The format will still make sense.
-          </li>
-        </ol>
-      </section>
-
-      <!-- Use Cases -->
-      <section style="max-width: var(--pv-max-prose); margin: var(--pv-space-12) auto;">
-        <h2>Who Uses Provara?</h2>
-        <ul style="color: var(--pv-ink-muted); font-size: var(--pv-text-sm); line-height: 1.8;">
-          <li><strong>Families</strong> preserving multi-generational records — birthdays, letters, family trees, recipes.</li>
-          <li><strong>Researchers</strong> maintaining tamper-evident lab notebooks and data logs.</li>
-          <li><strong>Organizations</strong> requiring immutable audit trails for compliance and governance.</li>
-          <li><strong>AI Agents</strong> maintaining cognitive continuity across sessions and embodied systems.</li>
-          <li><strong>Anyone</strong> who believes their memories belong to them — not to a platform.</li>
-        </ul>
-      </section>
-
-      <!-- Final CTA -->
-      <section style="max-width: var(--pv-max-prose); margin: var(--pv-space-12) auto; padding: var(--pv-space-8); background: var(--pv-surface); border: 1px solid var(--pv-rule); text-align: center;">
-        <h2>Ready?</h2>
-        <p style="color: var(--pv-ink-muted); font-size: var(--pv-text-sm); line-height: 1.6; max-width: 60ch; margin: 0 auto var(--pv-space-6) auto;">
-          Start with the <a href="https://github.com/provara-protocol/provara">GitHub repository</a>. Read the <a href="https://provara.dev/">full specification</a>. 
-          No account needed. No data collected. Just you and your memories.
-        </p>
-        <div class="pv-app-ctas">
-          <a href="https://github.com/provara-protocol/provara" class="pv-app-btn">Get Started</a>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <footer class="pv-app-footer">
-    <div class="pv-shell">
-      <p>Provara — Sovereign Memory for Everyone</p>
-      <p><small>Apache 2.0 Licensed. Made by <a href="https://huntinformationsystems.com/">Hunt Information Systems LLC</a>.</small></p>
-      <p style="margin-top: var(--pv-space-4); font-size: var(--pv-text-xs);">
-        <a href="https://provara.dev/">Specification</a> · 
-        <a href="https://github.com/provara-protocol/provara">GitHub</a> · 
-        <a href="https://huntinformationsystems.com/">Company</a>
-      </p>
     </div>
-  </footer>
+
+    <section id="features">
+        <div class="section-header">
+            <span class="section-label">WHY PROVARA</span>
+            <h2>Built for Generations, Not Quarters</h2>
+            <p>While cloud services come and go, your family's memories deserve better than a terms-of-service agreement.</p>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <h3>Tamper-Evident</h3>
+                <p>Every document, photo, and memory is cryptographically signed. You'll know immediately if anything changes.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📦</div>
+                <h3>Truly Yours</h3>
+                <p>Your vault lives on your hardware. No accounts, no subscriptions, no company that can disappear overnight.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🕰️</div>
+                <h3>50-Year Design</h3>
+                <p>Built on industry standards (JSON, SHA-256, Ed25519) that will be readable for decades.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🌐</div>
+                <h3>Works Offline</h3>
+                <p>No internet required after setup. Your memories are accessible even when the cloud isn't.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">👁️</div>
+                <h3>Human Readable</h3>
+                <p>Open your vault with any text editor. No proprietary formats. No vendor lock-in.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔑</div>
+                <h3>You Hold the Keys</h3>
+                <p>Cryptographic keys stay on your devices. We can't access your vault even if we wanted to.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works">
+        <div class="section-header">
+            <span class="section-label">GETTING STARTED</span>
+            <h2>Three Simple Steps</h2>
+            <p>From zero to sovereign in under 5 minutes. No technical expertise required.</p>
+        </div>
+        
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Install Provara</h3>
+                    <p>One command installs everything you need. Works on Windows, Mac, and Linux. No account required.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Create Your Vault</h3>
+                    <p>Generate your cryptographic keys and initialize your family vault. Takes less than 30 seconds.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Add Your Memories</h3>
+                    <p>Store documents, photos, and records. Each addition is cryptographically sealed. Verify anytime.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="use-cases">
+        <div class="use-cases">
+            <div class="section-header">
+                <span class="section-label">USE CASES</span>
+                <h2>What Families Store</h2>
+            </div>
+            
+            <div class="use-case-grid">
+                <div class="use-case">
+                    <div class="use-case-icon">📄</div>
+                    <h4>Important Documents</h4>
+                    <p>Wills, trusts, deeds, insurance policies</p>
+                </div>
+                <div class="use-case">
+                    <div class="use-case-icon">📸</div>
+                    <h4>Family Photos</h4>
+                    <p>Generations of memories, preserved forever</p>
+                </div>
+                <div class="use-case">
+                    <div class="use-case-icon">🌳</div>
+                    <h4>Genealogy Records</h4>
+                    <p>Family trees, histories, oral traditions</p>
+                </div>
+                <div class="use-case">
+                    <div class="use-case-icon">💼</div>
+                    <h4>Business Records</h4>
+                    <p>Family business documentation, succession plans</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="cta">
+            <h2>Start Your Family Vault Today</h2>
+            <p>Join families who are preserving their legacy with cryptographic certainty. Free, open source, and designed to outlive us all.</p>
+            <a href="https://github.com/provara-protocol/provara" class="btn">
+                Get Started Free
+                <span>→</span>
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-links">
+            <a href="https://provara.dev">Developers</a>
+            <a href="https://github.com/provara-protocol/provara">GitHub</a>
+            <a href="https://huntinformationsystems.com">Hunt Information Systems</a>
+        </div>
+        <p>© 2026 Hunt Information Systems LLC · Apache 2.0 License</p>
+    </footer>
 </body>
 </html>
