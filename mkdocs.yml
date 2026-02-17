@@ -1,0 +1,43 @@
+site_name: Provara API Documentation
+site_url: https://provara.dev/docs/
+repo_url: https://github.com/provara-protocol/provara
+repo_name: provara-protocol/provara
+
+theme:
+  name: material
+  palette:
+    scheme: default
+    primary: teal
+    accent: blue
+
+markdown_extensions:
+  - codehilite
+  - toc:
+      permalink: true
+  - tables
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - Modules:
+    - canonical_json: modules/canonical_json.md
+    - backpack_integrity: modules/backpack_integrity.md
+    - reducer_v0: modules/reducer_v0.md
+    - manifest_generator: modules/manifest_generator.md
+    - backpack_signing: modules/backpack_signing.md
+    - rekey_backpack: modules/rekey_backpack.md
+    - bootstrap_v0: modules/bootstrap_v0.md
+    - sync_v0: modules/sync_v0.md
+  - Utilities:
+    - checkpoint_v0: modules/checkpoint_v0.md
+    - perception_v0: modules/perception_v0.md
+    - CLI: modules/cli.md
+  - Integration:
+    - MCP Server: integration/mcp.md
+    - PSMC: integration/psmc.md
+  - Getting Started: getting-started.md
+  - Protocol Spec: https://provara.dev/spec/
+
+docs_dir: docs/api
+site_dir: docs/site
