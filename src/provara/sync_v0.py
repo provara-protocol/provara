@@ -170,29 +170,29 @@ class ImportResult:
 # Event log I/O
 # ---------------------------------------------------------------------------
 
-def load_events(path: Path) -> List[Dict[str, Any]]:
+def iter_events(path: Path) -> Iterable[Dict[str, Any]]:
     """
-    Load events from an NDJSON file. Skips blank lines and malformed JSON.
-
-    Args:
-        path: Path to the events.ndjson file.
-
-    Returns:
-        List of event dicts in file order.
+    Generator that yields events from an NDJSON file. 
+    Skips blank lines and malformed JSON.
     """
-    events: List[Dict[str, Any]] = []
     if not path.exists():
-        return events
+        return
     with path.open("r", encoding="utf-8") as f:
         for line_num, line in enumerate(f, 1):
             stripped = line.strip()
             if not stripped:
                 continue
             try:
-                events.append(json.loads(stripped))
+                yield json.loads(stripped)
             except json.JSONDecodeError:
                 pass  # skip malformed lines
-    return events
+
+def load_events(path: Path) -> List[Dict[str, Any]]:
+    """
+    Load all events from an NDJSON file into a list.
+    Deprecated for large logs; use iter_events instead.
+    """
+    return list(iter_events(path))
 
 
 def write_events(path: Path, events: List[Dict[str, Any]]) -> None:
