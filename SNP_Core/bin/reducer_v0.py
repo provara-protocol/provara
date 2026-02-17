@@ -141,10 +141,18 @@ class SovereignReducerV0:
     # ------------------------------------------------------------------
 
     def apply_events(self, events: Iterable[Dict[str, Any]]) -> None:
+        """Apply a sequence of events efficiently, hashing only once at the end."""
         for event in events:
-            self.apply_event(event)
+            self._apply_event_internal(event)
+        self.state["metadata"]["state_hash"] = self._compute_state_hash()
 
     def apply_event(self, event: Dict[str, Any]) -> None:
+        """Apply a single event and update the state hash."""
+        self._apply_event_internal(event)
+        self.state["metadata"]["state_hash"] = self._compute_state_hash()
+
+    def _apply_event_internal(self, event: Dict[str, Any]) -> None:
+        """Core logic for applying an event without recomputing the state hash."""
         if not isinstance(event, dict):
             return  # malformed — skip silently
 
@@ -174,7 +182,6 @@ class SovereignReducerV0:
         # Update metadata (always, even for unknown types — they still count)
         self.state["metadata"]["last_event_id"] = event_id
         self.state["metadata"]["event_count"] += 1
-        self.state["metadata"]["state_hash"] = self._compute_state_hash()
 
     def export_state(self) -> Dict[str, Any]:
         """Deterministic, JSON-serializable snapshot of all four namespaces."""

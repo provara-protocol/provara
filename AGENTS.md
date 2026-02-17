@@ -179,6 +179,21 @@ These are load-bearing. If you touch crypto code, verify all of these still hold
 
 ## Multi-Agent Governance
 
+### Provara as L0/L1 Memory Substrate
+
+Provara is designed to serve as the foundational memory layer (L0/L1) for multi-agent governance systems. Any system that coordinates AI agents — whether for model evaluation, policy enforcement, cost routing, or red-team operations — can use a Provara vault as its cryptographic source of truth.
+
+**Key properties for governance substrates:**
+
+- **Determinism** — The reducer is a pure function. Given the same event log, any compliant implementation produces the same `state_hash`. Governance conclusions are reproducible, not opinions.
+- **Replayability** — The complete event history is preserved. Auditors can replay events to any point in time and independently verify derived state. No hidden side channels.
+- **Signature integrity** — Every event is Ed25519-signed and causally chained. Non-repudiation is a protocol guarantee, not an application feature.
+- **Namespace separation** — The four-namespace model (`canonical`, `local`, `contested`, `archived`) makes the epistemic status of every belief explicit. Governance systems can distinguish attested institutional truth from unverified observations.
+
+Governance products, dashboards, and compliance engines are built *on top of* Provara vaults. Provara provides the cryptographic guarantees. The product provides the interface.
+
+> See [`docs/GOVERNANCE_ALIGNMENT.md`](docs/GOVERNANCE_ALIGNMENT.md) for a detailed treatment.
+
 ### Agent Roles
 
 This project uses multiple AI coding agents (Claude Code, Codex/ChatGPT, Gemini CLI, Copilot) under owner coordination. Agents do not communicate with each other directly — the owner is the coordinator.

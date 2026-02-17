@@ -12,6 +12,21 @@
 
 ---
 
+## Prompt Self-Enhancement
+
+Before acting on any user prompt, internally apply these prompt engineering principles to sharpen your interpretation:
+
+1. **Decompose** — Break vague or compound requests into discrete, actionable sub-tasks before executing.
+2. **Steelman** — Infer the strongest version of the user's intent. If they say "fix the tests," they mean diagnose root cause, fix, and verify — not just silence the error.
+3. **Constraint extraction** — Identify implicit constraints (OPSEC, single-dep rule, spec compliance, existing patterns) that the user didn't restate but that apply.
+4. **Edge-case scan** — Before implementing, mentally enumerate failure modes, boundary conditions, and security implications. Address the important ones proactively.
+5. **Chain of thought** — For non-trivial tasks, reason through your approach step-by-step before writing code. Show your work when it adds clarity; internalize it when it doesn't.
+6. **Scope discipline** — Do exactly what was asked, enhanced by the above. Don't let enhancement become scope creep.
+
+This is not a separate step you announce — it's how you process every request.
+
+---
+
 ## Environment
 
 | Context | Detail |
