@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocol Specification — Provara v1.0</title>
+    <meta name="description" content="Provara Protocol v1.0 normative specification. SHA-256, Ed25519, RFC 8785 canonical JSON.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📜</text></svg>">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #0d1117;
+            --bg-raised: #161b22;
+            --bg-card: #1c2128;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-dim: #8b949e;
+            --text-dimmer: #6e7681;
+            --green: #3fb950;
+            --blue: #58a6ff;
+            --orange: #d29922;
+            --red: #f85149;
+            --mono: 'SF Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace;
+            --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            --serif: Georgia, 'Times New Roman', serif;
+        }
+
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        a { color: var(--blue); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Nav */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; color: var(--text); }
+        .nav-links { display: flex; gap: 2rem; font-size: 0.9rem; }
+        .nav-links a { color: var(--text-dim); }
+        .nav-links a:hover { color: var(--text); }
+
+        /* Layout */
+        .spec-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 6rem 2rem 4rem;
+        }
+
+        /* TOC */
+        .toc {
+            position: sticky;
+            top: 6rem;
+            align-self: start;
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            height: fit-content;
+        }
+
+        .toc h2 {
+            font-family: var(--mono);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+        }
+
+        .toc ol {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .toc li { margin: 0.5rem 0; }
+
+        .toc a {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.25rem 0;
+        }
+
+        .toc a:hover { color: var(--text); }
+
+        .toc ol ol {
+            padding-left: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Content */
+        .spec-content {
+            max-width: 900px;
+        }
+
+        .spec-header {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .spec-header h1 {
+            font-size: 2.5rem;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .spec-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-family: var(--mono);
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .spec-meta span {
+            background: var(--bg-raised);
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        /* Sections */
+        section {
+            margin-bottom: 4rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        section:last-child { border-bottom: none; }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            margin: 2rem 0 1rem;
+            color: var(--text);
+        }
+
+        h4 {
+            font-size: 1.05rem;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--text);
+        }
+
+        p {
+            color: var(--text-dim);
+            margin-bottom: 1.25rem;
+            font-size: 1.05rem;
+        }
+
+        ul, ol {
+            color: var(--text-dim);
+            margin-bottom: 1.25rem;
+            padding-left: 2rem;
+        }
+
+        li { margin-bottom: 0.5rem; }
+
+        /* Protocol blocks */
+        .protocol-block {
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            font-family: var(--mono);
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+
+        .protocol-block code { color: var(--text); }
+
+        /* Callouts */
+        .callout {
+            border-left: 4px solid var(--border);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            background: var(--bg-raised);
+            border-radius: 0 6px 6px 0;
+        }
+
+        .callout.must { border-left-color: var(--red); }
+        .callout.should { border-left-color: var(--orange); }
+        .callout.may { border-left-color: var(--green); }
+
+        .callout-title {
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .callout.must .callout-title { color: var(--red); }
+        .callout.should .callout-title { color: var(--orange); }
+        .callout.may .callout-title { color: var(--green); }
+
+        .callout p { margin: 0; font-size: 0.95rem; }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+
+        th {
+            background: var(--bg-raised);
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        td { color: var(--text-dim); }
+
+        tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+        /* Code in text */
+        code {
+            font-family: var(--mono);
+            font-size: 0.9em;
+            background: var(--bg-raised);
+            padding: 0.2em 0.5em;
+            border-radius: 4px;
+            color: var(--text);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-dimmer);
+            font-size: 0.9rem;
+            margin-top: 4rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .spec-container {
+                grid-template-columns: 1fr;
+            }
+            .toc {
+                position: static;
+                margin-bottom: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 1rem; }
+            .nav-links { display: none; }
+            .spec-container { padding: 5rem 1rem 2rem; }
+            .spec-header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="nav-brand">Provara Protocol</a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/#quickstart">Quickstart</a>
+            <a href="https://github.com/provara-protocol/provara">GitHub</a>
+        </div>
+    </nav>
+
+    <div class="spec-container">
+        <aside class="toc">
+            <h2>Contents</h2>
+            <ol>
+                <li><a href="#profile">Profile ID</a></li>
+                <li><a href="#hash">Hash Algorithm</a></li>
+                <li><a href="#signature">Signature Algorithm</a></li>
+                <li><a href="#canonicalization">Canonicalization</a></li>
+                <li><a href="#event-identity">Event Identity</a></li>
+                <li><a href="#merkle">Merkle Tree</a></li>
+                <li><a href="#reducer">Reducer Determinism</a></li>
+                <li><a href="#key-id">Key ID Derivation</a></li>
+                <li><a href="#compliance">Compliance</a></li>
+            </ol>
+        </aside>
+
+        <main class="spec-content">
+            <div class="spec-header">
+                <h1>Provara Protocol v1.0</h1>
+                <div class="spec-meta">
+                    <span>Profile: PROVARA-1.0_PROFILE_A</span>
+                    <span>Status: IMMUTABLE</span>
+                    <span>Date: 2026-02-13</span>
+                </div>
+                <p style="margin-top: 1.5rem; max-width: 700px;">
+                    This document is the normative cryptographic and serialization profile for Provara v1.0. 
+                    Two compliant implementations processing the same event log MUST produce byte-identical state hashes.
+                </p>
+            </div>
+
+            <section id="profile">
+                <h2>Profile Identification</h2>
+                <p>Profile ID: <code>PROVARA-1.0_PROFILE_A</code></p>
+                <p>Status: <strong>IMMUTABLE</strong> — Do not modify after distribution.</p>
+                <p>The key words "MUST", "MUST NOT", "SHALL", "SHALL NOT", and "MAY" in this document are to be interpreted as described in <a href="https://datatracker.ietf.org/doc/html/rfc2119">RFC 2119</a>.</p>
+            </section>
+
+            <section id="hash">
+                <h2>Hash Algorithm</h2>
+                <div class="callout must">
+                    <div class="callout-title">MUST</div>
+                    <p>Implementations MUST use SHA-256 (FIPS 180-4).</p>
+                </div>
+
+                <h3>Output Format</h3>
+                <ul>
+                    <li>Output MUST be 64 lowercase hexadecimal characters</li>
+                    <li>Input MUST be UTF-8 encoded bytes</li>
+                    <li>No other hash algorithm is permitted in Profile A</li>
+                </ul>
+
+                <h3>Usage</h3>
+                <p>SHA-256 MUST be used for:</p>
+                <ul>
+                    <li>Event content addressing (<code>event_id</code>)</li>
+                    <li>File integrity (manifest entries)</li>
+                    <li>Merkle tree computation (leaves and nodes)</li>
+                    <li>State hash (reducer output)</li>
+                    <li>Key ID derivation</li>
+                </ul>
+            </section>
+
+            <section id="signature">
+                <h2>Signature Algorithm</h2>
+                <div class="callout must">
+                    <div class="callout-title">MUST</div>
+                    <p>Implementations MUST use Ed25519 (RFC 8032).</p>
+                </div>
+
+                <h3>Key Parameters</h3>
+                <table>
+                    <tr><th>Property</th><th>Requirement</th></tr>
+                    <tr><td>Key size</td><td>256-bit (32 bytes public, 64 bytes private with seed)</td></tr>
+                    <tr><td>Signatures</td><td>64 bytes</td></tr>
+                    <tr><td>Encoding</td><td>Base64 (standard alphabet, with padding)</td></tr>
+                </table>
+
+                <h3>Signing Payload</h3>
+                <p>Implementations MUST sign <code>canonical_bytes(event_without_sig_field)</code>.</p>
+                <ul>
+                    <li>The <code>sig</code> field MUST be excluded before signing</li>
+                    <li>The <code>event_id</code> field MUST be included in the signing payload</li>
+                </ul>
+
+                <div class="protocol-block">
+                    <code>
+signing_payload = SHA-256(canonical_json({<br>
+&nbsp;&nbsp;"type": event["type"],<br>
+&nbsp;&nbsp;"actor": event["actor"],<br>
+&nbsp;&nbsp;"prev_event_hash": event["prev_event_hash"],<br>
+&nbsp;&nbsp;"payload": event["payload"],<br>
+&nbsp;&nbsp;...  // all fields except "sig"<br>
+}))
+                    </code>
+                </div>
+            </section>
+
+            <section id="canonicalization">
+                <h2>Canonicalization</h2>
+                <div class="callout must">
+                    <div class="callout-title">MUST</div>
+                    <p>Implementations MUST use RFC 8785 (JSON Canonicalization Scheme).</p>
+                </div>
+
+                <h3>Rules</h3>
+                <ol>
+                    <li>Object keys MUST be sorted lexicographically by Unicode code point</li>
+                    <li>There MUST be no whitespace between tokens</li>
+                    <li>There MUST be no trailing commas</li>
+                    <li>Numbers MUST NOT have leading zeros, positive signs, or trailing decimal zeros</li>
+                    <li>Strings MUST use minimal escape sequences</li>
+                    <li>Encoding MUST be UTF-8 without BOM</li>
+                    <li>Null values MUST be preserved as <code>null</code> (MUST NOT be omitted)</li>
+                </ol>
+
+                <h3>Reference Implementation</h3>
+                <div class="protocol-block">
+                    <code>
+import json
+
+def canonical_bytes(obj: dict) -> bytes:
+    return json.dumps(
+        obj,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
+                    </code>
+                </div>
+
+                <div class="callout should">
+                    <div class="callout-title">NOTE</div>
+                    <p>For fractional values (floats), prefer integer encoding or string-wrapped decimals to guarantee byte-exact interoperability across languages.</p>
+                </div>
+            </section>
+
+            <section id="event-identity">
+                <h2>Event Identity</h2>
+                <p>Event IDs MUST be content-addressed using derived hashes. UUIDv7 is NOT permitted for event IDs in Profile A.</p>
+
+                <h3>Derivation Rule</h3>
+                <ol>
+                    <li>Remove <code>event_id</code> and <code>sig</code> fields from the event</li>
+                    <li>Compute canonical JSON bytes of the remaining object</li>
+                    <li><code>event_id = "evt_" + SHA-256(canonical_bytes)[:24 hex chars]</code></li>
+                </ol>
+
+                <div class="callout must">
+                    <div class="callout-title">MUST</div>
+                    <p>This rule MUST be deterministic: identical event content MUST always produce the same event_id.</p>
+                </div>
+
+                <h3>Example</h3>
+                <div class="protocol-block">
+                    <code>
+def derive_event_id(event: dict) -> str:
+    hashable = {
+        k: v for k, v in event.items() 
+        if k not in ("event_id", "sig")
+    }
+    digest = hashlib.sha256(canonical_bytes(hashable)).hexdigest()
+    return f"evt_{digest[:24]}"
+                    </code>
+                </div>
+            </section>
+
+            <section id="merkle">
+                <h2>Merkle Tree</h2>
+                <p>The Merkle tree seals the integrity of all backpack files.</p>
+
+                <h3>Construction</h3>
+                <ol>
+                    <li><strong>Leaves:</strong> For each file entry in the manifest:
+                        <br><code>leaf_hash = SHA-256(canonical_bytes({"path": "...", "sha256": "...", "size": N}))</code>
+                    </li>
+                    <li><strong>Ordering:</strong> Leaves MUST be sorted lexicographically by file path</li>
+                    <li><strong>Padding:</strong> If leaf count is odd, the last leaf MUST be duplicated</li>
+                    <li><strong>Nodes:</strong> <code>node_hash = SHA-256(left_child_bytes || right_child_bytes)</code>
+                        <br>Concatenation is raw bytes (32 + 32 bytes), NOT hex string concatenation
+                    </li>
+                    <li><strong>Root:</strong> A single 64-character lowercase hex string stored in <code>merkle_root.txt</code></li>
+                </ol>
+
+                <h3>Empty Tree</h3>
+                <p>An empty tree (no files) produces: <code>SHA-256(b"").hexdigest()</code></p>
+
+                <h3>Reference Implementation</h3>
+                <div class="protocol-block">
+                    <code>
+def merkle_root_hex(leaves: list[bytes]) -> str:
+    if not leaves:
+        return hashlib.sha256(b"").hexdigest()
+    
+    level = [hashlib.sha256(leaf).digest() for leaf in leaves]
+    
+    while len(level) > 1:
+        next_level = []
+        for i in range(0, len(level), 2):
+            left = level[i]
+            right = level[i + 1] if i + 1 < len(level) else level[i]
+            next_level.append(hashlib.sha256(left + right).digest())
+        level = next_level
+    
+    return level[0].hex()
+                    </code>
+                </div>
+            </section>
+
+            <section id="reducer">
+                <h2>Reducer Determinism</h2>
+                <div class="callout must">
+                    <div class="callout-title">MUST</div>
+                    <p>Given the same event sequence, any compliant implementation MUST produce a byte-identical state_hash.</p>
+                </div>
+
+                <h3>State Hash Computation</h3>
+                <div class="protocol-block">
+                    <code>
+state_hash = SHA-256(canonical_bytes({
+    "canonical": state["canonical"],
+    "local": state["local"],
+    "contested": state["contested"],
+    "archived": state["archived"],
+    "metadata_partial": {
+        "last_event_id": state["metadata"]["last_event_id"],
+        "event_count": state["metadata"]["event_count"],
+        "current_epoch": state["metadata"]["current_epoch"],
+        "reducer": state["metadata"]["reducer"],
+    }
+}))
+                    </code>
+                </div>
+
+                <div class="callout must">
+                    <div class="callout-title">MUST</div>
+                    <p>The hash excludes <code>metadata.state_hash</code> itself (non-self-referential).</p>
+                </div>
+
+                <h3>Invariants</h3>
+                <ol>
+                    <li>Same event sequence → byte-identical <code>state_hash</code></li>
+                    <li>Empty log → valid state hash, all namespaces empty, <code>event_count = 0</code></li>
+                    <li>Unknown event types: counted, ignored for state, logged to <code>_ignored_types</code></li>
+                    <li>Malformed events: skipped or handled gracefully — never crash</li>
+                </ol>
+            </section>
+
+            <section id="key-id">
+                <h2>Key ID Derivation</h2>
+                <div class="protocol-block">
+                    <code>
+key_id = "bp1_" + SHA-256(raw_public_key_bytes)[:16 hex chars]
+                    </code>
+                </div>
+
+                <h3>Example</h3>
+                <p><code>bp1_27a6549d43046062</code></p>
+
+                <div class="callout must">
+                    <div class="callout-title">MUST</div>
+                    <p>Raw public key bytes MUST be the 32-byte Ed25519 public key in raw format (not PEM, not DER).</p>
+                </div>
+            </section>
+
+            <section id="compliance">
+                <h2>Compliance Requirements</h2>
+                <p>Implementations MUST pass all 17 compliance tests to be considered conformant.</p>
+
+                <h3>Test Categories</h3>
+                <table>
+                    <tr><th>Category</th><th>Tests</th><th>Requirement</th></tr>
+                    <tr><td>Directory structure</td><td>2</td><td>Required folders and files exist</td></tr>
+                    <tr><td>Identity schema</td><td>2</td><td>Genesis event and key registry validity</td></tr>
+                    <tr><td>Event schema + causal chain</td><td>3</td><td>Event format, uniqueness, causal ordering</td></tr>
+                    <tr><td>Manifest integrity + Merkle</td><td>5</td><td>File hashes, Merkle computation, no phantoms, path safety</td></tr>
+                    <tr><td>Safety policy structure</td><td>2</td><td>L0-L3 structure and ratchet constraints</td></tr>
+                    <tr><td>Sync contract schema</td><td>1</td><td>Governance schema validity</td></tr>
+                    <tr><td>Reducer determinism</td><td>1</td><td>Same events → identical state hash</td></tr>
+                    <tr><td>Retention permanence</td><td>1</td><td>Events are never deleted</td></tr>
+                </table>
+
+                <h3>Test Vectors</h3>
+                <p>Implementations MUST validate against <code>test_vectors/vectors.json</code>. The 7 vectors cover:</p>
+                <ul>
+                    <li>Canonical JSON</li>
+                    <li>SHA-256 hashing</li>
+                    <li>Event ID derivation</li>
+                    <li>Key ID derivation</li>
+                    <li>Ed25519 sign/verify</li>
+                    <li>Merkle root computation</li>
+                    <li>Reducer determinism</li>
+                </ul>
+
+                <div class="callout may">
+                    <div class="callout-title">REFERENCE</div>
+                    <p>The Python reference implementation is the canonical source of truth for any ambiguity. Run compliance tests against: <code>SNP_Core/test/backpack_compliance_v1.py</code></p>
+                </div>
+            </section>
+
+            <div class="spec-header" style="margin-top: 4rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+                <p style="margin: 0;">
+                    <strong>Source of Truth:</strong> 
+                    <a href="https://github.com/provara-protocol/provara/blob/main/PROTOCOL_PROFILE.txt">PROTOCOL_PROFILE.txt</a>
+                </p>
+                <p style="margin: 0.5rem 0 0; color: var(--text-dimmer); font-size: 0.9rem;">
+                    This HTML rendering is for human readability. The plain text file is the normative specification.
+                </p>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>
+            <a href="/">← Back to Provara.dev</a> ·
+            <a href="https://github.com/provara-protocol/provara">GitHub</a> ·
+            <a href="https://pypi.org/project/provara-protocol/">PyPI</a>
+        </p>
+        <p style="margin-top: 1rem;">
+            © 2026 Hunt Information Systems LLC · Apache 2.0 License
+        </p>
+    </footer>
+</body>
+</html>

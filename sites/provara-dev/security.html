@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security & Threat Model | provara.dev</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">PROVARA.DEV</a>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="spec.html">Specification</a>
+            <a href="security.html" class="active">Security</a>
+            <a href="https://github.com/provara-protocol/provara">GitHub</a>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Security & Threat Model</h1>
+        <p>Provara is designed for high-integrity environments where non-repudiation and tamper-evidence are mission-critical.</p>
+
+        <section id="threat-model">
+            <h2>Threat Model</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Threat</th>
+                        <th>Defense</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Data Tampering</strong></td>
+                        <td>Ed25519 signatures on every event + Merkle root anchors.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>History Re-ordering</strong></td>
+                        <td>Per-actor causal chain (<code>prev_event_hash</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Silent Deletion</strong></td>
+                        <td>Missing links in the causal chain detect truncation.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Identity Takeover</strong></td>
+                        <td>Key rotation requires surviving signer; self-promotion prohibited.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="validation-order">
+            <h2>Mandatory Validation Order</h2>
+            <p>To reduce attack surface, conformant implementations SHOULD validate in this exact order:</p>
+            <ol>
+                <li>UTF-8 + JSON parse checks</li>
+                <li>Required field existence checks</li>
+                <li>Event ID recomputation (Content Hash)</li>
+                <li>Causal chain linkage checks</li>
+                <li>Key resolution and revocation checks</li>
+                <li>Signature verification</li>
+                <li>Manifest and Merkle verification</li>
+            </ol>
+        </section>
+
+        <section id="confidentiality">
+            <h2>Confidentiality</h2>
+            <p><strong>Note:</strong> Provara provides <em>integrity</em> and <em>authenticity</em>, not confidentiality. Events are plaintext JSON unless encrypted upstream before being appended to the vault.</p>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2026 Hunt Information Systems LLC. Report security issues via GitHub.
+    </footer>
+</body>
+</html>
