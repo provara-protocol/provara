@@ -318,8 +318,9 @@ class TestMCPServerStdio(unittest.TestCase):
 
         self.assertEqual(resp["id"], 1)
         self.assertIn("result", resp)
-        events = json.loads(resp["result"]["content"][0]["text"])
-        self.assertIsInstance(events, list)
+        data = json.loads(resp["result"]["content"][0]["text"])
+        self.assertIn("events", data)
+        self.assertIsInstance(data["events"], list)
 
     def test_stdio_list_conflicts(self):
         proc = subprocess.Popen(
