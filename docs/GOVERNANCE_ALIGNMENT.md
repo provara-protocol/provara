@@ -146,4 +146,4 @@ Governance products are built *on top of* Provara. Provara provides the guarante
 
 ---
 
-(c) 2026 Hunt Information Services
+(c) 2026 Hunt Information Systems LLC
