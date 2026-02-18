@@ -21,7 +21,9 @@ Mapping:   docs/SCITT_MAPPING.md
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
+
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from .backpack_signing import load_private_key_b64, sign_event
 from .canonical_json import canonical_dumps, canonical_hash
@@ -158,7 +160,7 @@ def record_scitt_receipt(
 # Internal helpers
 # ---------------------------------------------------------------------------
 
-def _load_key_from_file(keyfile_path: Path):
+def _load_key_from_file(keyfile_path: Path) -> Tuple[str, Ed25519PrivateKey]:
     """
     Returns (kid, Ed25519PrivateKey). Handles both keyfile formats:
       - {keys: [{key_id, private_key_b64, ...}, ...]}  (from provara init)

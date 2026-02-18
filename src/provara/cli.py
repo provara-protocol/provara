@@ -155,8 +155,8 @@ def cmd_verify(args: argparse.Namespace) -> None:
     from .backpack_integrity import validate_vault_structure
     try:
         validate_vault_structure(target)
-    except ProvaraError as e:
-        _fail_with_error(e)
+    except ProvaraError as err:
+        _fail_with_error(err)
 
     # 2. Cryptographic/Compliance checks
     sys.path.insert(0, str(_repo_root / "tests"))
@@ -176,6 +176,25 @@ def cmd_verify(args: argparse.Namespace) -> None:
     
     if result.wasSuccessful():
         print("\nPASS: All 17 integrity checks passed.")
+        
+        if args.show_redacted:
+            # Load events and show redaction info
+            from .sync_v0 import iter_events
+            events_path = target / "events" / "events.ndjson"
+            if events_path.exists():
+                print("\nRedacted Events Metadata:")
+                count = 0
+                for event in iter_events(events_path):
+                    if event.get("payload", {}).get("redacted"):
+                        eid = event.get("event_id")
+                        reason = event.get("payload", {}).get("redaction_reason")
+                        redact_eid = event.get("payload", {}).get("redaction_event_id")
+                        print(f"  - Target: {eid}")
+                        print(f"    Reason: {reason}")
+                        print(f"    Redaction Event: {redact_eid}")
+                        count += 1
+                if count == 0:
+                    print("  None detected.")
     else:
         _cli_error(
             "Vault integrity verification failed",
@@ -753,6 +772,7 @@ def main() -> None:
     p_verify = sub.add_parser("verify", help="Verify vault integrity")
     p_verify.add_argument("path", help="Path to vault")
     p_verify.add_argument("-v", "--verbose", action="store_true")
+    p_verify.add_argument("--show-redacted", action="store_true", help="Show metadata for redacted events")
     
     # backup
     p_backup = sub.add_parser("backup", help="Create verified backup")
