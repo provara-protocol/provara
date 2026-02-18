@@ -1,15 +1,14 @@
-"""
-Provara Protocol SDK
-====================
+"""Provara Python SDK public API.
 
-A sovereign, tamper-evident memory substrate for AI agents and digital institutions.
+This module exposes the high-level ``Vault`` facade and stable top-level imports
+for signing, replay, sync, checkpointing, and integration helpers.
 
-Usage:
-    from provara import SovereignReducer, bootstrap_backpack, sign_event
+Example:
+    from provara import Vault
 
-    reducer = SovereignReducer()
-    reducer.apply_events(events)
-    print(reducer.export_state())
+    vault = Vault.create("My_Backpack")
+    state = vault.replay_state()
+    print(state["metadata"]["state_hash"])
 """
 
 from importlib import import_module
@@ -50,6 +49,24 @@ class Vault:
         include_quorum: bool = False,
         quiet: bool = False,
     ) -> "Vault":
+        """Create and bootstrap a new vault, then return a ``Vault`` wrapper.
+
+        Args:
+            path: Filesystem path for the new vault directory.
+            uid: Optional stable vault identifier.
+            actor: Actor label used for the genesis event.
+            include_quorum: Whether to create a quorum recovery key.
+            quiet: Suppress bootstrap console output when True.
+
+        Returns:
+            Vault: Wrapper bound to the initialized vault path.
+
+        Raises:
+            ValueError: If bootstrap cannot produce a compliant vault.
+
+        Example:
+            vault = Vault.create("My_Backpack", actor="operator")
+        """
         result = bootstrap_backpack(
             Path(path),
             uid=uid,
@@ -68,6 +85,15 @@ class Vault:
         return cls(path)
 
     def replay_state(self) -> Dict[str, Any]:
+        """Replay the vault event log and return the deterministic reducer state.
+
+        Returns:
+            Dict[str, Any]: Current derived state with metadata, including
+            ``state_hash``.
+
+        Raises:
+            FileNotFoundError: If the vault event log does not exist.
+        """
         from .sync_v0 import iter_events
         events = iter_events(self.path / "events" / "events.ndjson")
         reducer = SovereignReducer()
@@ -75,6 +101,14 @@ class Vault:
         return reducer.export_state()
 
     def sync_from(self, remote_path: str | Path) -> Any:
+        """Merge events from a remote vault into this vault.
+
+        Args:
+            remote_path: Path to the source vault to merge from.
+
+        Returns:
+            Any: The sync result object returned by ``sync_backpacks``.
+        """
         return sync_backpacks(self.path, Path(remote_path).resolve())
 
     def append_event(
@@ -85,7 +119,22 @@ class Vault:
         private_key_b64: str,
         actor: str = "provara_sdk",
     ) -> Dict[str, Any]:
-        """Append a signed event to the vault."""
+        """Append a signed event to ``events.ndjson``.
+
+        Args:
+            event_type: Provara event type such as ``OBSERVATION``.
+            payload: Event payload object.
+            key_id: Actor signing key identifier.
+            private_key_b64: Base64 Ed25519 private key.
+            actor: Human-readable actor label.
+
+        Returns:
+            Dict[str, Any]: Signed event object as persisted.
+
+        Raises:
+            ValueError: If key material is invalid.
+            OSError: If event file write fails.
+        """
         import json
         from datetime import datetime, timezone
         from .sync_v0 import write_events, iter_events
@@ -123,7 +172,15 @@ class Vault:
         return signed
 
     def checkpoint(self, key_id: str, private_key_b64: str) -> Path:
-        """Create a signed state snapshot."""
+        """Create and save a signed checkpoint for the current state.
+
+        Args:
+            key_id: Signing key identifier for checkpoint attestation.
+            private_key_b64: Base64 Ed25519 private key.
+
+        Returns:
+            Path: Path to the created checkpoint file.
+        """
         state = self.replay_state()
         priv = load_private_key_b64(private_key_b64)
         cp = create_checkpoint(self.path, state, priv, key_id)
@@ -136,9 +193,18 @@ class Vault:
         private_key_b64: str,
         network: str = "base-mainnet",
     ) -> Dict[str, Any]:
-        """
-        Simulate anchoring the current Merkle root to an L2.
-        Records an ANCHOR_ATTESTATION in the vault.
+        """Record a simulated L2 anchoring attestation in the vault.
+
+        Args:
+            key_id: Signing key identifier used for the attestation event.
+            private_key_b64: Base64 Ed25519 private key.
+            network: Target network label for anchor metadata.
+
+        Returns:
+            Dict[str, Any]: The appended anchor attestation event.
+
+        Raises:
+            FileNotFoundError: If ``merkle_root.txt`` is missing.
         """
         # 1. Get current Merkle root
         merkle_root_path = self.path / "merkle_root.txt"
@@ -177,12 +243,18 @@ class Vault:
         parent_key_id: str,
         parent_private_key_b64: str,
     ) -> Dict[str, Any]:
-        """
-        Spin up a new sovereign sub-agent.
-        1. Generates new keypair.
-        2. Bootstraps a new vault for the agent.
-        3. Records an AGENT_CREATION event in the parent vault (this vault).
-        Returns the new agent's credentials.
+        """Create a child agent vault and record its creation in this vault.
+
+        Args:
+            agent_name: Directory and logical label for the child agent.
+            parent_key_id: Parent vault key used to sign creation evidence.
+            parent_private_key_b64: Parent signing key material.
+
+        Returns:
+            Dict[str, Any]: Child vault credentials and creation metadata.
+
+        Raises:
+            ValueError: If child vault bootstrap fails.
         """
         import uuid
         from datetime import datetime, timezone
@@ -276,8 +348,19 @@ class Vault:
         details: Optional[Dict[str, Any]] = None,
         actor: str = "agent_worker",
     ) -> Dict[str, Any]:
-        """
-        Record a TASK_COMPLETION event (The "Billable Hour" of the Agent Economy).
+        """Record a task completion observation in the vault.
+
+        Args:
+            key_id: Signing key identifier.
+            private_key_b64: Base64 Ed25519 private key.
+            task_id: Task identifier.
+            status: Completion status label.
+            output_hash: Hash of produced artifact or output.
+            details: Optional extra task metadata.
+            actor: Actor name for event attribution.
+
+        Returns:
+            Dict[str, Any]: Signed event that was appended.
         """
         value = {
             "task_id": task_id,
@@ -306,7 +389,19 @@ class Vault:
         message: Dict[str, Any],
         subject: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Encrypt and append a P2P message to the vault."""
+        """Encrypt and append a peer-to-peer message event.
+
+        Args:
+            sender_key_id: Sender signing key identifier.
+            sender_private_key_b64: Sender Ed25519 private key.
+            sender_encryption_private_key_b64: Sender X25519 private key.
+            recipient_encryption_public_key_b64: Recipient X25519 public key.
+            message: JSON-serializable message body.
+            subject: Optional message subject.
+
+        Returns:
+            Dict[str, Any]: Signed message wrapper event.
+        """
         from .messaging import send_encrypted_message
 
         wrapper = send_encrypted_message(
@@ -333,7 +428,14 @@ class Vault:
         self,
         my_encryption_private_key_b64: str,
     ) -> List[Dict[str, Any]]:
-        """Scan vault for messages intended for me and decrypt them."""
+        """Decrypt inbox messages addressed to the supplied encryption key.
+
+        Args:
+            my_encryption_private_key_b64: Recipient X25519 private key.
+
+        Returns:
+            List[Dict[str, Any]]: Decrypted message objects with sender metadata.
+        """
         from .sync_v0 import iter_events
         
         events_file = self.path / "events" / "events.ndjson"
@@ -380,9 +482,13 @@ class Vault:
         return messages
 
     def check_safety(self, action_type: str) -> Dict[str, Any]:
-        """
-        Evaluate a proposed action against the vault's safety policy.
-        Returns a result dict with 'status' (APPROVED, BLOCKED, REQUIRES_MFA).
+        """Evaluate an action against the vault safety policy.
+
+        Args:
+            action_type: Proposed action name (for example ``REKEY``).
+
+        Returns:
+            Dict[str, Any]: Decision payload including status and rationale.
         """
         import json
         policy_path = self.path / "policies" / "safety_policy.json"
@@ -441,7 +547,18 @@ _OPTIONAL_EXPORTS = {
 
 
 def __getattr__(name: str) -> Any:
-    """Lazy-load optional exports so core imports remain stable."""
+    """Lazy-load optional exports on first access.
+
+    Args:
+        name: Requested attribute name.
+
+    Returns:
+        Any: Loaded module attribute value.
+
+    Raises:
+        ImportError: If optional dependency import fails.
+        AttributeError: If the attribute is not part of optional exports.
+    """
     if name in _OPTIONAL_EXPORTS:
         module_name, attr_name = _OPTIONAL_EXPORTS[name]
         try:
@@ -457,7 +574,18 @@ def __getattr__(name: str) -> Any:
 
 
 def check_safety(vault_path: str | Path, action_type: str) -> Dict[str, Any]:
-    """Module-level compatibility wrapper for Vault.check_safety()."""
+    """Compatibility wrapper around ``Vault.check_safety``.
+
+    Args:
+        vault_path: Vault path to evaluate.
+        action_type: Action name to classify.
+
+    Returns:
+        Dict[str, Any]: Safety policy decision payload.
+
+    Example:
+        result = check_safety("My_Backpack", "SYNC_IN")
+    """
     return Vault(vault_path).check_safety(action_type)
 
 

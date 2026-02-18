@@ -7,7 +7,7 @@ PYTHON := python
 TEST_DIR := tests
 REF_BACKPACK := tests/fixtures/reference_backpack
 
-.PHONY: test test-unit test-comply bootstrap verify manifest checksums clean help
+.PHONY: test test-unit test-comply bootstrap verify manifest checksums docs-api docs-build docs-serve clean help
 
 ## ── Testing ──────────────────────────────────────────────
 
@@ -61,6 +61,15 @@ checksums: ## Regenerate CHECKSUMS.txt
 		! -name 'Thumbs.db' \
 		-exec sha256sum {} \; | sort -k2 > CHECKSUMS.txt
 	@echo "Done. $(shell wc -l < CHECKSUMS.txt) files hashed."
+
+docs-api: ## Generate API reference pages from Python docstrings
+	$(PYTHON) tools/docs/generate_api_reference.py
+
+docs-build: docs-api ## Build static documentation site
+	mkdocs build
+
+docs-serve: docs-api ## Serve docs locally with live reload
+	mkdocs serve
 
 clean: ## Remove generated caches (not vaults or keys)
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

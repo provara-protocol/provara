@@ -79,21 +79,27 @@ def record_scitt_statement(
     cose_envelope_b64: Optional[str] = None,
     actor: str = "scitt_agent",
 ) -> Dict[str, Any]:
-    """
-    Append a com.ietf.scitt.signed_statement event to the vault.
+    """Append a SCITT signed statement event to a vault.
 
     Args:
-        vault_path:        Path to the Provara vault directory.
-        keyfile_path:      Path to the private keys JSON file.
-        statement_hash:    SHA-256 hex digest of the original SCITT statement.
-        content_type:      MIME type of the statement (e.g. 'application/json').
-        subject:           What the statement is about.
-        issuer:            Who made the statement (DID, key ID, or free string).
-        cose_envelope_b64: Optional Base64-encoded COSE Sign1 envelope.
-        actor:             Provara actor label for this event.
+        vault_path: Path to the Provara vault directory.
+        keyfile_path: Path to the private keys JSON file.
+        statement_hash: SHA-256 digest hex of the signed statement.
+        content_type: Statement MIME type (for example ``application/json``).
+        subject: Subject identifier of the statement.
+        issuer: Issuer identifier (DID, key ID, or label).
+        cose_envelope_b64: Optional Base64 COSE Sign1 payload.
+        actor: Actor label recorded in the event envelope.
 
     Returns:
-        The signed event dict (already appended to events.ndjson).
+        Dict[str, Any]: Signed event object written to ``events.ndjson``.
+
+    Raises:
+        ValueError: If required payload fields are missing or malformed.
+        OSError: If vault files cannot be read or written.
+
+    Example:
+        record_scitt_statement(vault, keys, stmt_hash, "application/json", "pkg:a", "issuer:1")
     """
     payload: Dict[str, Any] = {
         "statement_hash": statement_hash,
@@ -116,20 +122,26 @@ def record_scitt_receipt(
     receipt_b64: Optional[str] = None,
     actor: str = "scitt_agent",
 ) -> Dict[str, Any]:
-    """
-    Append a com.ietf.scitt.receipt event to the vault.
+    """Append a SCITT receipt event to a vault.
 
     Args:
-        vault_path:           Path to the Provara vault directory.
-        keyfile_path:         Path to the private keys JSON file.
-        statement_event_id:   event_id of the signed_statement event (evt_...).
-        transparency_service: URL or identifier of the transparency service.
-        inclusion_proof:      Proof data from the TS (string, dict, or list).
-        receipt_b64:          Optional Base64-encoded CBOR receipt.
-        actor:                Provara actor label for this event.
+        vault_path: Path to the Provara vault directory.
+        keyfile_path: Path to the private keys JSON file.
+        statement_event_id: Provara event ID of the source statement.
+        transparency_service: Transparency service URL or identifier.
+        inclusion_proof: Inclusion proof payload from the transparency service.
+        receipt_b64: Optional Base64-encoded receipt bytes.
+        actor: Actor label recorded in the event envelope.
 
     Returns:
-        The signed event dict (already appended to events.ndjson).
+        Dict[str, Any]: Signed event object written to ``events.ndjson``.
+
+    Raises:
+        ValueError: If required payload fields are missing or malformed.
+        OSError: If vault files cannot be read or written.
+
+    Example:
+        record_scitt_receipt(vault, keys, "evt_abcd", "ts.example", {"root": "..."})
     """
     payload: Dict[str, Any] = {
         "statement_event_id": statement_event_id,

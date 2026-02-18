@@ -27,9 +27,19 @@ from .backpack_signing import (
 )
 
 def export_to_solana(private_key_b64: str) -> List[int]:
-    """
-    Convert a Provara private key (Base64) to Solana CLI format (JSON byte array).
-    Solana format: [priv_bytes (32) + pub_bytes (32)] (64 ints total)
+    """Convert a Provara private key to Solana CLI ``id.json`` byte-array format.
+
+    Args:
+        private_key_b64: Base64 Ed25519 private key bytes (32-byte seed).
+
+    Returns:
+        List[int]: 64-byte Solana keypair array ``[priv32 + pub32]``.
+
+    Raises:
+        ValueError: If the private key cannot be decoded.
+
+    Example:
+        arr = export_to_solana(private_key_b64)
     """
     # 1. Decode Private Key bytes (32 bytes)
     # cryptography serialization returns the raw seed for Ed25519
@@ -56,9 +66,19 @@ def export_to_solana(private_key_b64: str) -> List[int]:
     return list(full_keypair)
 
 def import_from_solana(solana_keypair: List[int]) -> Dict[str, str]:
-    """
-    Convert a Solana CLI keypair (list of 64 ints) to Provara format.
-    Returns: {"key_id": "...", "private_key_b64": "..."}
+    """Convert Solana CLI ``id.json`` bytes into Provara key format.
+
+    Args:
+        solana_keypair: Solana keypair list of 64 integer bytes.
+
+    Returns:
+        Dict[str, str]: ``{"key_id": ..., "private_key_b64": ...}``.
+
+    Raises:
+        ValueError: If keypair length is not exactly 64 bytes.
+
+    Example:
+        key = import_from_solana(json.loads(Path("id.json").read_text()))
     """
     if len(solana_keypair) != 64:
         raise ValueError(
