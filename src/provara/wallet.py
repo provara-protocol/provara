@@ -61,7 +61,11 @@ def import_from_solana(solana_keypair: List[int]) -> Dict[str, str]:
     Returns: {"key_id": "...", "private_key_b64": "..."}
     """
     if len(solana_keypair) != 64:
-        raise ValueError("Invalid Solana keypair: expected 64 bytes")
+        raise ValueError(
+            "ERROR: Invalid Solana keypair length. Solana CLI format encodes "
+            "32 private-key bytes + 32 public-key bytes. Fix: supply a valid "
+            "64-byte `id.json` keypair export. (See: wallet import format)"
+        )
         
     # Extract first 32 bytes (private seed)
     priv_bytes = bytes(solana_keypair[:32])
