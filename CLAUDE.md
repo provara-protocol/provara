@@ -8,7 +8,7 @@
 
 1. **This file auto-loads every session.** AGENTS.md does not — read it explicitly at the start of any substantive work.
 2. **Read TODO.md** before touching code. If you spot gaps, missing items, or things the owner might have missed, add them to the appropriate phase. Don't wait to be asked.
-3. **Read MEMORY.md** at `C:\Users\c8324\.claude\projects\C--provara\memory\MEMORY.md` — it contains cross-session learnings. Update it when you discover something that should persist.
+3. **Read MEMORY.md** at `$HOME\.claude\projects\C--provara\memory\MEMORY.md` — it contains cross-session learnings. Update it when you discover something that should persist.
 4. If the task touches a specific module, read that module's code before proposing changes. Read-before-write, always.
 
 ---
