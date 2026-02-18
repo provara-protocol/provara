@@ -34,7 +34,13 @@ def canonical_dumps(obj: Any) -> str:
 
 
 def canonical_bytes(obj: Any) -> bytes:
-    """Return canonical JSON as UTF-8 bytes."""
+    """Return canonical bytes for JSON objects, with bytes passthrough support.
+
+    ``bytes`` inputs are returned unchanged for backward compatibility in code
+    paths that hash raw binary payloads before embedding them in JSON events.
+    """
+    if isinstance(obj, bytes):
+        return obj
     return canonical_dumps(obj).encode("utf-8")
 
 
