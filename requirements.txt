@@ -1,3 +1,4 @@
 # Provara Protocol — Runtime Dependencies
 # Install: pip install -r requirements.txt
 cryptography>=41.0
+mcp[fastmcp]>=0.1.0
