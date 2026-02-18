@@ -61,6 +61,53 @@ def run_verification(
         result["signature_integrity"] = False
         result["errors"].append(str(exc))
 
+    # Load events for crypto checks
+    events: list[dict[str, Any]] = []
+    try:
+        from provara.sync_v0 import load_events
+        events_file = vp / "events" / "events.ndjson"
+        if events_file.exists():
+            events = load_events(events_file)
+    except Exception as exc:
+        result["errors"].append(f"Event load error: {exc}")
+
+    # Causal chain integrity (prev_event_hash linkage)
+    if events and result["chain_integrity"]:
+        try:
+            from provara.sync_v0 import verify_all_causal_chains
+            chain_results = verify_all_causal_chains(events)
+            broken = [actor for actor, ok in chain_results.items() if not ok]
+            if broken:
+                result["chain_integrity"] = False
+                result["status"] = "FAIL"
+                result["errors"].append(
+                    f"Broken causal chain for: {', '.join(broken)}"
+                )
+        except Exception as exc:
+            result["chain_integrity"] = False
+            result["status"] = "FAIL"
+            result["errors"].append(f"Chain verification error: {exc}")
+
+    # Ed25519 signature verification
+    if events and result["signature_integrity"]:
+        try:
+            from provara.sync_v0 import verify_all_signatures
+            from provara.backpack_signing import load_keys_registry
+            keys_path = vp / "identity" / "keys.json"
+            if keys_path.exists():
+                reg = load_keys_registry(keys_path)
+                _valid, invalid_count, sig_errors = verify_all_signatures(
+                    events, reg
+                )
+                if invalid_count > 0:
+                    result["signature_integrity"] = False
+                    result["status"] = "FAIL"
+                    result["errors"].extend(sig_errors)
+        except Exception as exc:
+            result["signature_integrity"] = False
+            result["status"] = "FAIL"
+            result["errors"].append(f"Signature verification error: {exc}")
+
     # Event stats via SQLite index
     try:
         from provara.query import VaultIndex
