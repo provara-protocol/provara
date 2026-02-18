@@ -7,6 +7,17 @@ links to normative documentation.
 
 from typing import Optional, List
 
+__all__ = [
+    "ProvaraError",
+    "HashMismatchError",
+    "BrokenCausalChainError",
+    "InvalidSignatureError",
+    "HashFormatError",
+    "KeyNotFoundError",
+    "RequiredFieldMissingError",
+    "VaultStructureInvalidError",
+]
+
 class ProvaraError(Exception):
     """Base class for all Provara-related errors."""
     def __init__(
