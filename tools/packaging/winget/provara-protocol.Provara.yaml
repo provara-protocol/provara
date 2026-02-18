@@ -1,0 +1,21 @@
+PackageIdentifier: provara-protocol.Provara
+PackageVersion: 1.0.0
+PackageName: Provara
+Publisher: Provara Protocol
+License: Apache-2.0
+ShortDescription: Self-sovereign cryptographic event log protocol
+Moniker: provara
+Tags:
+  - cryptography
+  - event-log
+  - provenance
+  - audit
+InstallerType: portable
+Commands:
+  - provara
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://files.pythonhosted.org/packages/12/74/67c334193eba8d9ac188b958815ec7ca987476b8f3e3c1371e33f1fab632/provara_protocol-1.0.0-py3-none-any.whl
+    InstallerSha256: 405cda118e8e9f5f9c7a371a0f833ace7023c5630d43153dc7195cb67113fcc1
+ManifestType: singleton
+ManifestVersion: 1.6.0
