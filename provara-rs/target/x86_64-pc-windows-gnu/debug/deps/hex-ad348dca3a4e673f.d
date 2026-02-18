@@ -1,0 +1,8 @@
+C:\provara\provara-rs\target\x86_64-pc-windows-gnu\debug\deps\hex-ad348dca3a4e673f.d: C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\hex-0.4.3\src\lib.rs C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\hex-0.4.3\src\error.rs
+
+C:\provara\provara-rs\target\x86_64-pc-windows-gnu\debug\deps\libhex-ad348dca3a4e673f.rlib: C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\hex-0.4.3\src\lib.rs C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\hex-0.4.3\src\error.rs
+
+C:\provara\provara-rs\target\x86_64-pc-windows-gnu\debug\deps\libhex-ad348dca3a4e673f.rmeta: C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\hex-0.4.3\src\lib.rs C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\hex-0.4.3\src\error.rs
+
+C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\hex-0.4.3\src\lib.rs:
+C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\hex-0.4.3\src\error.rs:

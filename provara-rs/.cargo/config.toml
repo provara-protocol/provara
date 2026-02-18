@@ -1,0 +1,4 @@
+# Default target intentionally not set here.
+# To build for WASM, pass --target wasm32-unknown-unknown explicitly.
+# [build]
+# target = "wasm32-unknown-unknown"

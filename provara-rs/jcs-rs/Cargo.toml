@@ -1,0 +1,32 @@
+[package]
+name = "jcs-rs"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+description = "RFC 8785 JSON Canonicalization Scheme implementation"
+keywords = ["json", "canonical", "rfc8785", "jcs", "deterministic"]
+categories = ["encoding", "cryptography"]
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+
+# Optional WASM support
+wasm-bindgen = { workspace = true, optional = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+
+[features]
+default = []
+wasm = ["wasm-bindgen"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
