@@ -96,5 +96,10 @@ def receive_encrypted_message(
     plaintext = aesgcm.decrypt(nonce, ciphertext, None)
     parsed = json.loads(plaintext)
     if not isinstance(parsed, dict):
-        raise ValueError("Decrypted message payload must be a JSON object")
+        raise ValueError(
+            "ERROR: Decrypted message payload is not a JSON object. Provara "
+            "messaging expects structured JSON content for deterministic processing. "
+            "Fix: ensure sender encrypts a JSON object and retry message exchange. "
+            "(See: PROTOCOL_PROFILE.txt §4)"
+        )
     return cast(Dict[str, Any], parsed)

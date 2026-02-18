@@ -58,7 +58,13 @@ class Vault:
             quiet=quiet,
         )
         if not result.success:
-            raise ValueError(f"Bootstrap failed: {result.errors}")
+            raise ValueError(
+                "ERROR: Vault bootstrap failed. Bootstrap must produce a compliant "
+                "genesis state and key registry before use. Fix: create the vault in "
+                "an empty directory and review bootstrap errors. "
+                "(See: PROTOCOL_PROFILE.txt §13) "
+                f"Details: {result.errors}"
+            )
         return cls(path)
 
     def replay_state(self) -> Dict[str, Any]:
@@ -137,7 +143,11 @@ class Vault:
         # 1. Get current Merkle root
         merkle_root_path = self.path / "merkle_root.txt"
         if not merkle_root_path.exists():
-            raise FileNotFoundError("merkle_root.txt not found. Run manifest first.")
+            raise FileNotFoundError(
+                "ERROR: merkle_root.txt is missing. Anchoring requires a current "
+                "manifest Merkle root to attest state integrity. Fix: run `provara "
+                "manifest <vault>` and retry. (See: PROTOCOL_PROFILE.txt §11)"
+            )
         merkle_root = merkle_root_path.read_text(encoding="utf-8").strip()
 
         # 2. MOCK L2 TRANSACTION
@@ -214,7 +224,13 @@ class Vault:
             quiet=True
         )
         if not res.success:
-            raise ValueError(f"Failed to bootstrap agent vault: {res.errors}")
+            raise ValueError(
+                "ERROR: Agent vault bootstrap failed. Sub-agent creation depends on "
+                "a valid child vault genesis and key material. Fix: retry with a "
+                "writable target path and inspect bootstrap errors. "
+                "(See: PROTOCOL_PROFILE.txt §13) "
+                f"Details: {res.errors}"
+            )
             
         # 3. Record in Parent Vault
         payload = {

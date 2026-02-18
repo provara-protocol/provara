@@ -38,16 +38,30 @@ from .backpack_integrity import merkle_root_hex, MANIFEST_EXCLUDE, canonical_jso
 from .reducer_v0 import SovereignReducerV0
 from .checkpoint_v0 import create_checkpoint, save_checkpoint, load_latest_checkpoint, verify_checkpoint
 from .sync_v0 import load_events, write_events
+from .errors import ProvaraError, VaultStructureInvalidError
 
 # Repo root: src/provara/../../  (two levels up from this file's directory)
 _repo_root = Path(__file__).resolve().parents[2]
+
+def _fail_with_error(err: ProvaraError) -> None:
+    context = f" Context: {err.context}." if err.context else ""
+    print(
+        f"ERROR: {err.code}. {err.message}.{context} "
+        f"Fix: review the referenced vault object and retry the command. "
+        f"(See: {err.doc_url})"
+    )
+    sys.exit(1)
+
+
+def _cli_error(what: str, why: str, fix: str, see: str) -> None:
+    print(f"ERROR: {what}. {why}. Fix: {fix}. (See: {see})")
+    sys.exit(1)
 
 def _get_timestamp() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d_%H%M%S")
 
 def cmd_init(args: argparse.Namespace) -> None:
     target = Path(args.path).resolve()
-    keys_file = Path(args.private_keys or "my_private_keys.json").resolve()
     
     print(f"Initializing Provara Vault at: {target}")
     # Fix: bootstrap_backpack uses 'actor', not 'actor_name'
@@ -63,24 +77,53 @@ def cmd_init(args: argparse.Namespace) -> None:
     # result is a BootstrapResult object, not a dict
     if result.success:
         print("\nSUCCESS: Vault created and verified.")
-        if args.private_keys:
-            # bootstrap_backpack doesn't take private_keys_path, we need to save them
-            keys = {
-                result.root_key_id: result.root_private_key_b64
+
+        # Prepare private keys output
+        keys_list = [
+            {
+                "key_id": result.root_key_id,
+                "private_key_b64": result.root_private_key_b64,
+                "algorithm": "Ed25519"
             }
-            if result.quorum_key_id:
-                keys[result.quorum_key_id] = result.quorum_private_key_b64
-            keys_file.write_text(json.dumps(keys, indent=2))
-            print(f"Private keys saved to: {keys_file}")
+        ]
+        if result.quorum_key_id:
+            keys_list.append({
+                "key_id": result.quorum_key_id,
+                "private_key_b64": result.quorum_private_key_b64,
+                "algorithm": "Ed25519"
+            })
+        
+        key_output = {"keys": keys_list}
+
+        # Default save location is identity/private_keys.json inside the vault
+        if args.private_keys:
+            keys_file = Path(args.private_keys).resolve()
         else:
-            print("\nIMPORTANT: Your private keys were printed to stdout (default bootstrap behavior).")
+            keys_file = target / "identity" / "private_keys.json"
+
+        keys_file.write_text(json.dumps(key_output, indent=2))
+        print(f"Private keys saved to: {keys_file}")
+        
         print("IMPORTANT: Secure your private keys. If lost, vault access is permanent read-only.")
     else:
-        print("\nERROR: Bootstrap failed.")
-        sys.exit(1)
+        _cli_error(
+            "Vault bootstrap failed",
+            "the bootstrap sequence could not produce a compliant genesis state",
+            "inspect bootstrap logs above and rerun `provara init` on an empty target directory",
+            "PROTOCOL_PROFILE.txt §13",
+        )
 
 def cmd_verify(args: argparse.Namespace) -> None:
     target = Path(args.path).resolve()
+    
+    # 1. Structural check with descriptive errors
+    from .backpack_integrity import validate_vault_structure
+    try:
+        validate_vault_structure(target)
+    except ProvaraError as e:
+        _fail_with_error(e)
+
+    # 2. Cryptographic/Compliance checks
     sys.path.insert(0, str(_repo_root / "tests"))
     from backpack_compliance_v1 import TestBackpackComplianceV1
     import unittest
@@ -99,8 +142,12 @@ def cmd_verify(args: argparse.Namespace) -> None:
     if result.wasSuccessful():
         print("\nPASS: All 17 integrity checks passed.")
     else:
-        print("\nFAIL: Integrity checks failed.")
-        sys.exit(1)
+        _cli_error(
+            "Vault integrity verification failed",
+            "one or more compliance checks detected a mismatch in required protocol invariants",
+            "review failing checks in output and repair the vault before continuing",
+            "PROTOCOL_PROFILE.txt §11",
+        )
 
 def cmd_backup(args: argparse.Namespace) -> None:
     vault = Path(args.path).resolve()
@@ -108,8 +155,12 @@ def cmd_backup(args: argparse.Namespace) -> None:
     max_backups = args.keep
     
     if not vault.is_dir():
-        print(f"Error: Vault not found at {vault}")
-        sys.exit(1)
+        _cli_error(
+            f"Vault path not found: {vault}",
+            "the command requires an existing initialized Provara vault directory",
+            "pass a valid vault path created with `provara init`",
+            "PROTOCOL_PROFILE.txt §13",
+        )
         
     print(f"Backing up vault: {vault}")
     
@@ -124,8 +175,12 @@ def cmd_backup(args: argparse.Namespace) -> None:
     result = runner.run(suite)
     
     if not result.wasSuccessful():
-        print("Error: Source vault integrity check failed. Backup aborted.")
-        sys.exit(1)
+        _cli_error(
+            "Source vault integrity check failed",
+            "backup is blocked when integrity checks fail to avoid archiving corrupted evidence",
+            "run `provara verify <vault>` and fix reported integrity issues before backup",
+            "PROTOCOL_PROFILE.txt §11",
+        )
         
     # 2. Create zip
     backup_dir.mkdir(parents=True, exist_ok=True)
@@ -173,10 +228,19 @@ def cmd_manifest(args: argparse.Namespace) -> None:
 
 def _load_keys(keys_path: Path) -> Dict[str, str]:
     if not keys_path.exists():
-        print(f"Error: Private keys file not found at {keys_path}")
-        sys.exit(1)
+        _cli_error(
+            f"Private key file not found: {keys_path}",
+            "signing requires the actor's private key material to produce Ed25519 signatures",
+            "provide a valid `--keyfile` path or rerun `provara init --private-keys <file>`",
+            "PROTOCOL_PROFILE.txt §2",
+        )
     data = json.loads(keys_path.read_text())
-    return {str(k): str(v) for k, v in data.items()}
+    
+    # Filter out WARNING if present in legacy format
+    if "keys" in data and isinstance(data["keys"], list):
+        return {str(k["key_id"]): str(k["private_key_b64"]) for k in data["keys"]}
+    else:
+        return {str(k): str(v) for k, v in data.items() if k != "WARNING"}
 
 def cmd_checkpoint(args: argparse.Namespace) -> None:
     vault = Path(args.path).resolve()
@@ -212,21 +276,30 @@ def cmd_append(args: argparse.Namespace) -> None:
     # Use specified key or first available
     kid = args.key_id or list(keys_data.keys())[0]
     if kid not in keys_data:
-        print(f"Error: Key {kid} not found in {args.keyfile}")
-        sys.exit(1)
+        _cli_error(
+            f"Requested key_id not found: {kid}",
+            "the selected key is not present in the supplied keyfile so the event cannot be signed",
+            "use `--key-id` that exists in the file or supply the correct `--keyfile`",
+            "PROTOCOL_PROFILE.txt §2",
+        )
     priv = load_private_key_b64(keys_data[kid])
     
     # Load existing events to find prev_hash for this actor
+    actor_name = args.actor or "provara_user"
     all_events = load_events(vault / "events" / "events.ndjson")
-    actor_events = [e for e in all_events if e.get("actor_key_id") == kid]
+    actor_events = [e for e in all_events if e.get("actor") == actor_name]
     prev_hash = actor_events[-1].get("event_id") if actor_events else None
     
     # Build event
     if args.data.startswith("@"):
         path = Path(args.data[1:]).resolve()
         if not path.exists():
-            print(f"Error: Data file not found: {path}")
-            sys.exit(1)
+            _cli_error(
+                f"Data file not found: {path}",
+                "file-based event payloads require a readable JSON file",
+                "create the file or pass inline JSON via `--data '{...}'`",
+                "PROTOCOL_PROFILE.txt §4",
+            )
         data_str = path.read_text(encoding="utf-8")
     else:
         data_str = args.data
@@ -234,8 +307,12 @@ def cmd_append(args: argparse.Namespace) -> None:
     try:
         payload_data = json.loads(data_str)
     except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON data: {e}")
-        sys.exit(1)
+        _cli_error(
+            f"Invalid JSON payload: {e}",
+            "event payload must be valid JSON for canonical serialization and deterministic hashing",
+            "fix JSON syntax and retry the append command",
+            "PROTOCOL_PROFILE.txt §1",
+        )
         
     # Mapping for convenience (similar to psmc)
     subject = payload_data.get("subject") or "provara_cli"
@@ -243,7 +320,7 @@ def cmd_append(args: argparse.Namespace) -> None:
     
     event = {
         "type": args.type.upper(),
-        "actor": args.actor or "provara_user",
+        "actor": actor_name,
         "prev_event_hash": prev_hash,
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "payload": {
@@ -333,8 +410,12 @@ def cmd_wallet_import(args: argparse.Namespace) -> None:
         solana_kp = json.loads(in_path.read_text(encoding="utf-8"))
         res = import_from_solana(solana_kp)
     except Exception as e:
-        print(f"Error importing Solana key: {e}")
-        sys.exit(1)
+        _cli_error(
+            f"Failed to import Solana key: {e}",
+            "wallet import expects Solana CLI key material in the documented 64-byte format",
+            "export a valid Solana `id.json` and rerun `provara wallet-import --file <id.json>`",
+            "wallet import format",
+        )
         
     print("Imported Solana Key:")
     print(f"Key ID: {res['key_id']}")
@@ -369,8 +450,12 @@ def cmd_send_message(args: argparse.Namespace) -> None:
                     recip_pub = pub
     
     if not recip_pub:
-        print("Error: Recipient public key or ID required.")
-        sys.exit(1)
+        _cli_error(
+            "Recipient public key is missing",
+            "encrypted messaging needs the recipient public key to perform X25519 key exchange",
+            "provide `--recipient-pubkey` or a valid `--recipient-id` present in keys.json",
+            "PROTOCOL_PROFILE.txt §8",
+        )
         
     # Read message from arg or file
     if args.message.startswith("@"):
@@ -408,6 +493,15 @@ def cmd_read_messages(args: argparse.Namespace) -> None:
         print(f"Date:    {m['timestamp']}")
         print(f"Subject: {m['subject']}")
         print(f"Body:    {json.dumps(m['body'], indent=2)}")
+
+def cmd_timestamp(args: argparse.Namespace) -> None:
+    from .timestamp import record_timestamp_anchor
+    vault = Path(args.path).resolve()
+    keys = Path(args.keyfile).resolve()
+    signed = record_timestamp_anchor(
+        vault, keys, args.tsa or "https://freetsa.org/tsr", args.actor
+    )
+    print(f"Recorded TIMESTAMP_ANCHOR: {signed['event_id']}")
 
 def main() -> None:
     parser = argparse.ArgumentParser(prog="provara", description="Provara Protocol CLI")
@@ -532,6 +626,13 @@ def main() -> None:
         help="My X25519 private key (Base64). Defaults to selected key value.",
     )
     
+    # timestamp
+    p_ts = sub.add_parser("timestamp", help="Anchor vault state to external TSA (RFC 3161)")
+    p_ts.add_argument("path", help="Path to vault")
+    p_ts.add_argument("--keyfile", required=True, help="Path to your private keys JSON")
+    p_ts.add_argument("--tsa", help="TSA URL (defaults to freetsa.org)")
+    p_ts.add_argument("--actor", default="timestamp_authority")
+    
     args = parser.parse_args()
     
     if args.command == "init": cmd_init(args)
@@ -551,6 +652,7 @@ def main() -> None:
     elif args.command == "agent-loop": cmd_agent_loop(args)
     elif args.command == "send-message": cmd_send_message(args)
     elif args.command == "read-messages": cmd_read_messages(args)
+    elif args.command == "timestamp": cmd_timestamp(args)
 
     # ... after other subparsers ...
     # Wait, I need to add the actual subparser definitions too.

@@ -47,6 +47,12 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 from .canonical_json import canonical_bytes, canonical_dumps, canonical_hash
+from .errors import (
+    BrokenCausalChainError, 
+    InvalidSignatureError, 
+    KeyNotFoundError, 
+    RequiredFieldMissingError
+)
 from .backpack_signing import (
     BackpackKeypair,
     load_keys_registry,
@@ -827,14 +833,23 @@ def import_delta(
         # Verify signature if present
         sig = event.get("sig")
         kid = event.get("actor_key_id")
-        if sig and kid:
+        if sig:
+            eid = event.get("event_id", "unknown")
+            if not kid:
+                rejected_count += 1
+                errors.append(f"Signed event {eid}: missing actor_key_id")
+                continue
+
             pk = resolve_public_key(kid, delta_registry)
-            if pk is not None:
-                if not verify_event_signature(event, pk):
-                    rejected_count += 1
-                    eid = event.get("event_id", "unknown")
-                    errors.append(f"Invalid signature on event {eid}")
-                    continue
+            if pk is None:
+                rejected_count += 1
+                errors.append(f"Signed event {eid}: key {kid} not found in registry")
+                continue
+
+            if not verify_event_signature(event, pk):
+                rejected_count += 1
+                errors.append(f"Invalid signature on event {eid}")
+                continue
 
         delta_events.append(event)
 
@@ -955,22 +970,21 @@ def verify_all_signatures(
             # Unsigned events are not verified (may be pre-signing)
             continue
 
-        if not kid:
-            invalid += 1
-            errors.append(f"Event {eid}: missing actor_key_id")
-            continue
+        try:
+            if not kid:
+                raise RequiredFieldMissingError(f"Event {eid}: missing actor_key_id")
 
-        pk = resolve_public_key(kid, keys_registry)
-        if pk is None:
-            invalid += 1
-            errors.append(f"Event {eid}: key {kid} not found in registry")
-            continue
+            pk = resolve_public_key(kid, keys_registry)
+            if pk is None:
+                raise KeyNotFoundError(f"Event {eid}: key {kid} not found or revoked")
 
-        if verify_event_signature(event, pk):
-            valid += 1
-        else:
+            if verify_event_signature(event, pk):
+                valid += 1
+            else:
+                raise InvalidSignatureError(f"Event {eid}")
+        except (RequiredFieldMissingError, KeyNotFoundError, InvalidSignatureError) as e:
             invalid += 1
-            errors.append(f"Event {eid}: invalid signature")
+            errors.append(str(e))
 
     return valid, invalid, errors
 
@@ -985,10 +999,22 @@ def _cmd_merge(args: argparse.Namespace) -> int:
     remote_path = Path(args.remote_backpack).resolve()
 
     if not local_path.is_dir():
-        print(f"Error: Local backpack not found: {local_path}", file=sys.stderr)
+        print(
+            f"ERROR: Local vault path not found: {local_path}. "
+            "Sync requires a valid local Provara vault. "
+            "Fix: pass a real local vault directory created with `provara init`. "
+            "(See: PROTOCOL_PROFILE.txt §13)",
+            file=sys.stderr,
+        )
         return 1
     if not remote_path.is_dir():
-        print(f"Error: Remote backpack not found: {remote_path}", file=sys.stderr)
+        print(
+            f"ERROR: Remote vault path not found: {remote_path}. "
+            "Sync requires a valid remote Provara vault to merge evidence. "
+            "Fix: pass a real remote vault directory or export/import a delta bundle. "
+            "(See: PROTOCOL_PROFILE.txt §3)",
+            file=sys.stderr,
+        )
         return 1
 
     print(f"Syncing: {local_path} <- {remote_path}")
@@ -1019,7 +1045,13 @@ def _cmd_delta_export(args: argparse.Namespace) -> int:
     bp_path = Path(args.backpack).resolve()
 
     if not bp_path.is_dir():
-        print(f"Error: Backpack not found: {bp_path}", file=sys.stderr)
+        print(
+            f"ERROR: Vault path not found: {bp_path}. "
+            "Delta export can only run against an existing vault event log. "
+            "Fix: pass a valid vault path created with `provara init`. "
+            "(See: PROTOCOL_PROFILE.txt §13)",
+            file=sys.stderr,
+        )
         return 1
 
     since = args.since if hasattr(args, "since") else None
@@ -1042,10 +1074,22 @@ def _cmd_delta_import(args: argparse.Namespace) -> int:
     delta_path = Path(args.delta_file).resolve()
 
     if not bp_path.is_dir():
-        print(f"Error: Backpack not found: {bp_path}", file=sys.stderr)
+        print(
+            f"ERROR: Vault path not found: {bp_path}. "
+            "Delta import needs a destination vault to append verified evidence. "
+            "Fix: pass an existing local vault directory. "
+            "(See: PROTOCOL_PROFILE.txt §3)",
+            file=sys.stderr,
+        )
         return 1
     if not delta_path.is_file():
-        print(f"Error: Delta file not found: {delta_path}", file=sys.stderr)
+        print(
+            f"ERROR: Delta file not found: {delta_path}. "
+            "Import requires a UTF-8 NDJSON delta bundle with a valid header. "
+            "Fix: run `delta-export` on the source vault and provide that file path. "
+            "(See: PROTOCOL_PROFILE.txt §4)",
+            file=sys.stderr,
+        )
         return 1
 
     delta_bytes = delta_path.read_bytes()
@@ -1071,7 +1115,13 @@ def _cmd_check_forks(args: argparse.Namespace) -> int:
     bp_path = Path(args.backpack).resolve()
 
     if not bp_path.is_dir():
-        print(f"Error: Backpack not found: {bp_path}", file=sys.stderr)
+        print(
+            f"ERROR: Vault path not found: {bp_path}. "
+            "Fork checks require an existing event log to verify actor chains. "
+            "Fix: pass a valid vault path and rerun `check-forks`. "
+            "(See: PROTOCOL_PROFILE.txt §3)",
+            file=sys.stderr,
+        )
         return 1
 
     events_path = bp_path / "events" / "events.ndjson"
