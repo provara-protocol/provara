@@ -76,7 +76,7 @@ class ReducerPlugin(Protocol):
     """
     name: str
     
-    def reduce(self, events: Iterator[dict]) -> dict[str, Any]:
+    def reduce(self, events: Iterator[dict[str, Any]]) -> dict[str, Any]:
         """Process event stream and return derived state.
         
         Args:
@@ -274,7 +274,7 @@ class PluginRegistry:
             if hasattr(entry_points, 'select'):
                 plugins = entry_points.select(group='provara.plugins')
             else:
-                plugins = entry_points.get('provara.plugins', [])
+                plugins = entry_points.get('provara.plugins', [])  # type: ignore[attr-defined]
             
             for ep in plugins:
                 try:
@@ -326,19 +326,19 @@ class PluginRegistry:
             List of dicts with keys: name, type, source
         """
         info = []
-        for name, plugin in self._event_types.items():
+        for name, _ in self._event_types.items():
             info.append({
                 "name": name,
                 "type": "event_type",
                 "source": self._plugin_sources.get(name, "unknown")
             })
-        for name, plugin in self._reducers.items():
+        for name, _ in self._reducers.items():
             info.append({
                 "name": name,
                 "type": "reducer",
                 "source": self._plugin_sources.get(name, "unknown")
             })
-        for name, plugin in self._exports.items():
+        for name, _ in self._exports.items():
             info.append({
                 "name": name,
                 "type": "export",

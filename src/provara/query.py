@@ -150,9 +150,9 @@ class VaultIndex:
         count = int(row["c"]) if row is not None else 0
         return last_offset > 0 or count > 0
 
-    def _query(self, sql: str, params: tuple[Any, ...] = ()) -> list[dict]:
+    def _query(self, sql: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
         rows = self.conn.execute(sql, params).fetchall()
-        out: list[dict] = []
+        out: list[dict[str, Any]] = []
         for row in rows:
             data_json = str(row["data_json"])
             try:
@@ -175,28 +175,28 @@ class VaultIndex:
             )
         return out
 
-    def query_by_actor(self, actor: str) -> list[dict]:
+    def query_by_actor(self, actor: str) -> list[dict[str, Any]]:
         """All events by a specific actor."""
         return self._query(
             "SELECT * FROM events WHERE actor = ? ORDER BY line_offset ASC",
             (actor,),
         )
 
-    def query_by_type(self, event_type: str) -> list[dict]:
+    def query_by_type(self, event_type: str) -> list[dict[str, Any]]:
         """All events of a specific type."""
         return self._query(
             "SELECT * FROM events WHERE event_type = ? ORDER BY line_offset ASC",
             (event_type,),
         )
 
-    def query_by_time_range(self, start: str, end: str) -> list[dict]:
+    def query_by_time_range(self, start: str, end: str) -> list[dict[str, Any]]:
         """Events within ISO 8601 time range."""
         return self._query(
             "SELECT * FROM events WHERE timestamp >= ? AND timestamp <= ? ORDER BY timestamp ASC, line_offset ASC",
             (start, end),
         )
 
-    def query_by_actor_and_time(self, actor: str, start: str, end: str) -> list[dict]:
+    def query_by_actor_and_time(self, actor: str, start: str, end: str) -> list[dict[str, Any]]:
         """Events by actor within time range."""
         return self._query(
             """
@@ -207,7 +207,7 @@ class VaultIndex:
             (actor, start, end),
         )
 
-    def query_by_content(self, key: str, value: str) -> list[dict]:
+    def query_by_content(self, key: str, value: str) -> list[dict[str, Any]]:
         """Events where data contains key=value (JSON extract)."""
         json_path = f"$.{key}"
         try:

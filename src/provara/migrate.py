@@ -164,7 +164,7 @@ def _append_migration_event(
     with events_path.open("a", encoding="utf-8") as f:
         f.write(canonical_dumps(event) + "\n")
 
-    return event["event_id"]
+    return str(event["event_id"])
 
 
 def _regenerate_manifest(vault_path: Path) -> None:
