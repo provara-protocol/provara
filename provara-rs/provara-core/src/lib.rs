@@ -41,7 +41,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, Map, json};
 use thiserror::Error;
 
-pub use jcs_rs::{canonicalize, canonical_to_string, canonical_hash, canonical_hash_hex};
+pub use jcs_rs::{canonicalize, canonical_to_string};
 
 pub mod reducer;
 pub use reducer::{SovereignReducerV0, ReducerState, ReducerMetadata, StateMetadata};
@@ -68,8 +68,8 @@ pub enum ProvaraError {
     Encoding(String),
 }
 
-impl From<jcs_rs::CanonicalizeError> for ProvaraError {
-    fn from(e: jcs_rs::CanonicalizeError) -> Self {
+impl From<jcs_rs::Error> for ProvaraError {
+    fn from(e: jcs_rs::Error) -> Self {
         ProvaraError::Serialization(e.to_string())
     }
 }
@@ -243,7 +243,8 @@ pub fn derive_event_id(event: &Event) -> Result<String, ProvaraError> {
     event_data.insert("payload".to_string(), event.payload.clone());
     
     let value = Value::Object(event_data);
-    let hash = canonical_hash(&value)?;
+    let canonical_bytes = canonicalize(&value)?;
+    let hash = sha256_hash(&canonical_bytes);
     
     // Take first 12 bytes (24 hex chars)
     let hex_chars = hex::encode(&hash[0..12]);
@@ -439,8 +440,8 @@ pub fn compute_merkle_root(file_entries: &[Value]) -> Result<String, ProvaraErro
 ///
 /// state_hash = SHA-256(canonical_json(state_without_metadata_block))
 pub fn compute_state_hash(state: &Value) -> Result<String, ProvaraError> {
-    let hash = canonical_hash_hex(state)?;
-    Ok(hash)
+    let canonical_bytes = canonicalize(state)?;
+    Ok(sha256_hash_hex(&canonical_bytes))
 }
 
 /// Import a public key from Base64-encoded bytes

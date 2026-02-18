@@ -197,6 +197,14 @@ cargo test -p provara-core
 wasm-pack test --headless --firefox
 ```
 
+## Publish jcs-rs
+
+```bash
+cargo publish --dry-run -p jcs-rs
+# then, when ready:
+# cargo publish -p jcs-rs
+```
+
 ## License
 
 Apache 2.0 — See [LICENSE](../LICENSE) for details.
