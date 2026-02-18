@@ -97,3 +97,14 @@ playground/src/**/*.d.ts.map
 wasm-pack*.tar.gz
 wasm-pack-*/
 rust-lld.exe
+
+# Playground build artifacts
+playground/src/**/*.js
+playground/src/**/*.js.map
+playground/src/**/*.d.ts
+playground/src/**/*.d.ts.map
+
+# WASM build tools
+wasm-pack*.tar.gz
+wasm-pack-*/
+rust-lld.exe
