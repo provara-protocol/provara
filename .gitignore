@@ -26,6 +26,7 @@ Thumbs.db
 desktop.ini
 
 # Private keys — NEVER commit these
+private_keys.json
 my_private_keys.json
 *_private_keys.json
 *.key
@@ -74,3 +75,14 @@ tools/mcp_server/test_vault_sse/
 
 # Local brainstorm files
 provara_github_brainstorm.md
+
+# Build artifacts
+.hypothesis/
+provara-rs/target/
+site/
+docs/site/
+
+# Sensitive/local
+keys_3.json
+trade_order.json
+atlas_pub.txt
