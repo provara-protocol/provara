@@ -1,166 +1,406 @@
-# Contributing to Provara Protocol
+# Contributing to Provara
 
-Welcome, and thank you for your interest in contributing to the Provara Protocol (formerly SNP Legacy Kit). Provara is a Python-based cryptographic memory vault protocol developed by Hunt Information Systems. It uses Ed25519 signatures, SHA-256 hashing, and RFC 8785 canonical JSON to provide verifiable, tamper-evident memory vaults.
+**Self-sovereign cryptographic event logs.**
 
-This document explains how to get involved, what we expect from contributions, and how the project is structured.
-
----
-
-## Code of Conduct
-
-We expect all participants to act professionally and respectfully. In short:
-
-- Be constructive in discussions, code reviews, and issue reports.
-- Assume good faith from other contributors.
-- Provide clear, actionable feedback rather than dismissive commentary.
-- Harassment, personal attacks, and discriminatory language will not be tolerated.
-
-Maintainers reserve the right to remove, edit, or reject contributions that do not meet these standards.
+Thank you for your interest in contributing to Provara! This document provides guidelines and instructions for contributing to the project.
 
 ---
 
-## How to Contribute
+## Welcome
 
-### Bug Reports
+Provara is a protocol for append-only cryptographic event logs with per-actor causal chains, deterministic replay, and 50-year readability guarantees. We welcome contributions from anyone interested in verifiable audit trails, AI governance, supply chain provenance, or long-term data preservation.
 
-If you find a bug, please open an issue and include:
+Whether you're reporting a bug, suggesting a feature, writing documentation, or implementing the protocol in a new language, your contributions help make Provara more robust and accessible.
 
-- A clear description of the problem.
-- Steps to reproduce the issue.
-- Expected behavior vs. actual behavior.
-- Python version, OS, and `cryptography` library version.
-- Any relevant tracebacks or log output.
+---
 
-### Feature Requests
+## Ways to Contribute
 
-Feature requests are welcome. Open an issue describing:
+### 1. Report Bugs
 
-- The problem you are trying to solve.
-- Your proposed approach or solution.
-- Whether you are willing to implement it yourself.
+Found a bug? Open an issue using the [bug report template](.github/ISSUE_TEMPLATE/bug_report.md).
 
-Please note that protocol-level changes follow a separate process (see [Protocol Changes](#protocol-changes) below).
+**Before reporting:**
+- Search existing issues to avoid duplicates.
+- Verify the bug exists in the latest version.
+- Include steps to reproduce, expected behavior, and actual behavior.
 
-### Code Contributions
+### 2. Suggest Features
 
-Code improvements, bug fixes, documentation corrections, and new test cases are all welcome. For anything beyond a trivial fix, consider opening an issue first to discuss the approach before investing significant effort.
+Have an idea? Start a [GitHub Discussion](https://github.com/provara-protocol/provara/discussions) or open a [feature request issue](.github/ISSUE_TEMPLATE/feature_request.md).
+
+**Before suggesting:**
+- Check existing discussions and issues.
+- Consider whether the feature aligns with Provara's design goals.
+- Be prepared to discuss trade-offs.
+
+### 3. Write Documentation
+
+Documentation improvements are always welcome:
+- Fix typos or unclear explanations.
+- Add examples or tutorials.
+- Improve API documentation.
+- Translate documentation into other languages.
+
+### 4. Add Test Coverage
+
+Help us maintain reliability:
+- Add unit tests for uncovered code paths.
+- Add integration tests for complex workflows.
+- Add property-based tests for invariants.
+- Add fuzzing tests for edge cases.
+
+### 5. Build Plugins/Extensions
+
+Extend Provara without modifying core:
+- Custom event types (see [docs/PLUGIN_API.md](docs/PLUGIN_API.md)).
+- Custom reducers for domain-specific state derivation.
+- Custom export formats (CSV, SIEM, legal bundles).
+
+### 6. Implement in New Languages
+
+Provara is designed for cross-language implementation:
+- Read [PROTOCOL_PROFILE.txt](PROTOCOL_PROFILE.txt) for normative requirements.
+- Validate against [test_vectors/vectors.json](test_vectors/vectors.json).
+- Run the [17 compliance tests](tests/backpack_compliance_v1.py).
+- Share your implementation with the community.
 
 ---
 
 ## Development Setup
 
-1. **Clone the repository:**
+### Prerequisites
 
-   ```
-   git clone https://github.com/provara-protocol/provara.git
-   cd provara
-   ```
+- **Python 3.10+** — [python.org](https://python.org)
+- **Git** — [git-scm.com](https://git-scm.com)
+- **Node.js 20+** (for playground) — [nodejs.org](https://nodejs.org)
 
-2. **Create a virtual environment (recommended):**
+### Clone and Install
 
-   ```
-   python -m venv venv
-   source venv/bin/activate        # Linux / macOS
-   venv\Scripts\activate           # Windows
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/provara-protocol/provara
+cd provara
 
-3. **Install dependencies:**
+# Install Python dependencies
+pip install -e ".[dev]"
 
-   ```
-   pip install cryptography>=41.0
-   ```
+# Install Node.js dependencies (for playground)
+cd playground && npm install && cd ..
+```
 
-   The project has a single runtime dependency: `cryptography >= 41.0`. Python 3.10 or later is required.
+### Run Tests
 
-4. **Verify your setup by running the test suite:**
+```bash
+# Run all tests
+pytest
 
-   ```
-   python -m pytest
-   ```
+# Run with coverage
+pytest --cov=src/provara --cov-report=html
+
+# Run specific test suite
+pytest tests/test_plugins.py -v
+
+# Run compliance tests
+python tests/backpack_compliance_v1.py tests/fixtures/reference_backpack -v
+```
+
+### Type Checking
+
+```bash
+# Run mypy (strict mode)
+mypy --strict src/provara/
+```
+
+### Code Formatting
+
+```bash
+# Format code with ruff
+ruff format src/ tests/
+
+# Lint code
+ruff check src/ tests/
+```
 
 ---
 
-## Testing Requirements
+## Code Standards
 
-The project maintains a suite of 110 tests (93 unit tests and 17 compliance tests). All tests must pass before you submit a pull request.
+### Conventional Commits
 
-Run the full test suite:
-
-```
-python -m pytest
-```
-
-Run with verbose output:
+We use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages:
 
 ```
-python -m pytest -v
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer]
 ```
 
-Run only unit tests or compliance tests as needed during development, but always confirm the full suite passes before submitting.
+**Types:**
+- `feat:` New feature
+- `fix:` Bug fix
+- `docs:` Documentation changes
+- `test:` Test additions or fixes
+- `chore:` Maintenance tasks
+- `refactor:` Code refactoring
+- `perf:` Performance improvements
 
-If your change adds new functionality, include corresponding tests. If your change fixes a bug, include a regression test that fails without the fix and passes with it.
+**Examples:**
+```
+feat(plugins): add custom event type validation
+fix(crypto): handle edge case in Ed25519 signature verification
+docs: update PLUGIN_API.md with export examples
+test: add fuzzing tests for canonical JSON
+chore(deps): bump cryptography to 42.0.0
+```
+
+### Code Quality Requirements
+
+All contributions must:
+
+- **Pass mypy --strict:** No type errors allowed.
+- **Maintain coverage:** Coverage must not decrease.
+- **Pass all tests:** CI must be green before merge.
+- **No new dependencies:** Runtime dependencies require discussion.
+- **Follow existing patterns:** Match code style and architecture.
+
+### Testing Requirements
+
+All code changes must include tests:
+
+| Change Type | Test Requirement |
+|-------------|------------------|
+| Bug fix | Regression test for the bug |
+| New feature | Unit tests + integration tests |
+| Refactoring | Existing tests must pass |
+| Performance | Benchmark comparison |
+
+### Security Guidelines
+
+- Never commit secrets, API keys, or credentials.
+- Use environment variables for sensitive configuration.
+- Validate all external inputs.
+- Follow cryptographic best practices (see [PROTOCOL_PROFILE.txt](PROTOCOL_PROFILE.txt)).
 
 ---
 
 ## Pull Request Process
 
-1. **Fork the repository** and create a feature branch from `main`.
-2. **Keep changes focused.** One logical change per pull request.
-3. **Write clear commit messages** that explain what changed and why.
-4. **Ensure all 110 tests pass** with no failures or errors.
-5. **Update documentation** if your change affects usage or behavior.
-6. **Describe your PR clearly.** Include:
-   - What the change does.
-   - Why it is needed.
-   - How it was tested.
-   - Any breaking changes or migration notes.
-7. **Be responsive to review feedback.** Maintainers may request changes before merging.
+### Before Opening a PR
 
-Pull requests that introduce test failures, reduce coverage without justification, or lack a clear description will not be merged.
+1. **Fork the repository** and create a branch:
+   ```bash
+   git checkout -b feat/my-feature
+   ```
+
+2. **Make your changes** following code standards.
+
+3. **Run tests locally:**
+   ```bash
+   pytest
+   mypy --strict src/provara/
+   ruff check src/ tests/
+   ```
+
+4. **Update documentation** if behavior changes.
+
+5. **Commit with conventional commits:**
+   ```bash
+   git commit -m "feat(scope): add my feature"
+   ```
+
+### Opening a PR
+
+1. **Fill out the PR template** (what, why, how, testing).
+
+2. **Link related issues** (e.g., "Closes #123").
+
+3. **Add reviewers** familiar with the affected code.
+
+4. **Wait for CI** — all checks must pass.
+
+### PR Template
+
+```markdown
+## What
+
+Brief description of changes.
+
+## Why
+
+Motivation and context. Link to issues.
+
+## How
+
+Implementation details and design decisions.
+
+## Testing
+
+- [ ] Unit tests added/updated
+- [ ] Integration tests added/updated
+- [ ] Compliance tests pass
+- [ ] mypy --strict passes
+- [ ] Coverage maintained
+
+## Checklist
+
+- [ ] Code follows project conventions
+- [ ] Documentation updated
+- [ ] No new warnings
+- [ ] Breaking changes documented
+```
+
+### Review Process
+
+1. **CI must be green** — automated checks pass.
+2. **One approval required** — from a maintainer.
+3. **Address feedback** — respond to review comments.
+4. **Squash commits** — if requested by maintainer.
+5. **Merge** — maintainer merges the PR.
 
 ---
 
-## Protocol Changes
+## Architecture Overview
 
-The file `PROTOCOL_PROFILE.txt` defines the canonical specification for the Provara Protocol. **This file is frozen.** Direct modifications to the protocol profile will not be accepted through regular pull requests.
+### Repository Structure
 
-If you believe a protocol-level change is necessary, it must go through an RFC process:
+```
+provara/
+├── src/provara/          # Core Python package
+│   ├── bootstrap_v0.py   # Vault initialization
+│   ├── reducer_v0.py     # Deterministic reducer
+│   ├── reducer_v1.py     # Streaming reducer
+│   ├── sync_v0.py        # Sync protocol
+│   ├── plugins.py        # Plugin system
+│   ├── cli.py            # Command-line interface
+│   └── mcp/              # MCP server
+├── tests/                # Test suites
+│   ├── test_*.py         # Unit tests
+│   ├── fuzz/             # Fuzzing tests
+│   └── fixtures/         # Test fixtures
+├── docs/                 # Documentation
+│   ├── PLUGIN_API.md     # Plugin specification
+│   ├── EXTENSION_REGISTRY.md
+│   └── draft-hunt-provara-protocol-00.xml  # IETF I-D
+├── examples/             # Example code
+│   └── plugins/          # Example plugins
+├── tools/                # Development tools
+│   ├── benchmarks/       # Performance benchmarks
+│   └── ietf/             # I-D build tools
+├── playground/           # Browser playground
+└── PROTOCOL_PROFILE.txt  # Frozen specification
+```
 
-1. Open an issue tagged as an RFC.
-2. Describe the proposed change, its motivation, and its impact on existing implementations and test vectors.
-3. Allow time for community and maintainer discussion.
-4. Protocol changes will only be accepted after thorough review and with maintainer approval.
+### Key Modules
 
-Code improvements, performance optimizations, better error handling, and new tests that operate within the existing protocol specification are always welcome without an RFC.
+| Module | Purpose |
+|--------|---------|
+| `bootstrap_v0.py` | Vault initialization with Ed25519 keys |
+| `reducer_v0.py` | Full replay reducer (deterministic) |
+| `reducer_v1.py` | Streaming reducer (performance) |
+| `sync_v0.py` | Multi-device sync with fork detection |
+| `plugins.py` | Plugin registry and discovery |
+| `cli.py` | Unified CLI interface |
+| `mcp/` | Model Context Protocol server |
+
+### PROTOCOL_PROFILE.txt
+
+**This file is immutable.** It is the frozen normative specification for Provara v1.0. Do not modify it.
+
+If you find an error or ambiguity:
+1. Open a GitHub issue describing the problem.
+2. Propose a fix in a new profile version (e.g., PROTOCOL_PROFILE_v1.1.txt).
+3. Discuss with maintainers before implementing.
 
 ---
 
-## Style Guide
+## Extension Development
 
-- Follow the existing code conventions in the project. Consistency matters more than personal preference.
-- Use type hints where they are already present in the codebase. Add them to new code where practical.
-- Keep functions focused and reasonably sized.
-- Write docstrings for public functions, classes, and modules.
-- Use meaningful variable and function names.
-- Avoid introducing new dependencies unless absolutely necessary and discussed in advance.
-- Format code cleanly. If the project uses a formatter or linter configuration, follow it.
+### Plugin API
+
+Provara supports three extension points:
+
+1. **Custom Event Types** — Define new event types with JSON Schema validation.
+2. **Custom Reducers** — Add derived state computation.
+3. **Custom Export Formats** — Export to CSV, SIEM, legal bundles.
+
+See [docs/PLUGIN_API.md](docs/PLUGIN_API.md) for the full specification.
+
+### Extension Registry
+
+To propose a new event type for community adoption:
+
+1. Read [docs/EXTENSION_REGISTRY.md](docs/EXTENSION_REGISTRY.md).
+2. Open a GitHub issue with your proposal.
+3. Include: type name, schema, security considerations.
+4. Wait for community review.
+
+### Example Plugin
+
+See [examples/plugins/audit_plugin/](examples/plugins/audit_plugin/) for a complete working plugin:
+
+```bash
+# Install the example plugin
+cd examples/plugins/audit_plugin
+pip install -e .
+
+# List plugins (should show audit plugin)
+provara plugins list
+
+# Use custom event type
+provara append my-vault --type com.example.audit.login \
+  --data '{"user_id":"alice","success":true,"ip_address":"192.168.1.1"}'
+```
 
 ---
 
-## Reimplementations in Other Languages
+## Code of Conduct
 
-Reimplementations of the Provara Protocol in other languages are welcomed and encouraged. The protocol is designed to be language-agnostic.
+We follow the [Contributor Covenant 2.1](CODE_OF_CONDUCT.md). Key points:
 
-To build a compliant implementation:
-
-- Use `PROTOCOL_PROFILE.txt` as the authoritative specification. Your implementation must conform to the protocol as defined there.
-- Use the existing test vectors to validate your implementation against the reference behavior.
-- If you build a reimplementation, consider opening an issue or discussion to let the community know. We are happy to link to conforming implementations.
+- Be respectful and inclusive.
+- Accept constructive criticism.
+- Focus on what's best for the community.
+- Report unacceptable behavior to conduct@provara.dev.
 
 ---
 
-## Questions
+## Security Policy
 
-If you have questions about contributing that are not covered here, open an issue and we will do our best to help.
+See [SECURITY.md](SECURITY.md) for our security policy.
 
-Thank you for contributing to Provara Protocol.
+**To report a vulnerability:**
+1. Email security@provara.dev (do not open a public issue).
+2. Include: description, steps to reproduce, impact assessment.
+3. We will respond within 48 hours.
+4. We request 90 days for patch development before public disclosure.
+
+**Scope:**
+- Cryptographic vulnerabilities (signature bypass, hash collisions).
+- Remote code execution.
+- Data corruption or loss.
+- Authentication bypass.
+
+**Out of scope:**
+- Denial of service (availability is user responsibility).
+- Information disclosure (Provara does not encrypt).
+- Social engineering.
+
+---
+
+## Questions?
+
+- **General questions:** [GitHub Discussions](https://github.com/provara-protocol/provara/discussions)
+- **Bug reports:** [GitHub Issues](https://github.com/provara-protocol/provara/issues)
+- **Security issues:** security@provara.dev
+- **Conduct issues:** conduct@provara.dev
+
+---
+
+## Thank You
+
+Your contributions make Provara better for everyone. Whether you're fixing a typo, adding a test, or implementing the protocol in a new language, we appreciate your time and effort.
+
+**Golden Rule:** *Truth is not merged. Evidence is merged. Truth is recomputed.*

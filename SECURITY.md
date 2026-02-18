@@ -1,116 +1,238 @@
 # Security Policy
 
-## Reporting Vulnerabilities
-
-**Do not open a public GitHub issue for security vulnerabilities.**
-
-Report vulnerabilities privately via GitHub's security advisory workflow:
-https://github.com/provara-protocol/provara/security/advisories/new
-
-We aim to acknowledge reports within 48 hours and provide a fix or mitigation
-within 14 days for critical issues.
+Provara takes security seriously. This document outlines our security policy and how to report vulnerabilities.
 
 ---
 
-## Supported Versions
+## Reporting a Vulnerability
 
-| Version | Supported |
-|---------|-----------|
-| 1.0.x | ✅ Yes |
-| 0.1.x | ❌ No (deprecated) |
+**Do not open a public issue for security vulnerabilities.**
 
-Profile A (`PROVARA-1.0_PROFILE_A`) is the only currently supported profile.
+To report a security issue:
+
+1. **Email:** security@provara.dev
+2. **Include:**
+   - Description of the vulnerability
+   - Steps to reproduce
+   - Impact assessment (what can an attacker do?)
+   - Suggested fix (if any)
+3. **We will respond within 48 hours** with an acknowledgment.
+4. **We request 90 days** for patch development before public disclosure.
+
+If you do not receive a response within 48 hours, please follow up.
 
 ---
 
-## Threat Model
+## Scope
 
-Provara provides **tamper evidence**, not encryption or access control.
+### In Scope
 
-### What Provara Guarantees
+The following are considered security vulnerabilities:
 
-| Property | Mechanism |
+| Category | Examples |
+|----------|----------|
+| **Cryptographic** | Signature bypass, hash collision, key recovery, nonce reuse |
+| **Remote Code Execution** | Arbitrary code execution via crafted events or payloads |
+| **Data Corruption** | Silent data loss, event tampering without detection |
+| **Authentication Bypass** | Unauthorized vault access, key impersonation |
+| **Privilege Escalation** | Unauthorized key rotation, policy bypass |
+
+### Out of Scope
+
+The following are **not** considered vulnerabilities in Provara:
+
+| Category | Rationale |
 |----------|-----------|
-| **Append-only** | Events are never deleted. No API exists to remove or modify events. |
-| **Tamper-evident** | Any modification to an event breaks its Ed25519 signature. |
-| **Causal chain integrity** | Inserting, reordering, or removing an event breaks `prev_event_hash` for all subsequent events. |
-| **Deterministic replay** | Any auditor can replay the full event log and arrive at the byte-identical `state_hash`. |
-| **Key binding** | Every event is cryptographically bound to a specific Ed25519 key via `key_id`. |
-| **Content addressing** | `event_id` is derived from event content — identical content always produces the same ID. |
+| **Denial of Service** | Availability is user responsibility (see Threat Model) |
+| **Information Disclosure** | Provara does not encrypt; confidentiality is out of scope |
+| **Social Engineering** | No technical control can prevent user deception |
+| **Physical Access Attacks** | If attacker has physical access, all bets are off |
+| **Key Loss** | Key management is user responsibility |
 
-### What Provara Does NOT Guarantee
-
-| Property | Notes |
-|----------|-------|
-| **Confidentiality** | Events are stored as plaintext NDJSON. Encryption at rest is a planned extension (not in Profile A). |
-| **Access control** | Provara does not enforce who can read or append events. Access control is the caller's responsibility. |
-| **Availability** | Local-first. No replication or clustering in the core protocol. |
-| **Key secrecy** | The private key must be kept secret by the vault owner. Provara does not manage private key storage. |
+If you're unsure whether something is in scope, email us and we'll clarify.
 
 ---
 
-## Known Attack Scenarios
+## Response Timeline
 
-### Replay Attack
-**Description:** An attacker records valid events and replays them in a different context.
+We commit to the following timeline:
 
-**Mitigation:** Events contain `actor`, `timestamp`, and `prev_event_hash`. Replayed events fail causal chain validation unless they hash-chain correctly into the target vault's history.
+| Milestone | Target |
+|-----------|--------|
+| Initial response | 48 hours |
+| Triage complete | 5 business days |
+| Patch developed | 90 days |
+| Public disclosure | After patch release |
 
-**Residual risk:** A full vault copy is indistinguishable from the original — this is by design (verifiability requires reproducibility). Guard physical access.
-
-### Chain Truncation
-**Description:** An attacker discards recent events, presenting an older state as current.
-
-**Mitigation:** Provara detects gaps in the causal chain but cannot detect truncation at the *tail* (after the last event). Use signed checkpoints and compare `state_hash` with trusted peers.
-
-**Residual risk:** Out-of-band state comparison (e.g., epoch anchors to a transparency log) is recommended for high-assurance deployments.
-
-### Key Compromise Recovery
-**Description:** The signing key is compromised. Can an attacker forge historical events?
-
-**Mitigation:** Existing events retain their original signatures. A compromised key cannot retroactively re-sign historical events without breaking the causal chain. Use `KEY_REVOCATION` + `KEY_PROMOTION` to establish a trust boundary.
-
-**Residual risk:** Events signed before revocation remain valid (they were legitimately signed at the time).
-
-### Time Manipulation / Backdating
-**Description:** An attacker with write access creates events with false timestamps.
-
-**Mitigation:** Timestamps are informational, not cryptographically enforced. Causal chain enforces ordering within an actor's chain but not wall-clock accuracy.
-
-**Residual risk:** For high-assurance use cases, include a trusted timestamp authority signature in the event payload.
-
-### Storage-Layer Tampering
-**Description:** An attacker with filesystem access modifies or deletes events.
-
-**Mitigation:** Ed25519 signatures bind each event to its content (`PROVARA_E003`). Deletion breaks causal chain (`PROVARA_E002`, `PROVARA_E006`). The compliance verifier detects both.
-
-### Fork-and-Discard Attack
-**Description:** An attacker creates a valid fork, records favorable events, then presents the original.
-
-**Mitigation:** Detecting forks requires comparing chains with a trusted peer or publishing epoch-anchors to a third party (Rekor, transparency log). Single-node vaults are vulnerable without external anchoring.
-
-### DoS via Large Events
-**Description:** Extremely large events exhaust disk space or slow verification.
-
-**Mitigation:** Provara does not enforce per-event size limits at the protocol layer. Applications SHOULD enforce size limits before calling `append_event`.
-
-### Key ID Collision
-**Description:** Two different keys produce the same `bp1_` + 16-hex key ID.
-
-**Probability:** ~2³² vaults needed for a birthday collision — negligible in practice. Always verify the full signature against stored public key bytes, not just the key ID.
+We will keep you informed of our progress throughout the process.
 
 ---
 
-## Cryptographic Parameters
+## Disclosure Policy
 
-| Primitive | Specification | Security Level |
-|-----------|--------------|----------------|
-| SHA-256 | FIPS 180-4 | 128-bit collision |
-| Ed25519 | RFC 8032 | ~128-bit |
-| Canonical JSON | RFC 8785 | Deterministic |
+We follow coordinated disclosure:
 
-**Post-quantum:** Ed25519 is not post-quantum secure. A `PROTOCOL_PROFILE_PQ.txt` extension for ML-DSA dual-signing is planned.
+1. **Reporter submits vulnerability** to security@provara.dev.
+2. **We acknowledge receipt** within 48 hours.
+3. **We triage and assess** severity and impact.
+4. **We develop and test a patch.**
+5. **We notify users** via security advisory (if critical).
+6. **We release the patch** and publish a CVE (if applicable).
+7. **We credit the reporter** (unless they prefer anonymity).
 
 ---
 
-*Provara Protocol v1.0 | Apache 2.0 | provara.dev*
+## Security Advisories
+
+Security advisories are published at:
+
+- **GitHub Security Advisories:** https://github.com/provara-protocol/provara/security/advisories
+- **Mailing List:** security-announce@provara.dev (subscribe for notifications)
+
+### Advisory Format
+
+Each advisory includes:
+
+- **Summary:** Brief description of the vulnerability.
+- **Severity:** CVSS score and rating (Critical/High/Medium/Low).
+- **Affected Versions:** Which versions are vulnerable.
+- **Patched Versions:** Which versions contain the fix.
+- **Workarounds:** Mitigations if upgrading is not immediately possible.
+- **References:** Links to related issues, CVEs, or external resources.
+
+---
+
+## Vulnerability Severity
+
+We use CVSS v3.1 for severity scoring:
+
+| Rating | CVSS Score | Response Time |
+|--------|------------|---------------|
+| **Critical** | 9.0–10.0 | 24 hours |
+| **High** | 7.0–8.9 | 7 days |
+| **Medium** | 4.0–6.9 | 30 days |
+| **Low** | 0.1–3.9 | 90 days |
+
+### Severity Examples
+
+**Critical:**
+- Remote code execution via crafted event.
+- Signature verification bypass.
+- Private key extraction from memory.
+
+**High:**
+- Chain integrity check bypass.
+- Unauthorized key rotation.
+- Event injection without detection.
+
+**Medium:**
+- Information disclosure (if encryption is layered).
+- Denial of service (if specific conditions met).
+
+**Low:**
+- Non-cryptographic hash collision (non-security impact).
+- Minor input validation issues.
+
+---
+
+## Security Best Practices
+
+### For Users
+
+1. **Secure your keys:**
+   - Store private keys encrypted at rest.
+   - Use HSMs or YubiKeys for high-value vaults.
+   - Never store keys on the same drive as the vault.
+
+2. **Verify before trusting:**
+   - Run `provara verify` before relying on vault state.
+   - Check Merkle root and manifest signatures.
+   - Verify causal chain integrity.
+
+3. **Maintain backups:**
+   - Use the 3-2-1 rule (3 copies, 2 media types, 1 offsite).
+   - Test restore procedures regularly.
+   - Encrypt backups if confidentiality is required.
+
+4. **Stay updated:**
+   - Subscribe to security-announce@provara.dev.
+   - Monitor GitHub Security Advisories.
+   - Upgrade promptly when patches are released.
+
+### For Developers
+
+1. **Validate all inputs:**
+   - Never trust external event data.
+   - Validate JSON Schema for custom event types.
+   - Check signature before processing events.
+
+2. **Use constant-time comparisons:**
+   - Compare signatures in constant time.
+   - Avoid timing side-channels.
+
+3. **Handle errors safely:**
+   - Don't leak sensitive information in error messages.
+   - Log security events for audit.
+
+4. **Follow cryptographic best practices:**
+   - Use libraries, don't roll your own crypto.
+   - Follow [PROTOCOL_PROFILE.txt](PROTOCOL_PROFILE.txt) exactly.
+   - Never modify cryptographic parameters without review.
+
+---
+
+## Security Testing
+
+We employ multiple security testing strategies:
+
+### Automated Testing
+
+- **Unit tests:** 495+ tests covering cryptographic operations.
+- **Property-based testing:** Hypothesis fuzzing for edge cases.
+- **Integration tests:** End-to-end vault operations.
+
+### Manual Review
+
+- **Code review:** All changes reviewed by maintainers.
+- **Security audit:** Third-party audit planned for 2026.
+- **Bug bounty:** Under consideration (contact us if interested).
+
+### External Testing
+
+We welcome external security testing:
+
+- **Academic researchers:** Contact us for test vaults and guidance.
+- **Security consultants:** We can provide scoped testing environments.
+- **Community members:** Report findings via security@provara.dev.
+
+---
+
+## Past Advisories
+
+### 2026
+
+No security advisories issued to date.
+
+---
+
+## Contact
+
+- **Security Email:** security@provara.dev
+- **PGP Key:** [Available upon request]
+- **Response Time:** 48 hours
+
+For non-security issues, use [GitHub Issues](https://github.com/provara-protocol/provara/issues).
+
+---
+
+## Acknowledgments
+
+We thank security researchers who responsibly disclose vulnerabilities. Contributors will be credited in security advisories (unless they prefer anonymity).
+
+---
+
+## References
+
+- [Threat Model](docs/THREAT_MODEL.md) — Detailed STRIDE analysis
+- [PROTOCOL_PROFILE.txt](PROTOCOL_PROFILE.txt) — Cryptographic specification
+- [Contributing Guide](CONTRIBUTING.md) — Security guidelines for contributors

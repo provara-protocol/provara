@@ -1,0 +1,1176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.2119.rnc"?>
+<?xml-model href="https://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7991.rnc"?>
+<!DOCTYPE rfc [
+  <!ENTITY nbsp "&#160;">
+  <!ENTITY zwsp "&#8203;">
+  <!ENTITY nbhy "&#8209;">
+  <!ENTITY wj "&#8288;">
+]>
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="info" docName="draft-hunt-provara-protocol-00" indexInclude="true" ipr="trust200902" obsoletes="" updates="" submissionType="IETF" tocDepth="4" tocInclude="true" version="3" xml:lang="en">
+  <front>
+    <title abbrev="Provara Protocol">Provara: A Self-Sovereign Cryptographic Event Log Protocol</title>
+    <seriesInfo name="Internet-Draft" value="draft-hunt-provara-protocol-00"/>
+    <author initials="H." surname="Hunt" fullname="Hunt Information Systems LLC">
+      <organization>Hunt Information Systems LLC</organization>
+      <address>
+        <email>contact@provara.dev</email>
+      </address>
+    </author>
+    <date day="18" month="February" year="2026"/>
+    <area>Security</area>
+    <workgroup>Internet Engineering Task Force</workgroup>
+    <keyword>audit trail</keyword>
+    <keyword>cryptographic logging</keyword>
+    <keyword>event sourcing</keyword>
+    <keyword>Ed25519</keyword>
+    <keyword>blockchain alternative</keyword>
+    <keyword>AI governance</keyword>
+    <keyword>supply chain provenance</keyword>
+    <abstract>
+      <t>
+        AI agents and distributed systems lack verifiable audit trails that survive platform changes, organizational boundaries, and long time horizons. Existing solutions—databases, log aggregators, and blockchains—either require trusted operators, sacrifice readability, or introduce unnecessary complexity.
+      </t>
+      <t>
+        This document specifies Provara, a protocol for append-only cryptographic event logs with per-actor causal chains, deterministic replay, and 50-year readability guarantees. Provara provides tamper-evidence via Ed25519 signatures and SHA-256 hashing, non-repudiation through cryptographic key binding, and self-sovereignty by storing all data in plain text files.
+      </t>
+      <t>
+        The protocol uses RFC 8785 canonical JSON for cross-platform determinism, per-actor causal chains for concurrency without coordination, and Merkle trees for file integrity. Provara is designed for AI agent memory, supply chain provenance, legal discovery, and any application requiring accountable records that outlive platforms.
+      </t>
+    </abstract>
+  </front>
+  <middle>
+    <section anchor="introduction" numbered="true" toc="default">
+      <name>Introduction</name>
+      <section anchor="problem-statement" numbered="true" toc="default">
+        <name>Problem Statement</name>
+        <t>
+          As AI systems make increasingly consequential decisions, the ability to reconstruct what happened, why, and who authorized it becomes critical. Yet most AI systems store memory in databases controlled by vendors, logs that can be silently modified, or proprietary formats that become unreadable when companies fail. This creates a fundamental vulnerability: the record of AI behavior depends on the continued existence and good faith of specific organizations.
+        </t>
+        <t>
+          The problem extends beyond AI. Regulated industries require audit trails that survive decades. Legal discovery demands evidence chains that cannot be tampered with. Multi-party collaboration needs a shared record that no single party can unilaterally rewrite.
+        </t>
+        <t>
+          Existing solutions fail on one or more dimensions:
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              <strong>Databases</strong> require trusted operators and specific software to read.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Log aggregators</strong> (e.g., Splunk, ELK) are centralized and can be modified by administrators.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Blockchains</strong> provide integrity but sacrifice readability, performance, and introduce tokens and consensus unnecessary for audit.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Git</strong> provides content-addressability but lacks built-in cryptographic signing and structured event semantics.
+            </t>
+          </li>
+        </ul>
+      </section>
+      <section anchor="design-goals" numbered="true" toc="default">
+        <name>Design Goals</name>
+        <t>
+          Provara is designed with the following goals:
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              <strong>Self-sovereign:</strong> No accounts, no internet required, no vendor lock-in. Identity lives in files, not on servers.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Append-only:</strong> Events are never modified or deleted. Corrections are new events that supersede old ones.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Tamper-evident:</strong> Any modification to the record is cryptographically detectable.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>50-year horizon:</strong> JSON, SHA-256, and Ed25519 are industry standards that will remain readable for decades.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Deterministic replay:</strong> Given the same event log, any compliant implementation produces byte-identical state.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Human-readable:</strong> The event log is NDJSON (newline-delimited JSON), readable with any text editor.
+            </t>
+          </li>
+        </ul>
+      </section>
+      <section anchor="scope" numbered="true" toc="default">
+        <name>Scope</name>
+        <t>
+          Provara is:
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              A protocol for append-only cryptographic event logs.
+            </t>
+          </li>
+          <li>
+            <t>
+              A format for structured events with cryptographic signatures.
+            </t>
+          </li>
+          <li>
+            <t>
+              A deterministic reducer for deriving state from events.
+            </t>
+          </li>
+          <li>
+            <t>
+              A manifest and Merkle tree for file integrity verification.
+            </t>
+          </li>
+        </ul>
+        <t>
+          Provara is not:
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              A blockchain (no consensus, no tokens, no mining).
+            </t>
+          </li>
+          <li>
+            <t>
+              An encryption system (confidentiality is out of scope; layer encryption as needed).
+            </t>
+          </li>
+          <li>
+            <t>
+              A database (no indexing, no query language; events are append-only).
+            </t>
+          </li>
+          <li>
+            <t>
+              A backup system (availability is user responsibility).
+            </t>
+          </li>
+        </ul>
+      </section>
+    </section>
+
+    <section anchor="terminology" numbered="true" toc="default">
+      <name>Terminology</name>
+      <t>
+        The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 <xref target="RFC2119"/> <xref target="RFC8174"/> when, and only when, they appear in all capitals, as shown here.
+      </t>
+      <dl newline="false" spacing="normal">
+        <dt>Vault:</dt>
+        <dd>
+          A directory containing a compliant event log, identity files, policies, and manifest. Also called a "backpack".
+        </dd>
+        <dt>Event:</dt>
+        <dd>
+          An immutable, content-addressed JSON record appended to the event log.
+        </dd>
+        <dt>Actor:</dt>
+        <dd>
+          The identity that authored an event, identified by a key ID.
+        </dd>
+        <dt>Chain:</dt>
+        <dd>
+          A per-actor linked list of events via prev_event_hash references.
+        </dd>
+        <dt>Manifest:</dt>
+        <dd>
+          A JSON file enumerating every vault file with its SHA-256 hash and size.
+        </dd>
+        <dt>Reducer:</dt>
+        <dd>
+          A pure function f(events) → state that deterministically produces derived beliefs.
+        </dd>
+        <dt>State hash:</dt>
+        <dd>
+          A SHA-256 digest of reducer output, byte-identical across all compliant implementations.
+        </dd>
+        <dt>Merkle root:</dt>
+        <dd>
+          A SHA-256 Merkle tree root over all vault files, sealing vault integrity.
+        </dd>
+        <dt>Key ID:</dt>
+        <dd>
+          A short identifier for an Ed25519 public key, formatted as "bp1_" followed by 16 hexadecimal characters.
+        </dd>
+      </dl>
+    </section>
+
+    <section anchor="protocol-overview" numbered="true" toc="default">
+      <name>Protocol Overview</name>
+      <section anchor="architecture" numbered="true" toc="default">
+        <name>Architecture</name>
+        <t>
+          Provara vaults follow this architecture:
+        </t>
+        <artwork name="" type="" align="left" alt="Provara Architecture">
+<![CDATA[
+                            PROVARA PROTOCOL
+                            ================
+
+  +-----------------+       +---------------------+       +------------------+
+  |                 |       |                     |       |                  |
+  |  EVENTS         |  -->  |  REDUCER            |  -->  |  BELIEF STATE    |
+  |  (append-only   |       |  (deterministic,    |       |  (derived view,  |
+  |   NDJSON log)   |       |   replayable)       |       |   never merged)  |
+  |                 |       |                     |       |                  |
+  +-----------------+       +---------------------+       +------------------+
+                                                                  |
+                                                                  v
+                                                          +------------------+
+                                                          |  MANIFEST        |
+                                                          |  + Merkle Root   |
+                                                          |  + Ed25519 Sig   |
+                                                          +------------------+
+
+  Events flow in. The reducer processes them deterministically.
+  Beliefs emerge. The manifest seals the vault state.
+
+  Same events --> same reducer --> same state hash. Always.
+]]>
+        </artwork>
+      </section>
+      <section anchor="event-lifecycle" numbered="true" toc="default">
+        <name>Event Lifecycle</name>
+        <t>
+          The event lifecycle is:
+        </t>
+        <ol spacing="normal" type="1">
+          <li>
+            <t>
+              <strong>Creation:</strong> An actor creates an event with payload, type, and timestamp.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Canonicalization:</strong> The event is serialized using RFC 8785 canonical JSON.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Signing:</strong> The actor signs the canonical bytes with their Ed25519 private key.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Content addressing:</strong> The event ID is computed as SHA-256 of canonical bytes.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Append:</strong> The event is appended to the NDJSON event log.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Verification:</strong> Verifiers check signatures, chain integrity, and Merkle root.
+            </t>
+          </li>
+        </ol>
+      </section>
+      <section anchor="trust-model" numbered="true" toc="default">
+        <name>Trust Model</name>
+        <t>
+          Provara's trust boundary is cryptographic:
+        </t>
+        <artwork name="" type="" align="left" alt="Trust Boundary">
+<![CDATA[
+  +--------------------------------------------------+
+  |  VAULT (trusted -- signed by key holder)         |
+  |  + Events + Keys + Manifest + Merkle Root +      |
+  +--------------------------------------------------+
+                    |
+                    v
+           External Verifier (untrusted)
+]]>
+        </artwork>
+        <t>
+          Anything inside the vault is signed by the key holder. External verifiers can validate but not modify. The key holder is responsible for:
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              Securing private keys (HSM, encrypted storage, offline backup).
+            </t>
+          </li>
+          <li>
+            <t>
+              Maintaining backups (availability is not guaranteed by the protocol).
+            </t>
+          </li>
+          <li>
+            <t>
+              Rotating keys if compromise is suspected.
+            </t>
+          </li>
+        </ul>
+      </section>
+    </section>
+
+    <section anchor="event-structure" numbered="true" toc="default">
+      <name>Event Structure</name>
+      <t>
+        Each event is a JSON object with the following fields:
+      </t>
+      <dl newline="false" spacing="normal">
+        <dt>event_id (string, required):</dt>
+        <dd>
+          Content-addressed identifier. Format: "evt_" followed by 32 lowercase hexadecimal characters. Derived as SHA-256 of canonical JSON bytes (excluding "event_id" and "sig" fields), truncated to 32 hex characters.
+        </dd>
+        <dt>type (string, required):</dt>
+        <dd>
+          Event type name. Core types: GENESIS, OBSERVATION, ASSERTION, ATTESTATION, RETRACTION, KEY_REVOCATION, KEY_PROMOTION, REDUCER_EPOCH. Custom types MUST use reverse-domain notation (e.g., "com.example.audit.login").
+        </dd>
+        <dt>actor (string, required):</dt>
+        <dd>
+          Human-readable actor identifier (e.g., "alice", "sensor_node_01").
+        </dd>
+        <dt>timestamp_utc (string, required):</dt>
+        <dd>
+          ISO 8601 UTC timestamp (e.g., "2026-02-18T12:00:00Z").
+        </dd>
+        <dt>payload (object, required):</dt>
+        <dd>
+          Event-specific data. Schema depends on event type.
+        </dd>
+        <dt>prev_event_hash (string, optional):</dt>
+        <dd>
+          Event ID of the actor's immediately preceding event. Null for genesis events.
+        </dd>
+        <dt>signature (string, required):</dt>
+        <dd>
+          Base64-encoded Ed25519 signature over canonical JSON bytes (excluding "signature" field).
+        </dd>
+        <dt>public_key (string, required):</dt>
+        <dd>
+          Base64-encoded Ed25519 public key (32 bytes).
+        </dd>
+        <dt>key_id (string, required):</dt>
+        <dd>
+          Key identifier. Format: "bp1_" followed by 16 lowercase hexadecimal characters. Derived as SHA-256 of raw public key bytes, truncated to 16 hex characters.
+        </dd>
+      </dl>
+      <section anchor="event-example" numbered="true" toc="default">
+        <name>Example Event</name>
+        <artwork name="" type="json" align="left" alt="Example Event">
+<![CDATA[
+{
+  "event_id": "evt_a1b2c3d4e5f6789012345678",
+  "type": "OBSERVATION",
+  "actor": "alice",
+  "timestamp_utc": "2026-02-18T12:00:00Z",
+  "payload": {
+    "observation": "System initialized",
+    "confidence": 0.95
+  },
+  "prev_event_hash": null,
+  "signature": "MEUCIQDv...64-byte-Base64...AA==",
+  "public_key": "MCowBQYDK2VwAyEAg...32-byte-Base64...==",
+  "key_id": "bp1_27a6549d43046062"
+}
+]]>
+        </artwork>
+      </section>
+    </section>
+
+    <section anchor="cryptographic-operations" numbered="true" toc="default">
+      <name>Cryptographic Operations</name>
+      <section anchor="hashing" numbered="true" toc="default">
+        <name>Hashing</name>
+        <t>
+          Implementations MUST use SHA-256 as specified in FIPS 180-4 <xref target="FIPS180-4"/>.
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              Output: 64 lowercase hexadecimal characters.
+            </t>
+          </li>
+          <li>
+            <t>
+              Input: UTF-8 encoded bytes.
+            </t>
+          </li>
+          <li>
+            <t>
+              Used for: event IDs, file integrity, Merkle nodes, state hash, key ID derivation.
+            </t>
+          </li>
+        </ul>
+      </section>
+      <section anchor="signing" numbered="true" toc="default">
+        <name>Signing</name>
+        <t>
+          Implementations MUST use Ed25519 as specified in RFC 8032 <xref target="RFC8032"/>.
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              Key size: 256-bit (32-byte public, 64-byte private with seed).
+            </t>
+          </li>
+          <li>
+            <t>
+              Signatures: 64 bytes, Base64-encoded (standard alphabet with padding).
+            </t>
+          </li>
+          <li>
+            <t>
+              Signing payload: SHA-256 of canonical JSON bytes (excluding "signature" field).
+            </t>
+          </li>
+        </ul>
+        <t>
+          The "event_id" field MUST be included in the signing payload. The "signature" field MUST be excluded.
+        </t>
+      </section>
+      <section anchor="canonical-json" numbered="true" toc="default">
+        <name>Canonical JSON</name>
+        <t>
+          Implementations MUST use RFC 8785 (JSON Canonicalization Scheme) <xref target="RFC8785"/>.
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              Object keys MUST be sorted lexicographically by Unicode code point.
+            </t>
+          </li>
+          <li>
+            <t>
+              No whitespace between tokens.
+            </t>
+          </li>
+          <li>
+            <t>
+              No trailing commas.
+            </t>
+          </li>
+          <li>
+            <t>
+              Numbers MUST NOT have leading zeros, positive signs, or trailing decimal zeros.
+            </t>
+          </li>
+          <li>
+            <t>
+              Strings MUST use minimal escape sequences.
+            </t>
+          </li>
+          <li>
+            <t>
+              Encoding MUST be UTF-8 without BOM.
+            </t>
+          </li>
+          <li>
+            <t>
+              Null values MUST be preserved as "null" (MUST NOT be omitted).
+            </t>
+          </li>
+        </ul>
+        <t>
+          Canonicalization ensures byte-identical serialization across implementations and platforms.
+        </t>
+      </section>
+    </section>
+
+    <section anchor="causal-chain" numbered="true" toc="default">
+      <name>Causal Chain</name>
+      <t>
+        Provara maintains per-actor causal chains via the prev_event_hash field.
+      </t>
+      <section anchor="chain-model" numbered="true" toc="default">
+        <name>Chain Model</name>
+        <t>
+          Unlike blockchains that enforce global ordering, Provara maintains separate chains per actor:
+        </t>
+        <artwork name="" type="" align="left" alt="Per-Actor Chains">
+<![CDATA[
+Actor Alice:  evt_001 → evt_003 → evt_007 → evt_012
+Actor Bob:    evt_002 → evt_004 → evt_009
+Actor Carol:  evt_005 → evt_006 → evt_010 → evt_011
+]]>
+        </artwork>
+        <t>
+          Benefits:
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              <strong>Concurrency:</strong> Actors can append events independently without coordination.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Fork Detection:</strong> Conflicting chains from the same actor are immediately detectable.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Efficiency:</strong> Verification is O(n) per actor, not O(n²) across all actors.
+            </t>
+          </li>
+        </ul>
+      </section>
+      <section anchor="chain-rules" numbered="true" toc="default">
+        <name>Chain Rules</name>
+        <t>
+          Implementations MUST follow these rules:
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              First event by an actor: prev_event_hash MUST be null.
+            </t>
+          </li>
+          <li>
+            <t>
+              Subsequent events: prev_event_hash MUST equal the event_id of that actor's immediately preceding event.
+            </t>
+          </li>
+          <li>
+            <t>
+              Cross-actor references: prev_event_hash MUST NOT reference another actor's events.
+            </t>
+          </li>
+        </ul>
+      </section>
+      <section anchor="chain-validation" numbered="true" toc="default">
+        <name>Chain Validation Algorithm</name>
+        <t>
+          To verify a chain:
+        </t>
+        <artwork name="" type="" align="left" alt="Chain Validation">
+<![CDATA[
+def verify_chain(events: List[Event]) -> bool:
+    by_actor = group_by(events, lambda e: e.actor)
+    for actor, actor_events in by_actor.items():
+        for i, event in enumerate(actor_events):
+            if i == 0:
+                assert event.prev_event_hash is None  # Genesis
+            else:
+                assert event.prev_event_hash == actor_events[i-1].event_id
+    return True
+]]>
+        </artwork>
+      </section>
+    </section>
+
+    <section anchor="manifest-integrity" numbered="true" toc="default">
+      <name>Manifest and Integrity</name>
+      <section anchor="manifest-structure" numbered="true" toc="default">
+        <name>Manifest Structure</name>
+        <t>
+          The manifest provides integrity verification for all vault files:
+        </t>
+        <artwork name="" type="json" align="left" alt="Manifest Example">
+<![CDATA[
+{
+  "manifest_version": "1.0",
+  "vault_uid": "my-vault",
+  "generated_at": "2026-02-18T12:00:00Z",
+  "files": [
+    {"path": "events/events.ndjson", "sha256": "abc123...", "size": 1234},
+    {"path": "identity/genesis.json", "sha256": "def456...", "size": 567},
+    ...
+  ],
+  "merkle_root": "<SHA-256 Merkle root of file hashes>"
+}
+]]>
+        </artwork>
+        <t>
+          The manifest is signed with the vault's Ed25519 key.
+        </t>
+      </section>
+      <section anchor="merkle-tree" numbered="true" toc="default">
+        <name>Merkle Tree Construction</name>
+        <t>
+          The Merkle tree is computed as follows:
+        </t>
+        <ol spacing="normal" type="1">
+          <li>
+            <t>
+              Sort files lexicographically by path.
+            </t>
+          </li>
+          <li>
+            <t>
+              For each file, compute leaf_hash = SHA-256 of canonical JSON bytes of {"path": "...", "sha256": "...", "size": N}.
+            </t>
+          </li>
+          <li>
+            <t>
+              If leaf count is odd, duplicate the last leaf.
+            </t>
+          </li>
+          <li>
+            <t>
+              Compute internal nodes: node_hash = SHA-256(left_child_bytes || right_child_bytes).
+            </t>
+          </li>
+          <li>
+            <t>
+              The root is a single 64-character lowercase hex string.
+            </t>
+          </li>
+        </ol>
+        <t>
+          The Merkle root is stored in merkle_root.txt for quick integrity checks.
+        </t>
+      </section>
+      <section anchor="verification" numbered="true" toc="default">
+        <name>Integrity Verification</name>
+        <t>
+          To verify vault integrity:
+        </t>
+        <ol spacing="normal" type="1">
+          <li>
+            <t>
+              Hash all files, compare against manifest entries.
+            </t>
+          </li>
+          <li>
+            <t>
+              Recompute Merkle root, compare against stored value.
+            </t>
+          </li>
+          <li>
+            <t>
+              Verify manifest signature.
+            </t>
+          </li>
+        </ol>
+        <t>
+          Any mismatch indicates tampering or corruption.
+        </t>
+      </section>
+    </section>
+
+    <section anchor="extension-mechanism" numbered="true" toc="default">
+      <name>Extension Mechanism</name>
+      <section anchor="custom-event-types" numbered="true" toc="default">
+        <name>Custom Event Types</name>
+        <t>
+          Implementations MAY define custom event types using reverse-domain notation:
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              Format: com.example.domain.event_type
+            </t>
+          </li>
+          <li>
+            <t>
+              Examples: com.acme.audit.login, org.hl7.fhir.observation
+            </t>
+          </li>
+          <li>
+            <t>
+              Custom types MUST NOT collide with reserved core types.
+            </t>
+          </li>
+        </ul>
+        <t>
+          Custom event types SHOULD be registered in the extension registry (see <xref target="EXTENSION_REGISTRY"/>).
+        </t>
+      </section>
+      <section anchor="EXTENSION_REGISTRY" numbered="true" toc="default">
+        <name>Extension Registry</name>
+        <t>
+          The extension registry process allows proposing new event types without forking the core protocol:
+        </t>
+        <ol spacing="normal" type="1">
+          <li>
+            <t>
+              Open a GitHub issue titled "RFC: event type &lt;reverse-domain-name&gt;".
+            </t>
+          </li>
+          <li>
+            <t>
+              Include: type name, owner/maintainer, payload schema (JSON Schema), reducer impact (none by default), security considerations.
+            </t>
+          </li>
+          <li>
+            <t>
+              Maintainers label as extension:proposed, extension:accepted, or extension:rejected.
+            </t>
+          </li>
+        </ol>
+        <t>
+          Accepted extensions are listed in the extension registry document.
+        </t>
+      </section>
+      <section anchor="scitt-compatibility" numbered="true" toc="default">
+        <name>SCITT Compatibility</name>
+        <t>
+          Provara implements IETF SCITT Phase 1 <xref target="SCITT"/> event types:
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              <strong>SIGNED_STATEMENT:</strong> Maps to SCITT Signed Statements.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>RECEIPT:</strong> Captures transparency service receipts.
+            </t>
+          </li>
+        </ul>
+        <t>
+          Export bundles are compatible with SCITT verifiers.
+        </t>
+      </section>
+    </section>
+
+    <section anchor="security-considerations" numbered="true" toc="default">
+      <name>Security Considerations</name>
+      <section anchor="threat-model" numbered="true" toc="default">
+        <name>Threat Model Summary</name>
+        <t>
+          Provara is analyzed using the STRIDE framework <xref target="SHOSTACK"/>. Key findings:
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              <strong>Spoofing:</strong> Mitigated by Ed25519 signatures. Residual risk: key theft via malware/phishing.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Tampering:</strong> Mitigated by signatures + causal chains + Merkle trees. No known attacks.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Repudiation:</strong> Mitigated by cryptographic binding. Signatures are non-repudiable.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Information Disclosure:</strong> Out of scope (Provara does not encrypt).
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Denial of Service:</strong> User responsibility (backups, availability).
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Elevation of Privilege:</strong> No privilege model; cryptographic access control only.
+            </t>
+          </li>
+        </ul>
+      </section>
+      <section anchor="key-management" numbered="true" toc="default">
+        <name>Key Management Requirements</name>
+        <t>
+          Private keys MUST be secured as follows:
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              Store keys encrypted at rest (OS keychain, HSM, YubiKey).
+            </t>
+          </li>
+          <li>
+            <t>
+              Never store private keys on the same drive as the vault.
+            </t>
+          </li>
+          <li>
+            <t>
+              Maintain offline backups in separate physical locations.
+            </t>
+          </li>
+          <li>
+            <t>
+              Use quorum keys for recovery (multi-location storage).
+            </t>
+          </li>
+          <li>
+            <t>
+              Rotate keys immediately if compromise is suspected.
+            </t>
+          </li>
+        </ul>
+      </section>
+      <section anchor="attack-resistance" numbered="true" toc="default">
+        <name>Replay, Forgery, and Tampering Resistance</name>
+        <t>
+          Provara resists the following attacks:
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              <strong>Replay attacks:</strong> Event IDs are content-addressed; duplicate events have identical IDs and are detected.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Forgery attacks:</strong> Forging a signature requires breaking Ed25519 (128-bit security level).
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Tampering attacks:</strong> Modifying an event changes its event_id, breaking the causal chain and Merkle root.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Chain skipping:</strong> Inserting events breaks prev_event_hash linkage.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Equivocation attacks:</strong> SHA-256 collision resistance prevents two events with the same hash.
+            </t>
+          </li>
+        </ul>
+      </section>
+      <section anchor="post-quantum" numbered="true" toc="default">
+        <name>Post-Quantum Migration Path</name>
+        <t>
+          Ed25519 and SHA-256 are vulnerable to large-scale quantum computers <xref target="SHOR"/>. Provara's migration path:
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              <strong>Dual-signing:</strong> Support Ed25519 + ML-DSA (FIPS 204) signatures simultaneously.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Configurable hash functions:</strong> Allow migration to SHA-3 or SHAKE.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Versioned event formats:</strong> New profile versions can specify post-quantum algorithms.
+            </t>
+          </li>
+        </ul>
+        <t>
+          A post-quantum extension is planned for 2027, contingent on NIST PQC standardization <xref target="NIST_PQC"/>.
+        </t>
+      </section>
+    </section>
+
+    <section anchor="iana-considerations" numbered="true" toc="default">
+      <name>IANA Considerations</name>
+      <section anchor="event-type-namespace" numbered="true" toc="default">
+        <name>Event Type Namespace Registration</name>
+        <t>
+          This document requests registration of the "Provara Event Type" namespace:
+        </t>
+        <ul spacing="normal">
+          <li>
+            <t>
+              <strong>Namespace:</strong> Provara Event Types
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Registration policy:</strong> First-come, first-served for reverse-domain names; expert review for core types.
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Format:</strong> Reverse-domain notation (e.g., com.example.event_type).
+            </t>
+          </li>
+          <li>
+            <t>
+              <strong>Reserved core types:</strong> GENESIS, OBSERVATION, ASSERTION, ATTESTATION, RETRACTION, KEY_REVOCATION, KEY_PROMOTION, REDUCER_EPOCH, SIGNED_STATEMENT, RECEIPT.
+            </t>
+          </li>
+        </ul>
+      </section>
+      <section anchor="media-type" numbered="true" toc="default">
+        <name>Media Type Registration</name>
+        <t>
+          This document requests registration of the following media type:
+        </t>
+        <dl newline="false" spacing="normal">
+          <dt>Type name:</dt>
+          <dd>application</dd>
+          <dt>Subtype name:</dt>
+          <dd>provara+json</dd>
+          <dt>Required parameters:</dt>
+          <dd>None</dd>
+          <dt>Optional parameters:</dt>
+          <dd>profile (e.g., "PROVARA-1.0_PROFILE_A")</dd>
+          <dt>Encoding considerations:</dt>
+          <dd>UTF-8; JSON per RFC 8785</dd>
+          <dt>Security considerations:</dt>
+          <dd>See Section 8 of this document</dd>
+          <dt>Interoperability considerations:</dt>
+          <dd>Provara implementations MUST use RFC 8785 canonical JSON</dd>
+          <dt>Published specification:</dt>
+          <dd>This document</dd>
+          <dt>Applications:</dt>
+          <dd>AI agent memory, supply chain provenance, legal discovery, audit logging</dd>
+          <dt>Fragment identifier considerations:</dt>
+          <dd>Event IDs (evt_...) may be used as fragment identifiers</dd>
+          <dt>Additional information:</dt>
+          <dd>
+            <dl newline="false" spacing="compact">
+              <dt>Magic number(s):</dt>
+              <dd>None</dd>
+              <dt>File extension(s):</dt>
+              <dd>.provara</dd>
+              <dt>Macintosh file type code(s):</dt>
+              <dd>None</dd>
+            </dl>
+          </dd>
+          <dt>Person &amp; email address to contact for further information:</dt>
+          <dd>contact@provara.dev</dd>
+          <dt>Intended usage:</dt>
+          <dd>COMMON</dd>
+          <dt>Restrictions on usage:</dt>
+          <dd>None</dd>
+          <dt>Author:</dt>
+          <dd>Hunt Information Systems LLC</dd>
+          <dt>Change controller:</dt>
+          <dd>IETF</dd>
+        </dl>
+      </section>
+    </section>
+  </middle>
+  <back>
+    <references>
+      <name>References</name>
+      <references>
+        <name>Normative References</name>
+        <reference anchor="RFC2119" target="https://www.rfc-editor.org/rfc/rfc2119">
+          <front>
+            <title>Key words for use in RFCs to Indicate Requirement Levels</title>
+            <author initials="S." surname="Bradner">
+              <organization/>
+            </author>
+            <date year="1997" month="March"/>
+          </front>
+          <seriesInfo name="RFC" value="2119"/>
+          <seriesInfo name="DOI" value="10.17487/RFC2119"/>
+        </reference>
+        <reference anchor="RFC8174" target="https://www.rfc-editor.org/rfc/rfc8174">
+          <front>
+            <title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
+            <author initials="B." surname="Leiba">
+              <organization/>
+            </author>
+            <date year="2017" month="May"/>
+          </front>
+          <seriesInfo name="RFC" value="8174"/>
+          <seriesInfo name="DOI" value="10.17487/RFC8174"/>
+        </reference>
+        <reference anchor="RFC8032" target="https://www.rfc-editor.org/rfc/rfc8032">
+          <front>
+            <title>Edwards-Curve Digital Signature Algorithm (EdDSA)</title>
+            <author initials="S." surname="Josefsson"/>
+            <author initials="I." surname="Liusvaara"/>
+            <date year="2017" month="January"/>
+          </front>
+          <seriesInfo name="RFC" value="8032"/>
+          <seriesInfo name="DOI" value="10.17487/RFC8032"/>
+        </reference>
+        <reference anchor="RFC8785" target="https://www.rfc-editor.org/rfc/rfc8785">
+          <front>
+            <title>JSON Canonicalization Scheme (JCS)</title>
+            <author initials="M." surname="Jones"/>
+            <date year="2020" month="June"/>
+          </front>
+          <seriesInfo name="RFC" value="8785"/>
+          <seriesInfo name="DOI" value="10.17487/RFC8785"/>
+        </reference>
+        <reference anchor="FIPS180-4" target="https://doi.org/10.6028/NIST.FIPS.180-4">
+          <front>
+            <title>Secure Hash Standard (SHS)</title>
+            <author>
+              <organization>NIST</organization>
+            </author>
+            <date year="2015"/>
+          </front>
+          <seriesInfo name="FIPS" value="PUB 180-4"/>
+        </reference>
+        <reference anchor="FIPS186-5" target="https://doi.org/10.6028/NIST.FIPS.186-5">
+          <front>
+            <title>Digital Identity Standard</title>
+            <author>
+              <organization>NIST</organization>
+            </author>
+            <date year="2023"/>
+          </front>
+          <seriesInfo name="FIPS" value="PUB 186-5"/>
+        </reference>
+      </references>
+      <references>
+        <name>Informative References</name>
+        <reference anchor="RFC6962" target="https://www.rfc-editor.org/rfc/rfc6962">
+          <front>
+            <title>Certificate Transparency</title>
+            <author initials="B." surname="Laurie"/>
+            <author initials="A." surname="Langley"/>
+            <author initials="E." surname="Kasper"/>
+            <date year="2013" month="June"/>
+          </front>
+          <seriesInfo name="RFC" value="6962"/>
+          <seriesInfo name="DOI" value="10.17487/RFC6962"/>
+        </reference>
+        <reference anchor="SCITT" target="https://datatracker.ietf.org/wg/scitt/documents/">
+          <front>
+            <title>IETF SCITT Working Group Documents</title>
+            <author>
+              <organization>IETF</organization>
+            </author>
+            <date year="2025"/>
+          </front>
+          <seriesInfo name="Internet-Draft" value="Multiple"/>
+        </reference>
+        <reference anchor="RFC3161" target="https://www.rfc-editor.org/rfc/rfc3161">
+          <front>
+            <title>Internet X.509 Public Key Infrastructure Time-Stamp Protocol (TSP)</title>
+            <author initials="C." surname="Adams"/>
+            <date year="2001" month="August"/>
+          </front>
+          <seriesInfo name="RFC" value="3161"/>
+          <seriesInfo name="DOI" value="10.17487/RFC3161"/>
+        </reference>
+        <reference anchor="SHOSTACK" target="https://csrc.nist.gov/glossary/term/stride">
+          <front>
+            <title>STRIDE Threat Model</title>
+            <author initials="A." surname="Shostack"/>
+            <date year="2014"/>
+          </front>
+          <seriesInfo name="Book" value="Threat Modeling: Designing for Security"/>
+        </reference>
+        <reference anchor="SHOR" target="https://doi.org/10.1137/S0097539795293172">
+          <front>
+            <title>Polynomial-Time Algorithms for Prime Factorization and Discrete Logarithms on a Quantum Computer</title>
+            <author initials="P. W." surname="Shor"/>
+            <date year="1997"/>
+          </front>
+          <seriesInfo name="Journal" value="SIAM Journal on Computing"/>
+          <seriesInfo name="Volume" value="26"/>
+          <seriesInfo name="Issue" value="5"/>
+          <seriesInfo name="Pages" value="1484-1509"/>
+        </reference>
+        <reference anchor="NIST_PQC" target="https://csrc.nist.gov/projects/post-quantum-cryptography">
+          <front>
+            <title>Post-Quantum Cryptography Standardization</title>
+            <author>
+              <organization>NIST</organization>
+            </author>
+            <date year="2024"/>
+          </front>
+        </reference>
+      </references>
+    </references>
+
+    <section anchor="appendix-event-schema" numbered="true" toc="default">
+      <name>Event Schema (Normative)</name>
+      <t>
+        The following JSON Schema defines the Provara event format:
+      </t>
+      <artwork name="" type="json" align="left" alt="Event Schema">
+<![CDATA[
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "event_id", "type", "actor", "timestamp_utc",
+    "payload", "signature", "public_key", "key_id"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt_[0-9a-f]{32}$"
+    },
+    "type": {
+      "type": "string"
+    },
+    "actor": {
+      "type": "string"
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payload": {
+      "type": "object"
+    },
+    "prev_event_hash": {
+      "type": "string",
+      "pattern": "^evt_[0-9a-f]{32}$"
+    },
+    "signature": {
+      "type": "string"
+    },
+    "public_key": {
+      "type": "string"
+    },
+    "key_id": {
+      "type": "string",
+      "pattern": "^bp1_[0-9a-f]{16}$"
+    }
+  }
+}
+]]>
+      </artwork>
+    </section>
+
+    <section anchor="appendix-cli" numbered="true" toc="default">
+      <name>CLI Reference</name>
+      <t>
+        The Provara CLI provides these commands:
+      </t>
+      <artwork name="" type="" align="left" alt="CLI Commands">
+<![CDATA[
+# Create vault
+provara init my-vault
+
+# Append event
+provara append my-vault \
+  --type OBSERVATION \
+  --data '{"key":"value"}' \
+  --keyfile my-vault/identity/private_keys.json
+
+# Verify integrity
+provara verify my-vault
+
+# Export for legal discovery
+provara export my-vault \
+  --format scitt-compat \
+  --output evidence-bundle/
+
+# List plugins
+provara plugins list
+]]>
+      </artwork>
+    </section>
+
+    <section anchor="acknowledgements" numbered="false" toc="default">
+      <name>Acknowledgements</name>
+      <t>
+        The authors thank the IETF SCITT working group for their work on supply chain integrity, which influenced Provara's design. The Provara protocol is available under Apache 2.0 at https://github.com/provara-protocol/provara.
+      </t>
+    </section>
+  </back>
+</rfc>
