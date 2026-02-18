@@ -48,9 +48,18 @@ def tmp_vault_path(tmp_path):
 @pytest.fixture
 def encrypted_vault(tmp_vault_path):
     """Create an encrypted vault for testing."""
-    vault = create_encrypted_vault(tmp_vault_path, "test_actor", "per-event")
-    result = bootstrap_backpack(vault, actor="test_actor", quiet=True)
-    
+    # Bootstrap first (needs empty directory)
+    result = bootstrap_backpack(tmp_vault_path, actor="test_actor", quiet=True)
+    assert result.success, f"Bootstrap failed: {result.errors}"
+
+    # Then add encryption config on top
+    config_path = tmp_vault_path / "identity" / "encryption_config.json"
+    config_path.write_text(json.dumps({
+        "encryption_enabled": True,
+        "encryption_mode": "per-event",
+        "algorithm": "AES-256-GCM",
+    }, indent=2))
+
     # Save private keys
     keys_list = [
         {
@@ -65,11 +74,11 @@ def encrypted_vault(tmp_vault_path):
             "private_key_b64": result.quorum_private_key_b64,
             "algorithm": "Ed25519"
         })
-    
-    keyfile = vault / "identity" / "private_keys.json"
+
+    keyfile = tmp_vault_path / "identity" / "private_keys.json"
     keyfile.write_text(json.dumps({"keys": keys_list}, indent=2))
-    
-    return vault
+
+    return tmp_vault_path
 
 
 class TestPrivacyKeyStore:
@@ -231,16 +240,21 @@ class TestShredEvent:
 
     def test_shred_unencrypted_event(self, tmp_vault_path):
         """Shred unencrypted event raises error."""
-        bootstrap_backpack(tmp_vault_path, actor="test_actor", quiet=True)
+        result = bootstrap_backpack(tmp_vault_path, actor="test_actor", quiet=True)
+        assert result.success
+
+        # Create keyfile from bootstrap result
+        keys_list = [{"key_id": result.root_key_id, "private_key_b64": result.root_private_key_b64, "algorithm": "Ed25519"}]
         keyfile = tmp_vault_path / "identity" / "private_keys.json"
-        
-        # Save keys
-        import json
-        keys_data = json.loads(keyfile.read_text())
-        key_id = list(keys_data.keys())[0] if "keys" not in keys_data else keys_data["keys"][0]["key_id"]
+        keyfile.write_text(json.dumps({"keys": keys_list}, indent=2))
+
+        # Use a real event ID from the vault (GENESIS event is unencrypted)
+        events_path = tmp_vault_path / "events" / "events.ndjson"
+        events = load_events(events_path)
+        target_id = events[0]["event_id"]
 
         with pytest.raises(ValueError, match="not encrypted"):
-            shred_event(tmp_vault_path, "evt_any", keyfile)
+            shred_event(tmp_vault_path, target_id, keyfile)
 
 
 class TestShredActor:

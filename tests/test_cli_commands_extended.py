@@ -13,7 +13,7 @@ from provara.cli import (
 @pytest.fixture
 def vault_path(tmp_path):
     path = tmp_path / "cli_vault"
-    args = argparse.Namespace(path=str(path), uid="cli-test", actor="cli_actor", quorum=True, private_keys=None)
+    args = argparse.Namespace(path=str(path), uid="cli-test", actor="cli_actor", quorum=True, private_keys=None, encrypted=False, mode="per-event")
     cmd_init(args)
     (path / "merkle_root.txt").write_text("mock_root")
     return path

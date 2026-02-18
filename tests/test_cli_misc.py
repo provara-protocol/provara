@@ -25,4 +25,4 @@ def test_cmd_init_fail(tmp_path):
     # Target not empty
     (tmp_path / "file.txt").write_text("stuff")
     with pytest.raises(SystemExit):
-        cmd_init(argparse.Namespace(path=str(tmp_path), uid="u", actor="a", quorum=False, private_keys=None))
+        cmd_init(argparse.Namespace(path=str(tmp_path), uid="u", actor="a", quorum=False, private_keys=None, encrypted=False, mode="per-event"))

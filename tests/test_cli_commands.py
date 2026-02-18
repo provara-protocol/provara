@@ -19,7 +19,9 @@ def initialized_vault(empty_vault_path):
         uid="test-uid-123",
         actor="test_actor",
         quorum=True,
-        private_keys=None
+        private_keys=None,
+        encrypted=False,
+        mode="per-event",
     )
     cmd_init(args)
     return empty_vault_path
@@ -34,7 +36,9 @@ def test_cmd_init(empty_vault_path):
         uid="test-uid",
         actor="gen_actor",
         quorum=True,
-        private_keys=None
+        private_keys=None,
+        encrypted=False,
+        mode="per-event",
     )
     cmd_init(args)
     

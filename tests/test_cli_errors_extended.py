@@ -7,7 +7,7 @@ from provara.cli import cmd_append, cmd_init, cmd_verify, cmd_backup, cmd_export
 @pytest.fixture
 def vault_path(tmp_path):
     path = tmp_path / "err_vault"
-    cmd_init(argparse.Namespace(path=str(path), uid="u", actor="a", quorum=False, private_keys=None))
+    cmd_init(argparse.Namespace(path=str(path), uid="u", actor="a", quorum=False, private_keys=None, encrypted=False, mode="per-event"))
     return path
 
 @pytest.fixture
