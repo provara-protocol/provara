@@ -1,0 +1,30 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.provara-protocol/provara-vault",
+  "description": "Cryptographically verified memory for AI agents. Ed25519 signed, tamper-evident event logs with Merkle tree integrity.",
+  "repository": {
+    "url": "https://github.com/provara-protocol/provara",
+    "source": "github"
+  },
+  "version": "1.0.1",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "provara-protocol",
+      "version": "1.0.1",
+      "runtimeHint": "python",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "PROVARA_VAULT_PATH",
+          "description": "Path to the Provara vault directory",
+          "format": "string",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

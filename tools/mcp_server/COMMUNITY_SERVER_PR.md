@@ -2,7 +2,9 @@
 
 **PR Title:** Add Provara Vault — Cryptographically verified memory for AI agents
 
-**Target Repository:** modelcontextprotocol/servers (or MCP Registry)
+**Target:** MCP Registry (modelcontextprotocol/registry)
+
+**Note:** The modelcontextprotocol/servers repository is no longer accepting new server submissions (as of 2025). All community servers must now be published via the [MCP Registry](https://github.com/modelcontextprotocol/registry).
 
 **Date:** 2026-02-18
 
@@ -61,7 +63,13 @@ Add to `claude_desktop_config.json`:
 
 ## README Addition (for Community Servers List)
 
-### Exact Text to Add
+### Note
+
+The modelcontextprotocol/servers repository is **no longer accepting** new server submissions. Community servers are now published via the [MCP Registry](https://registry.modelcontextprotocol.io/).
+
+### Registry Listing Format
+
+Once published to the MCP Registry, Provara Vault will appear as:
 
 ```markdown
 ### Provara Vault
@@ -74,58 +82,90 @@ tamper-evident, multi-actor event logs with causal chain integrity.
   `check_safety`, `scitt_export` (14 tools)
 - **Resources:** `vault://events`, `vault://status`
 - **Install:** `pip install provara-protocol[mcp]`
+- **Registry:** [MCP Registry](https://registry.modelcontextprotocol.io/servers/io.github.provara-protocol/provara-vault)
 - **Repo:** [provara-protocol/provara](https://github.com/provara-protocol/provara)
 - **Docs:** [Provara Documentation](https://provara-protocol.github.io/provara/)
 ```
 
-### Where to Add
+### Where to Find
 
-Insert alphabetically under "P" in the community servers list, or submit via the MCP Registry at https://modelcontextprotocol.io/registry.
+After publishing, the server will be discoverable at:
+- MCP Registry: https://registry.modelcontextprotocol.io/
+- Search: `provara` or `io.github.provara-protocol/provara-vault`
 
 ---
 
 ## MCP Registry Submission (server.json)
 
-For the official MCP Registry, prepare:
+### Publishing Steps
+
+1. **Publish to PyPI** (already done: `provara-protocol`)
+2. **Create server.json** (see below)
+3. **Authenticate** with MCP Registry via GitHub OAuth
+4. **Publish** using `mcp-publisher` CLI
+
+### server.json
 
 ```json
 {
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.provara-protocol/provara-vault",
-  "location": "pypi:provara-protocol[mcp]",
-  "description": "Cryptographically verified memory for AI agents with tamper-evident event logs",
-  "capabilities": {
-    "tools": [
-      "init_vault",
-      "append_event",
-      "verify_vault",
-      "query_events",
-      "forensic_export",
-      "checkpoint_vault",
-      "export_markdown",
-      "list_conflicts",
-      "generate_digest",
-      "verify_chain",
-      "snapshot_state",
-      "query_timeline",
-      "check_safety",
-      "scitt_export"
-    ],
-    "resources": [
-      "vault://events",
-      "vault://status"
-    ]
+  "description": "Cryptographically verified memory for AI agents. Ed25519 signed, tamper-evident event logs with Merkle tree integrity.",
+  "repository": {
+    "url": "https://github.com/provara-protocol/provara",
+    "source": "github"
   },
-  "execution": {
-    "command": "python",
-    "args": ["-m", "provara.mcp", "--transport", "stdio"],
-    "env": {
-      "PROVARA_VAULT_PATH": "${VAULT_PATH}"
+  "version": "1.0.1",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "provara-protocol",
+      "version": "1.0.1",
+      "runtimeHint": "python",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "PROVARA_VAULT_PATH",
+          "description": "Path to the Provara vault directory",
+          "format": "string",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
     }
-  },
-  "repository": "https://github.com/provara-protocol/provara",
-  "documentation": "https://provara-protocol.github.io/provara/",
-  "version": "1.0.1"
+  ]
 }
+```
+
+### Namespace Authentication
+
+For the `io.github.provara-protocol` namespace, authenticate via:
+
+**Option A: GitHub OAuth**
+```bash
+mcp-publisher login github
+```
+
+**Option B: GitHub Actions OIDC** (for CI/CD)
+- Run from a GitHub Actions workflow in the `provara-protocol` organization
+- Automatic OIDC token exchange
+
+### Publishing Commands
+
+```bash
+# Install mcp-publisher (macOS/Linux)
+curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher && sudo mv mcp-publisher /usr/local/bin/
+
+# Login
+mcp-publisher login github
+
+# Publish
+mcp-publisher publish
+
+# Verify
+curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=provara"
 ```
 
 ---
