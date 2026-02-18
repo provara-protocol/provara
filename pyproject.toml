@@ -53,6 +53,9 @@ timestamps = [
 mcp = [
     "mcp>=1.0",
 ]
+sigstore = [
+    "sigstore>=3.0",
+]
 
 [project.scripts]
 provara = "provara.cli:main"
@@ -101,3 +104,13 @@ omit = [
     "tools/*",
     "*/__pycache__/*",
 ]
+
+[tool.hypothesis]
+
+[tool.hypothesis.profiles.ci]
+max_examples = 200
+deadline = 5000
+
+[tool.hypothesis.profiles.dev]
+max_examples = 1000
+deadline = 5000

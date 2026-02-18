@@ -1168,6 +1168,64 @@ def cmd_forensic_export(args: argparse.Namespace) -> None:
     print("Verify with:       python verify.py")
 
 
+def cmd_anchor(args: argparse.Namespace) -> None:
+    """Handle ``provara anchor`` — anchor vault state to Sigstore."""
+    from .sigstore_anchor import anchor_to_sigstore
+
+    vault = Path(args.path).resolve()
+    event_id: Optional[str] = getattr(args, "event_id", None)
+    staging: bool = getattr(args, "staging", False)
+
+    if event_id:
+        print(f"[anchor] Anchoring event {event_id} to Sigstore...")
+    else:
+        print(f"[anchor] Anchoring vault Merkle root to Sigstore...")
+    if staging:
+        print("[anchor] Using Sigstore STAGING environment")
+
+    try:
+        result = anchor_to_sigstore(vault, event_id=event_id, staging=staging)
+    except ImportError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
+    except (ValueError, RuntimeError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"[anchor] Log index:    {result.log_index}")
+    print(f"[anchor] Log ID:       {result.log_id}")
+    print(f"[anchor] Integrated:   {result.integrated_time.isoformat()}")
+    print(f"[anchor] Verify at:    {result.verification_url}")
+    if result.anchor_path:
+        print(f"[anchor] Saved to:     {result.anchor_path}")
+
+
+def cmd_verify_anchor(args: argparse.Namespace) -> None:
+    """Handle ``provara verify-anchor`` — verify a Sigstore anchor."""
+    from .sigstore_anchor import verify_sigstore_anchor
+
+    vault = Path(args.path).resolve()
+    anchor_path = Path(args.anchor_path).resolve()
+
+    print(f"[verify-anchor] Verifying anchor: {anchor_path}")
+
+    try:
+        valid = verify_sigstore_anchor(vault, anchor_path)
+    except ImportError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    if valid:
+        print("[verify-anchor] PASS — Sigstore anchor is valid")
+    else:
+        print("[verify-anchor] FAIL — Sigstore bundle verification failed",
+              file=sys.stderr)
+        sys.exit(1)
+
+
 def main() -> None:
     """CLI entrypoint.
 
@@ -1369,8 +1427,8 @@ def main() -> None:
     p_vt = sub.add_parser("verify-timestamps", help="Verify all RFC 3161 timestamps in a vault")
     p_vt.add_argument("path", help="Path to vault")
 
-    # timestamp (existing)
-    p_te = sub.add_parser("timestamp", help="Request RFC 3161 timestamp for an existing event")
+    # timestamp-event (existing)
+    p_te = sub.add_parser("timestamp-event", help="Request RFC 3161 timestamp for an existing event")
     p_te.add_argument("path", help="Path to vault")
     p_te.add_argument("event_id", help="Event ID to timestamp")
     p_te.add_argument("--tsa-url", help="Custom TSA URL")
@@ -1459,6 +1517,38 @@ def main() -> None:
         help="Include raw/vault_snapshot.tar.gz in the bundle",
     )
 
+    # anchor — Sigstore transparency log anchoring
+    p_anchor = sub.add_parser(
+        "anchor",
+        help="Anchor vault Merkle root (or event hash) to Sigstore transparency log",
+    )
+    p_anchor.add_argument("path", help="Path to vault")
+    p_anchor.add_argument(
+        "--event",
+        dest="event_id",
+        default=None,
+        help="Anchor specific event canonical hash (default: full Merkle root)",
+    )
+    p_anchor.add_argument(
+        "--staging",
+        action="store_true",
+        default=False,
+        help="Use Sigstore staging environment (for testing)",
+    )
+
+    # verify-anchor — verify a Sigstore anchor
+    p_va = sub.add_parser(
+        "verify-anchor",
+        help="Verify a Sigstore transparency log anchor against the vault",
+    )
+    p_va.add_argument("path", help="Path to vault")
+    p_va.add_argument(
+        "--anchor",
+        required=True,
+        dest="anchor_path",
+        help="Path to the anchor JSON file to verify",
+    )
+
     args = parser.parse_args()
     
     if args.command == "init": cmd_init(args)
@@ -1486,7 +1576,7 @@ def main() -> None:
     elif args.command == "send-message": cmd_send_message(args)
     elif args.command == "read-messages": cmd_read_messages(args)
     elif args.command == "verify-timestamps": cmd_verify_timestamps(args)
-    elif args.command == "timestamp": cmd_timestamp_existing(args)
+    elif args.command == "timestamp-event": cmd_timestamp_existing(args)
     elif args.command == "plugins":
         if args.plugins_command == "list":
             cmd_plugins_list(args)
@@ -1499,6 +1589,10 @@ def main() -> None:
             cmd_scitt_receipt(args)
     elif args.command == "forensic-export":
         cmd_forensic_export(args)
+    elif args.command == "anchor":
+        cmd_anchor(args)
+    elif args.command == "verify-anchor":
+        cmd_verify_anchor(args)
 
 if __name__ == "__main__":
     main()

@@ -35,6 +35,9 @@ jobs:
           python -m pytest tests/test_reducer_v0.py tests/test_rekey.py tests/test_bootstrap.py tests/test_sync_v0.py -q
           python -m pytest tests/test_cli.py tests/test_package.py -q
 
+      - name: Run property-based tests
+        run: python -m pytest tests/test_fuzz_*.py -v --hypothesis-seed=0 --hypothesis-profile=ci
+
   test:
     runs-on: ${{ matrix.os }}
     strategy:

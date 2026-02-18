@@ -1,0 +1,92 @@
+name: 'Provara Verify'
+description: 'Verify cryptographic integrity of Provara vaults'
+branding:
+  icon: 'shield'
+  color: 'green'
+
+inputs:
+  vault-path:
+    description: 'Path to the vault directory'
+    required: true
+  python-version:
+    description: 'Python version to use'
+    required: false
+    default: '3.12'
+  fail-on-error:
+    description: 'Fail the workflow if verification fails'
+    required: false
+    default: 'true'
+  verify-timestamps:
+    description: 'Also verify RFC 3161 timestamps if present'
+    required: false
+    default: 'false'
+  output-report:
+    description: 'Path to write verification report JSON'
+    required: false
+    default: ''
+
+outputs:
+  status:
+    description: 'PASS or FAIL'
+    value: ${{ steps.verify.outputs.status }}
+  event-count:
+    description: 'Number of events verified'
+    value: ${{ steps.verify.outputs.event-count }}
+  actor-count:
+    description: 'Number of actors in vault'
+    value: ${{ steps.verify.outputs.actor-count }}
+  chain-integrity:
+    description: 'true if all chains are valid'
+    value: ${{ steps.verify.outputs.chain-integrity }}
+  signature-integrity:
+    description: 'true if all signatures are valid'
+    value: ${{ steps.verify.outputs.signature-integrity }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install Provara
+      run: pip install provara-protocol
+      shell: bash
+
+    - name: Verify Vault
+      id: verify
+      run: python "${{ github.action_path }}/verify.py"
+      shell: bash
+      env:
+        VAULT_PATH: ${{ inputs.vault-path }}
+        FAIL_ON_ERROR: ${{ inputs.fail-on-error }}
+        VERIFY_TIMESTAMPS: ${{ inputs.verify-timestamps }}
+        OUTPUT_REPORT: ${{ inputs.output-report }}
+
+    - name: Verify Timestamps
+      if: ${{ inputs.verify-timestamps == 'true' }}
+      run: provara verify-timestamps "${{ inputs.vault-path }}"
+      shell: bash
+
+    - name: Post PR Comment
+      if: ${{ github.event_name == 'pull_request' }}
+      run: |
+        STATUS="${{ steps.verify.outputs.status }}"
+        EVENTS="${{ steps.verify.outputs.event-count }}"
+        ACTORS="${{ steps.verify.outputs.actor-count }}"
+        CHAIN="${{ steps.verify.outputs.chain-integrity }}"
+        SIGS="${{ steps.verify.outputs.signature-integrity }}"
+        if [ "$STATUS" = "PASS" ]; then ICON="✅"; else ICON="❌"; fi
+        CHAIN_ICON=$([ "$CHAIN" = "true" ] && echo "✓" || echo "✗")
+        SIG_ICON=$([ "$SIGS" = "true" ] && echo "✓" || echo "✗")
+        BODY="${ICON} **Provara Vault Verified**
+
+Events: ${EVENTS}
+Actors: ${ACTORS}
+Chain integrity: ${CHAIN_ICON}
+Signature integrity: ${SIG_ICON}"
+        gh pr comment "${{ github.event.pull_request.number }}" --body "$BODY" || true
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}

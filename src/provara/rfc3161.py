@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional, cast
 
 try:
     import rfc3161_client
@@ -40,7 +40,7 @@ class TimestampResult:
         self.hash_algorithm = hash_algorithm
         self.error = error
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "event_id": self.event_id,
             "valid": self.valid,
@@ -51,7 +51,7 @@ class TimestampResult:
             "error": self.error
         }
 
-def _check_dependency():
+def _check_dependency() -> None:
     if not HAS_RFC3161:
         raise ImportError(
             "RFC 3161 support requires the 'rfc3161-client' package. "
@@ -100,7 +100,7 @@ def request_timestamp(
         # To avoid double hashing, we might need to use the internal Request object.
         
         # Standard usage:
-        return rfc3161_client.request(tsa_url, data=event_hash, hash_data=True)
+        return cast(bytes, rfc3161_client.request(tsa_url, data=event_hash, hash_data=True))
     except Exception as e:
         logger.error(f"Failed to request timestamp from {tsa_url}: {e}")
         raise
