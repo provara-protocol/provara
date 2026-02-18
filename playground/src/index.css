@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-provara-primary: #9333ea;
+  --color-provara-dark: #2d1b4e;
+}
+
+body {
+  @apply bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100;
+}
+
+.chain-node {
+  @apply p-3 border rounded-md bg-slate-50 dark:bg-slate-800 cursor-pointer hover:shadow-md transition-shadow;
+}
+
+.chain-edge {
+  @apply stroke-slate-300 dark:stroke-slate-600;
+}
+
+.verification-badge {
+  @apply inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm font-medium;
+}
+
+.verification-badge.valid {
+  @apply bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100;
+}
+
+.verification-badge.invalid {
+  @apply bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100;
+}
+
+.json-editor {
+  @apply font-mono text-sm p-4 bg-slate-100 dark:bg-slate-800 rounded-md overflow-auto;
+}
