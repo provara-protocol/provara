@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "provara-audit-plugin"
+version = "1.0.0"
+description = "Example audit plugin for Provara Protocol"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Provara"}
+]
+dependencies = [
+    "provara-protocol>=1.0.0"
+]
+
+[project.entry-points."provara.plugins"]
+login_event = "audit_plugin:LoginEventPlugin"
+login_counter = "audit_plugin:LoginCounterReducer"
+csv_export = "audit_plugin:CSVExportPlugin"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["audit_plugin*"]

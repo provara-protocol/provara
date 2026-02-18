@@ -38,10 +38,13 @@ from .manifest_generator import build_manifest, manifest_leaves
 from .backpack_integrity import merkle_root_hex, MANIFEST_EXCLUDE, canonical_json_bytes
 from .reducer_v0 import SovereignReducerV0
 from .reducer_v1 import reduce_stream
+from .query import VaultIndex
+from .migrate import migrate_vault
 from .checkpoint_v0 import create_checkpoint, save_checkpoint, load_latest_checkpoint, verify_checkpoint
 from .sync_v0 import load_events, write_events
 from .export import export_vault_scitt_compat
 from .errors import ProvaraError, VaultStructureInvalidError
+from .plugins import registry as plugin_registry
 
 # Repo root: src/provara/../../  (two levels up from this file's directory)
 _repo_root = Path(__file__).resolve().parents[2]
@@ -374,6 +377,84 @@ def cmd_reduce(args: argparse.Namespace) -> None:
         return
 
     print(json.dumps(final_state.to_dict(), indent=2))
+
+
+def _print_table(rows: List[Dict[str, Any]]) -> None:
+    if not rows:
+        print("(no rows)")
+        return
+    print(f"{'event_id':<28} {'type':<24} {'actor':<24} {'timestamp_utc':<30}")
+    print("-" * 110)
+    for row in rows:
+        print(
+            f"{str(row.get('event_id', '')):<28} "
+            f"{str(row.get('type', '')):<24} "
+            f"{str(row.get('actor', '')):<24} "
+            f"{str(row.get('timestamp_utc', '')):<30}"
+        )
+
+
+def cmd_query(args: argparse.Namespace) -> None:
+    """Handle ``provara query``."""
+    vault = Path(args.path).resolve()
+    events_path = vault / "events" / "events.ndjson"
+    events_size = events_path.stat().st_size if events_path.exists() else 0
+    with VaultIndex(vault) as index:
+        if args.rebuild_index:
+            index.build()
+        elif not index.has_index_state() and events_size > 0:
+            index.build()
+        else:
+            index.update()
+
+        rows: List[Dict[str, Any]]
+        if args.actor and (args.after or args.before):
+            start = args.after or "0000-01-01T00:00:00Z"
+            end = args.before or "9999-12-31T23:59:59Z"
+            rows = index.query_by_actor_and_time(args.actor, start, end)
+        elif args.actor:
+            rows = index.query_by_actor(args.actor)
+        elif args.event_type:
+            rows = index.query_by_type(args.event_type)
+        elif args.after or args.before:
+            start = args.after or "0000-01-01T00:00:00Z"
+            end = args.before or "9999-12-31T23:59:59Z"
+            rows = index.query_by_time_range(start, end)
+        elif args.content_key and args.content_value:
+            rows = index.query_by_content(args.content_key, args.content_value)
+        else:
+            _cli_error(
+                "No query filter provided",
+                "query requires at least one filter",
+                "provide --actor, --type, --after/--before, or --content-key/--content-value",
+                "provara query --help",
+            )
+            return
+
+    if args.format == "table":
+        _print_table(rows)
+    else:
+        print(json.dumps(rows, indent=2))
+
+
+def cmd_migrate(args: argparse.Namespace) -> None:
+    """Handle ``provara migrate``."""
+    vault = Path(args.path).resolve()
+    report = migrate_vault(
+        vault,
+        target_version=args.target_version,
+        dry_run=args.dry_run,
+    )
+    print(json.dumps(
+        {
+            "source_version": report.source_version,
+            "target_version": report.target_version,
+            "events_migrated": report.events_migrated,
+            "changes": report.changes,
+            "migration_event_id": report.migration_event_id,
+        },
+        indent=2,
+    ))
 
 def cmd_append(args: argparse.Namespace) -> None:
     """Handle ``provara append`` event creation/signing.
@@ -747,6 +828,51 @@ def cmd_scitt_statement(args: argparse.Namespace) -> None:
     print(f"Recorded SCITT signed_statement: {signed['event_id']}")
 
 
+def cmd_plugins_list(args: argparse.Namespace) -> None:
+    """Handle ``provara plugins list``.
+
+    Args:
+        args: Parsed CLI arguments.
+    """
+    # Discover plugins
+    plugin_registry.discover_plugins()
+    
+    info = plugin_registry.get_plugin_info()
+    
+    if not info:
+        print("No plugins installed.")
+        print("\nTo install plugins:")
+        print("  pip install <plugin-package>")
+        print("\nTo create a plugin, see: docs/PLUGIN_API.md")
+        return
+    
+    print("Installed Provara Plugins")
+    print("=========================\n")
+    
+    # Group by type
+    event_types = [i for i in info if i["type"] == "event_type"]
+    reducers = [i for i in info if i["type"] == "reducer"]
+    exports = [i for i in info if i["type"] == "export"]
+    
+    if event_types:
+        print("Event Types:")
+        for item in event_types:
+            print(f"  - {item['name']} ({item['source']})")
+        print()
+    
+    if reducers:
+        print("Reducers:")
+        for item in reducers:
+            print(f"  - {item['name']} ({item['source']})")
+        print()
+    
+    if exports:
+        print("Export Formats:")
+        for item in exports:
+            print(f"  - {item['name']} ({item['source']})")
+        print()
+
+
 def cmd_scitt_receipt(args: argparse.Namespace) -> None:
     """Handle ``provara scitt receipt`` event creation.
 
@@ -819,6 +945,24 @@ def main() -> None:
     p_reduce.add_argument("path", help="Path to vault")
     p_reduce.add_argument("--from-checkpoint", help="Path to reducer_v1 checkpoint JSON")
     p_reduce.add_argument("--snapshot-interval", type=int, default=10000, help="Emit interval in events")
+
+    # query
+    p_query = sub.add_parser("query", help="Query events via non-normative SQLite index")
+    p_query.add_argument("path", help="Path to vault")
+    p_query.add_argument("--actor", help="Actor ID")
+    p_query.add_argument("--type", dest="event_type", help="Event type")
+    p_query.add_argument("--after", help="Start timestamp (inclusive)")
+    p_query.add_argument("--before", help="End timestamp (inclusive)")
+    p_query.add_argument("--content-key", help="Payload key for content search")
+    p_query.add_argument("--content-value", help="Payload value for content search")
+    p_query.add_argument("--rebuild-index", action="store_true", help="Force full index rebuild")
+    p_query.add_argument("--format", choices=["json", "table"], default="json")
+
+    # migrate
+    p_migrate = sub.add_parser("migrate", help="Migrate vault format with audit event")
+    p_migrate.add_argument("path", help="Path to vault")
+    p_migrate.add_argument("--target-version", default="latest", help="Target format version")
+    p_migrate.add_argument("--dry-run", action="store_true", help="Preview changes without modifying vault")
 
     # redact
     p_red = sub.add_parser("redact", help="Redact an event content (GDPR Article 17)")
@@ -922,6 +1066,11 @@ def main() -> None:
         help="My X25519 private key (Base64). Defaults to selected key value.",
     )
 
+    # plugins
+    p_plugins = sub.add_parser("plugins", help="Manage plugins")
+    plugins_sub = p_plugins.add_subparsers(dest="plugins_command", required=True)
+    p_plugins_list = plugins_sub.add_parser("list", help="List installed plugins")
+
     # export
     p_export = sub.add_parser("export", help="Export vault with SCITT events to standalone bundle")
     p_export.add_argument("path", help="Path to vault")
@@ -995,6 +1144,8 @@ def main() -> None:
     elif args.command == "checkpoint": cmd_checkpoint(args)
     elif args.command == "replay": cmd_replay(args)
     elif args.command == "reduce": cmd_reduce(args)
+    elif args.command == "query": cmd_query(args)
+    elif args.command == "migrate": cmd_migrate(args)
     elif args.command == "append": cmd_append(args)
     elif args.command == "redact": cmd_redact(args)
     elif args.command == "market-alpha": cmd_market_alpha(args)
@@ -1007,6 +1158,9 @@ def main() -> None:
     elif args.command == "agent-loop": cmd_agent_loop(args)
     elif args.command == "send-message": cmd_send_message(args)
     elif args.command == "read-messages": cmd_read_messages(args)
+    elif args.command == "plugins":
+        if args.plugins_command == "list":
+            cmd_plugins_list(args)
     elif args.command == "export": cmd_export(args)
     elif args.command == "timestamp": cmd_timestamp(args)
     elif args.command == "scitt":
