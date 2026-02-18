@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cookbook | Provara Docs</title>
+  <meta name="description" content="Provara cookbook index.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Cookbook | Provara Docs">
+  <meta property="og:description" content="Provara cookbook index.">
+  <meta property="og:url" content="https://provara.dev/docs/cookbook/">
+  <link rel="canonical" href="https://provara.dev/docs/cookbook/">
+  <link rel="alternate" type="application/rss+xml" title="Provara Blog" href="https://provara.dev/rss.xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  
+</head>
+<body class="doc-page">
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand">Provara</a>
+    <nav>
+      <a href="/spec/v1.0/">Spec v1.0</a>
+      <a href="/docs/">Docs</a>
+      <a href="/blog/">Blog</a>
+      <a href="https://github.com/provara-protocol/provara">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+<div class="doc-layout">
+  <aside class="sidebar">
+<h2>Documentation</h2>
+<ul>
+  <li><a href="/docs/">Hub</a></li>
+  <li><a href="/docs/quickstart/">Quickstart</a></li>
+  <li><a href="/docs/tutorials/">Tutorials</a></li>
+  <li><a href="/docs/api-reference/">API Reference</a></li>
+  <li><a href="/docs/cookbook/">Cookbook</a></li>
+</ul>
+</aside>
+  <article class="prose"><h1 id="provara-cookbook">Provara Cookbook</h1>
+<p>Real-world recipes for using Provara in production systems.</p>
+<hr>
+<h2 id="available-recipes">Available Recipes</h2>
+<table><thead><tr>
+<th>Recipe</th>
+<th>Use Case</th>
+<th>Time</th>
+<th>Difficulty</th>
+</tr></thead><tbody>
+<tr>
+<td><strong><a href="./audit_log_saas.md">SaaS Audit Log</a></strong></td>
+<td>Tamper-evident audit trail for SaaS applications</td>
+<td>15 min</td>
+<td>Intermediate</td>
+</tr>
+<tr>
+<td><strong><a href="./legal_discovery.md">Legal Discovery</a></strong></td>
+<td>Evidence chain for legal proceedings</td>
+<td>20 min</td>
+<td>Advanced</td>
+</tr>
+<tr>
+<td><strong><a href="./ai_agent_memory.md">AI Agent Memory</a></strong></td>
+<td>Verifiable memory with dispute resolution</td>
+<td>25 min</td>
+<td>Advanced</td>
+</tr>
+<tr>
+<td><strong><a href="./supply_chain.md">Supply Chain Provenance</a></strong></td>
+<td>Multi-organization product journey tracking</td>
+<td>30 min</td>
+<td>Advanced</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="common-patterns">Common Patterns</h2>
+<p>All recipes follow these patterns:</p>
+<h3 id="1-initialize-vault">1. Initialize Vault</h3>
+<pre><code>
+provara init &lt;vault_path&gt; \
+  --actor &quot;&lt;actor_name&gt;&quot; \
+  --private-keys &lt;keyfile&gt;.json
+</code></pre>
+<h3 id="2-append-events">2. Append Events</h3>
+<pre><code>
+provara append &lt;vault_path&gt; \
+  --data-file &lt;event&gt;.json \
+  --keyfile &lt;keyfile&gt;.json
+</code></pre>
+<h3 id="3-verify-integrity">3. Verify Integrity</h3>
+<pre><code>
+provara verify &lt;vault_path&gt;
+</code></pre>
+<h3 id="4-replay-state">4. Replay State</h3>
+<pre><code>
+provara replay &lt;vault_path&gt;
+</code></pre>
+<hr>
+<h2 id="event-schema-reference">Event Schema Reference</h2>
+<h3 id="observation-event">OBSERVATION Event</h3>
+<pre><code>
+{
+  &quot;type&quot;: &quot;OBSERVATION&quot;,
+  &quot;namespace&quot;: &quot;local&quot;,
+  &quot;actor&quot;: &quot;&lt;actor_name&gt;&quot;,
+  &quot;payload&quot;: {
+    &quot;subject&quot;: &quot;&lt;subject&gt;&quot;,
+    &quot;predicate&quot;: &quot;&lt;predicate&gt;&quot;,
+    &quot;value&quot;: {...},
+    &quot;confidence&quot;: 0.0-1.0
+  }
+}
+</code></pre>
+<h3 id="attestation-event">ATTESTATION Event</h3>
+<pre><code>
+{
+  &quot;type&quot;: &quot;ATTESTATION&quot;,
+  &quot;namespace&quot;: &quot;canonical&quot;,
+  &quot;actor&quot;: &quot;&lt;actor_name&gt;&quot;,
+  &quot;payload&quot;: {
+    &quot;subject&quot;: &quot;&lt;subject&gt;&quot;,
+    &quot;predicate&quot;: &quot;attested&quot;,
+    &quot;value&quot;: {...},
+    &quot;actor_key_id&quot;: &quot;bp1_...&quot;,
+    &quot;confidence&quot;: 0.9-1.0
+  }
+}
+</code></pre>
+<hr>
+<h2 id="namespace-model">Namespace Model</h2>
+<table><thead><tr>
+<th>Namespace</th>
+<th>Purpose</th>
+<th>Entry Criteria</th>
+<th>Exit Criteria</th>
+</tr></thead><tbody>
+<tr>
+<td><code>canonical</code></td>
+<td>Attested truth</td>
+<td>ATTESTATION ≥0.9 confidence</td>
+<td>Superseded → <code>archived</code></td>
+</tr>
+<tr>
+<td><code>local</code></td>
+<td>Private observations</td>
+<td>OBSERVATION events</td>
+<td>Promoted or contested</td>
+</tr>
+<tr>
+<td><code>contested</code></td>
+<td>Conflicting evidence</td>
+<td>≥2 conflicting OBSERVATIONs</td>
+<td>Resolved → <code>archived</code></td>
+</tr>
+<tr>
+<td><code>archived</code></td>
+<td>Historical record</td>
+<td>Superseded beliefs</td>
+<td>Permanent</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="1-key-management">1. Key Management</h3>
+<ul>
+<li>Store private keys in secure enclave or HSM</li>
+<li>Rotate keys periodically via <code>KEY_REVOCATION</code> + <code>KEY_PROMOTION</code></li>
+<li>Export backup keys to offline storage</li>
+</ul>
+<h3 id="2-timestamp-anchoring">2. Timestamp Anchoring</h3>
+<pre><code>
+# Anchor vault state to independent TSA
+provara timestamp &lt;vault_path&gt; \
+  --keyfile &lt;keyfile&gt;.json \
+  --tsa https://freetsa.org/tsr
+</code></pre>
+<h3 id="3-checkpointing">3. Checkpointing</h3>
+<pre><code>
+# Create state snapshot for fast replay
+provara checkpoint &lt;vault_path&gt; \
+  --keyfile &lt;keyfile&gt;.json
+</code></pre>
+<h3 id="4-backup">4. Backup</h3>
+<pre><code>
+# Create verified backup
+provara backup &lt;vault_path&gt; \
+  --output backup_$(date +%Y%m%d).zip
+</code></pre>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="invalid-signature-error">&quot;Invalid signature&quot; Error</h3>
+<p><strong>Cause:</strong> Wrong key or tampered event</p>
+<p><strong>Fix:</strong> Verify you&#x27;re using the correct keyfile. Check event was not modified after signing.</p>
+<h3 id="broken-causal-chain-error">&quot;Broken causal chain&quot; Error</h3>
+<p><strong>Cause:</strong> Events out of order or <code>prev_event_hash</code> mismatch</p>
+<p><strong>Fix:</strong> Ensure events are appended in causal order. Do not manually edit <code>events.ndjson</code>.</p>
+<h3 id="key-not-found-in-registry-error">&quot;Key not found in registry&quot; Error</h3>
+<p><strong>Cause:</strong> Signing with a key not in <code>keys.json</code></p>
+<p><strong>Fix:</strong> Register the key via <code>KEY_PROMOTION</code> event or use the correct keyfile.</p>
+<hr>
+<h2 id="getting-help">Getting Help</h2>
+<ul>
+<li><strong>Documentation:</strong> https://provara.dev/docs</li>
+<li><strong>GitHub Issues:</strong> https://github.com/provara-protocol/provara/issues</li>
+<li><strong>Protocol Spec:</strong> <a href="../PROTOCOL_PROFILE.txt"><code>PROTOCOL_PROFILE.txt</code></a></li>
+</ul>
+<hr>
+<p><strong>See Also:</strong></p>
+<ul>
+<li><a href="../QUICKSTART.md">Provara Quickstart</a></li>
+<li><a href="../docs/MCP_SERVER.md">MCP Server Guide</a></li>
+<li><a href="../content/papers/cryptographic-event-logs-for-llm-agent-memory.md">Position Paper: Cryptographic Event Logs for LLM Agent Memory</a></li>
+</ul></article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Apache 2.0. <a href="https://github.com/provara-protocol/provara">GitHub</a>. Anthropic-free zone.</p>
+  </div>
+</footer>
+</body>
+</html>

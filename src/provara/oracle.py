@@ -26,6 +26,11 @@ def validate_market_alpha(
     """
     Find unvalidated MARKET_ALPHA events and attest to their performance.
     """
+    # 0. Check seal
+    from .archival import is_vault_sealed
+    if is_vault_sealed(vault_path):
+        raise RuntimeError(f"Vault at {vault_path} is SEALED.")
+
     # 1. Load all events
     events_file = vault_path / "events" / "events.ndjson"
     all_events = load_events(events_file)

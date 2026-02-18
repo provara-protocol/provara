@@ -1,4 +1,4 @@
-name: Deploy Playground to GitHub Pages
+name: Build Playground Artifact
 
 on:
   push:
@@ -7,19 +7,8 @@ on:
     paths:
       - 'playground/**'
 
-permissions:
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -42,11 +31,8 @@ jobs:
           cd playground
           npm run build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
+          name: playground-dist
           path: './playground/dist'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4

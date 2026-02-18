@@ -137,6 +137,11 @@ class Vault:
         import json
         from datetime import datetime, timezone
         from .sync_v0 import write_events, iter_events
+        from .archival import is_vault_sealed
+
+        # 0. Check if sealed
+        if is_vault_sealed(self.path):
+            raise RuntimeError(f"Vault at {self.path} is SEALED and permanently read-only.")
 
         # 1. Load keys
         priv = load_private_key_b64(private_key_b64)

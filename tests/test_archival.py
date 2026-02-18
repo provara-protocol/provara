@@ -16,19 +16,13 @@ def vault_path(tmp_path):
 @pytest.fixture
 def keyfile_path(vault_path, tmp_path):
     # Create a keyfile for the vault
-    # bootstrap_v0 doesn't save private keys by default in a file we can easily find
-    # unless we use --private-keys.
-    # Actually, we can just use the one from bootstrap result if we had it.
-    # Let's just create a dummy one that matches the vault's root key.
-    keys_json = vault_path / "identity" / "keys.json"
-    keys_data = json.loads(keys_json.read_text())
-    root_kid = keys_data["keys"][0]["key_id"]
-    
-    # We need the actual private key. 
-    # Let's re-bootstrap with a known keyfile.
     keyfile = tmp_path / "keys.json"
-    shutil.rmtree(vault_path)
-    from provara.bootstrap_v0 import bootstrap_backpack
+    # We need the actual private key. 
+    # Re-bootstrap with a known keyfile or just use the one from bootstrap result.
+    # bootstrap_v0 doesn't easily return the key unless we mock or capture.
+    # Let's re-bootstrap and use the returned private key.
+    if vault_path.exists():
+        shutil.rmtree(vault_path)
     res = bootstrap_backpack(vault_path, actor="tester", quiet=True)
     
     key_output = {
@@ -45,7 +39,7 @@ def test_seal_vault_and_append_fails(vault_path, keyfile_path):
     assert seal_event["type"] == "com.provara.vault.seal"
     assert is_vault_sealed(vault_path)
     
-    # Try to append - should fail
+    # Try to append via CLI - should fail
     args = argparse.Namespace(
         path=str(vault_path),
         type="OBSERVATION",

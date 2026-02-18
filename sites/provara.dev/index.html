@@ -1,145 +1,52 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Provara Protocol — Sovereign Memory for AI Agents</title>
-<meta name="description" content="A tamper-evident, append-only memory protocol built on Ed25519 and SHA-256. Designed for AI agent audit trails, multi-agent dispute resolution, and 50-year readability.">
-<link rel="stylesheet" href="/shared/tokens.css">
-<link rel="stylesheet" href="/shared/components.css">
-<link rel="stylesheet" href="./style.css">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' font-family='monospace'>ⓥ</text></svg>">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Provara Protocol</title>
+  <meta name="description" content="Self-sovereign cryptographic event logs.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Provara Protocol">
+  <meta property="og:description" content="Self-sovereign cryptographic event logs.">
+  <meta property="og:url" content="https://provara.dev/">
+  <link rel="canonical" href="https://provara.dev/">
+  <link rel="alternate" type="application/rss+xml" title="Provara Blog" href="https://provara.dev/rss.xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  
 </head>
-<body>
-
-<div class="pv-shell">
-  <header class="pv-topbar">
-    <div style="font-weight: bold; letter-spacing: 0.05em;">PROVARA PROTOCOL v1.0</div>
-    <nav style="display: flex; gap: var(--pv-space-4);">
-      <a href="/spec/" style="text-decoration: none;">Spec</a>
-      <a href="/docs/" style="text-decoration: none;">Docs</a>
-      <a href="https://github.com/provara-protocol/provara" style="text-decoration: none;">GitHub</a>
+<body class="">
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand">Provara</a>
+    <nav>
+      <a href="/spec/v1.0/">Spec v1.0</a>
+      <a href="/docs/">Docs</a>
+      <a href="/blog/">Blog</a>
+      <a href="https://github.com/provara-protocol/provara">GitHub</a>
     </nav>
-  </header>
-
-  <main class="pv-main">
-    <section class="pv-hero">
-      <h1 class="pv-title">Sovereign Memory for AI Agents</h1>
-      <p class="pv-subtitle">Provara is an open-source protocol for creating tamper-evident, self-sovereign event logs. Built for the next 50 years of cognitive continuity.</p>
-      
-      <div class="pv-ctas">
-        <a href="/docs/quickstart" class="pv-btn pv-btn-primary">Get Started</a>
-        <a href="/playground.html" class="pv-btn pv-btn-secondary">Try Playground</a>
-      </div>
-    </section>
-
-    <div class="pv-callout">
-      <code style="font-family: var(--pv-font-mono); font-size: var(--pv-text-md); color: var(--pv-accent);">pip install provara-protocol</code>
-    </div>
-
-    <div class="pv-status-row">
-      <div class="pv-status">
-        <strong>Status</strong>
-        Stable / v1.0.0
-      </div>
-      <div class="pv-status">
-        <strong>Tests</strong>
-        225 Passing
-      </div>
-      <div class="pv-status">
-        <strong>License</strong>
-        Apache 2.0
-      </div>
-    </div>
-
-    <section style="margin-top: var(--pv-space-16);">
-      <h2>The Golden Rule</h2>
-      <div class="pv-callout pv-normative" style="font-family: var(--pv-font-serif); font-size: var(--pv-text-lg); font-style: italic;">
-        "Truth is not merged. Evidence is merged. Truth is recomputed."
-      </div>
-      <p>Provara vaults are append-only. Integrity is verified cryptographically, never assumed. State is derived by replaying evidence through a deterministic reducer.</p>
-    </section>
-
-    <section>
-      <h2>Core Invariants</h2>
-      <div class="pv-feature-grid">
-        <div class="pv-feature">
-          <h3>Chain Integrity</h3>
-          <p>Every event is causally linked via SHA-256 hashes. Breaking one link invalidates the entire subsequent chain.</p>
-        </div>
-        <div class="pv-feature">
-          <h3>Non-Repudiation</h3>
-          <p>All events are signed with Ed25519. The signature proves provenance and prevents unauthorized modifications.</p>
-        </div>
-        <div class="pv-feature">
-          <h3>Determinism</h3>
-          <p>The reducer is a pure function. Given the same events, any compliant implementation produces the exact same state hash.</p>
-        </div>
-        <div class="pv-feature">
-          <h3>Auditability</h3>
-          <p>The complete history of observations and decisions is preserved. Auditors can replay the vault to any point in time.</p>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <h2>Protocol Architecture</h2>
-      <div class="pv-protocol-block">
-        <pre>
-bootstrap_v0 ──→ backpack_signing ──→ canonical_json
-     │                  │
-     ▼                  ▼
-reducer_v0      backpack_integrity
-     │                  │
-     ▼                  ▼
-sync_v0 ◄──── manifest_generator
-     │
-     ▼
-rekey_backpack ──→ backpack_signing
-        </pre>
-      </div>
-    </section>
-
-    <section>
-      <h2>Use Cases</h2>
-      <div class="pv-use-cases">
-        <div class="pv-use-case">
-          <h3>AI Agent Memory</h3>
-          <p>A verifiable audit trail for autonomous agents. Prove what the agent saw and why it made a specific decision.</p>
-        </div>
-        <div class="pv-use-case">
-          <h3>Multi-Agent Disputes</h3>
-          <p>Cryptographic evidence for resolving conflicts between autonomous systems operating in shared environments.</p>
-        </div>
-        <div class="pv-use-case">
-          <h3>Legal Discovery</h3>
-          <p>Chain-of-custody for digital evidence that meets the requirements for forensic-grade authentication.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="pv-cta-section">
-      <h2>Ready to build?</h2>
-      <p>Start with the Conformance Kit to build your own Provara-compliant implementation in any language.</p>
-      <div class="pv-ctas">
-        <a href="/docs/conformance" class="pv-btn pv-btn-primary">Conformance Kit</a>
-        <a href="https://github.com/provara-protocol/provara" class="pv-btn pv-btn-secondary">GitHub Repo</a>
-      </div>
-    </section>
-  </main>
-
-  <footer class="pv-footer">
-    <div class="container">
-      <p>&copy; 2026 Hunt Information Systems LLC. All rights reserved.</p>
-      <p>Provara is a trademark of Hunt Information Systems. Protocol v1.0.</p>
-      <p style="margin-top: var(--pv-space-4);">
-        <a href="https://provara.app">Provara App</a> &middot; 
-        <a href="https://huntinformationsystems.com">Corporate</a> &middot;
-        <a href="mailto:contact@provara.dev">Contact</a>
-      </p>
-    </div>
-  </footer>
-</div>
-
+  </div>
+</header>
+<main class="wrap">
+<section class="hero">
+  <p class="eyebrow">Provara Protocol</p>
+  <h1>Self-sovereign cryptographic event logs</h1>
+  <p class="subtitle">Provara Protocol makes memory tamper-evident, replayable, and readable on a 50-year horizon.</p>
+  <div class="cta">
+    <a class="btn primary" href="/playground/">Try Playground</a>
+    <a class="btn" href="/spec/v1.0/">Read Spec</a>
+    <a class="btn" href="/docs/quickstart/">Install (pip/npm)</a>
+  </div>
+</section>
+<section class="cards">
+  <article class="card"><h2>Tamper-Evident</h2><p>Every event is signed and hash-chained. Evidence can be verified independently.</p></article>
+  <article class="card"><h2>Self-Sovereign</h2><p>Vault operators own keys and logs. No hosted dependency is required for verification.</p></article>
+  <article class="card"><h2>50-Year Horizon</h2><p>Append-only NDJSON, deterministic replay, and non-normative indexes for scale.</p></article>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Apache 2.0. <a href="https://github.com/provara-protocol/provara">GitHub</a>. Anthropic-free zone.</p>
+  </div>
+</footer>
 </body>
 </html>
