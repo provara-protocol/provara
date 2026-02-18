@@ -1,4 +1,3 @@
-import React from 'react';
 import { usePlaygroundStore } from './store/playground';
 import Header from './components/Header';
 import LeftSidebar from './components/LeftSidebar';

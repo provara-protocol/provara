@@ -1,165 +1,200 @@
 /**
- * Playground Store — Zustand-based state management
- * 
- * Single source of truth for:
- * - Vault state (events, manifest, hashes)
- * - Key management
- * - UI state (view mode, selections)
+ * Playground Store — Zustand state management
+ *
+ * Single source of truth for vault events, keypair, verification state, and UI.
+ * All crypto operations call provara-crypto.ts (WebCrypto-based implementation).
  */
 
 import { create } from 'zustand';
+import {
+  generateKeypair,
+  createEvent,
+  verifyChain,
+  type ProvaraKeypair,
+  type ProvaraEvent,
+  type ChainVerifyResult,
+} from '../lib/provara-crypto';
 
-export interface Event {
-  event_id: string;
-  actor: string;
-  event_type: 'GENESIS' | 'OBSERVATION' | 'ATTESTATION' | 'RETRACTION' | string;
-  timestamp: string;
-  prev_event_hash: string | null;
-  content?: string;
-  sig?: string;
-  namespace?: 'canonical' | 'local' | 'contested' | 'archived';
+interface VaultState {
+  events: ProvaraEvent[];
 }
 
-export interface KeyPair {
-  public_key: string;
-  key_id: string;
-  private_key?: string; // Only if generated locally
-}
-
-export interface VerificationResult {
-  valid: boolean;
-  chain_integrity: boolean;
-  all_sigs_valid: boolean;
-  errors: string[];
+interface UiState {
+  selected_event_id: string | null;
+  view_mode: 'list' | 'graph' | 'merkle';
+  sidebar_open: boolean;
+  loading: boolean;
+  error: string | null;
 }
 
 interface PlaygroundStore {
-  // Vault state
-  vault: {
-    events: Event[];
-    state_hash: string;
-    merkle_root: string;
-  };
+  // Vault
+  vault: VaultState;
 
-  // Keys
-  keys: KeyPair[];
-  current_key_id: string | null;
+  // Active keypair (single actor per session)
+  keypair: ProvaraKeypair | null;
+
+  // Verification result
+  verification: ChainVerifyResult | null;
 
   // UI state
-  ui: {
-    selected_event_id: string | null;
-    view_mode: 'list' | 'graph' | 'merkle';
-    sidebar_open: boolean;
-    theme: 'light' | 'dark';
-  };
-
-  // Verification state
-  verification: VerificationResult | null;
+  ui: UiState;
 
   // Actions
   actions: {
-    appendEvent: (event: Event) => void;
-    verifyChain: () => void;
+    initVault: () => Promise<void>;
+    appendEvent: (eventType: string, payload: unknown) => Promise<void>;
+    verifyVault: () => Promise<void>;
     setSelectedEvent: (id: string | null) => void;
     setViewMode: (mode: 'list' | 'graph' | 'merkle') => void;
     toggleSidebar: () => void;
-    setCurrentKey: (key_id: string) => void;
-    addKey: (key: KeyPair) => void;
     resetVault: () => void;
-    exportVaultJSON: () => string;
+    exportVaultJson: () => string;
+    clearError: () => void;
   };
 }
 
 export const usePlaygroundStore = create<PlaygroundStore>((set, get) => ({
-  vault: {
-    events: [],
-    state_hash: '',
-    merkle_root: '',
-  },
-
-  keys: [],
-  current_key_id: null,
+  vault: { events: [] },
+  keypair: null,
+  verification: null,
 
   ui: {
     selected_event_id: null,
     view_mode: 'list',
     sidebar_open: true,
-    theme: 'light',
+    loading: false,
+    error: null,
   },
 
-  verification: null,
-
   actions: {
-    appendEvent: (event: Event) => {
-      set((state) => ({
-        vault: {
-          ...state.vault,
-          events: [...state.vault.events, event],
-        },
-      }));
+    // Generate a new keypair and create the genesis OBSERVATION event
+    initVault: async () => {
+      set((s) => ({ ui: { ...s.ui, loading: true, error: null } }));
+      try {
+        const kp = await generateKeypair();
+        const genesis = await createEvent(
+          'OBSERVATION',
+          { subject: 'vault', predicate: 'created', value: 'genesis' },
+          kp.private_key_b64,
+          kp.key_id,
+          undefined,
+        );
+        set({
+          keypair: kp,
+          vault: { events: [genesis] },
+          verification: null,
+          ui: {
+            selected_event_id: null,
+            view_mode: 'list',
+            sidebar_open: true,
+            loading: false,
+            error: null,
+          },
+        });
+      } catch (err) {
+        set((s) => ({
+          ui: { ...s.ui, loading: false, error: String(err) },
+        }));
+      }
     },
 
-    verifyChain: () => {
-      const { vault } = get();
-      // TODO: Call WASM verify_chain(vault.events)
-      const result: VerificationResult = {
-        valid: true,
-        chain_integrity: true,
-        all_sigs_valid: true,
-        errors: [],
-      };
-      set({ verification: result });
+    // Append a signed event to the vault
+    appendEvent: async (eventType: string, payload: unknown) => {
+      const { keypair, vault } = get();
+      if (!keypair) {
+        set((s) => ({
+          ui: { ...s.ui, error: 'No keypair — create vault first.' },
+        }));
+        return;
+      }
+      set((s) => ({ ui: { ...s.ui, loading: true, error: null } }));
+      try {
+        // prev_event_hash = event_id of the last event by this actor
+        const actorEvents = vault.events.filter((e) => e.actor === keypair.key_id);
+        const prevHash =
+          actorEvents.length > 0
+            ? actorEvents[actorEvents.length - 1].event_id
+            : undefined;
+
+        const event = await createEvent(
+          eventType,
+          payload,
+          keypair.private_key_b64,
+          keypair.key_id,
+          prevHash,
+        );
+        set((s) => ({
+          vault: { events: [...s.vault.events, event] },
+          verification: null, // stale — needs re-verify
+          ui: { ...s.ui, loading: false },
+        }));
+      } catch (err) {
+        set((s) => ({
+          ui: { ...s.ui, loading: false, error: String(err) },
+        }));
+      }
     },
 
-    setSelectedEvent: (id: string | null) => {
-      set((state) => ({
-        ui: { ...state.ui, selected_event_id: id },
-      }));
+    // Verify the entire chain: causal integrity + signatures
+    verifyVault: async () => {
+      const { keypair, vault } = get();
+      if (!keypair || vault.events.length === 0) {
+        set({ verification: { valid: false, errors: ['Vault is empty'] } });
+        return;
+      }
+      set((s) => ({ ui: { ...s.ui, loading: true, error: null } }));
+      try {
+        const result = await verifyChain(vault.events, keypair.public_key_b64);
+        set((s) => ({
+          verification: result,
+          ui: { ...s.ui, loading: false },
+        }));
+      } catch (err) {
+        set((s) => ({
+          verification: { valid: false, errors: [String(err)] },
+          ui: { ...s.ui, loading: false },
+        }));
+      }
     },
 
-    setViewMode: (mode) => {
-      set((state) => ({
-        ui: { ...state.ui, view_mode: mode },
-      }));
-    },
+    setSelectedEvent: (id) =>
+      set((s) => ({ ui: { ...s.ui, selected_event_id: id } })),
 
-    toggleSidebar: () => {
-      set((state) => ({
-        ui: { ...state.ui, sidebar_open: !state.ui.sidebar_open },
-      }));
-    },
+    setViewMode: (mode) =>
+      set((s) => ({ ui: { ...s.ui, view_mode: mode } })),
 
-    setCurrentKey: (key_id) => {
-      set({ current_key_id: key_id });
-    },
+    toggleSidebar: () =>
+      set((s) => ({ ui: { ...s.ui, sidebar_open: !s.ui.sidebar_open } })),
 
-    addKey: (key) => {
-      set((state) => ({
-        keys: [...state.keys, key],
-        current_key_id: key.key_id,
-      }));
-    },
-
-    resetVault: () => {
+    resetVault: () =>
       set({
-        vault: { events: [], state_hash: '', merkle_root: '' },
-        current_key_id: null,
-      });
-    },
+        vault: { events: [] },
+        keypair: null,
+        verification: null,
+        ui: {
+          selected_event_id: null,
+          view_mode: 'list',
+          sidebar_open: true,
+          loading: false,
+          error: null,
+        },
+      }),
 
-    exportVaultJSON: () => {
-      const { vault } = get();
+    exportVaultJson: () => {
+      const { vault, keypair } = get();
       return JSON.stringify(
         {
-          manifest: {
-            version: '1.0',
-            created_at: new Date().toISOString(),
-          },
+          version: '1.0',
+          exported_at: new Date().toISOString(),
+          actor_key_id: keypair?.key_id ?? null,
           events: vault.events,
         },
         null,
-        2
+        2,
       );
     },
+
+    clearError: () => set((s) => ({ ui: { ...s.ui, error: null } })),
   },
 }));

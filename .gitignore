@@ -86,3 +86,14 @@ docs/site/
 keys_3.json
 trade_order.json
 atlas_pub.txt
+
+# Playground build artifacts
+playground/src/**/*.js
+playground/src/**/*.js.map
+playground/src/**/*.d.ts
+playground/src/**/*.d.ts.map
+
+# WASM build tools
+wasm-pack*.tar.gz
+wasm-pack-*/
+rust-lld.exe
