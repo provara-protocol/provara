@@ -12,6 +12,7 @@
 
 ![Protocol](https://img.shields.io/badge/Protocol-Provara_v1.0-blue)
 ![Tests](https://img.shields.io/badge/Tests-232_passing-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-65%25-brightgreen)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-yellow)
 ![PyPI](https://img.shields.io/badge/PyPI-provara--protocol_1.0.0-blue)
 ![License](https://img.shields.io/badge/License-Apache_2.0-blue)
