@@ -45,6 +45,7 @@ from .sync_v0 import load_events, write_events
 from .export import export_vault_scitt_compat
 from .errors import ProvaraError, VaultStructureInvalidError
 from .plugins import registry as plugin_registry
+from .rfc3161 import request_timestamp, store_timestamp, verify_all_timestamps, TimestampResult
 
 # Repo root: src/provara/../../  (two levels up from this file's directory)
 _repo_root = Path(__file__).resolve().parents[2]
@@ -96,8 +97,15 @@ def cmd_init(args: argparse.Namespace) -> None:
         None: Writes vault files and prints result details.
     """
     target = Path(args.path).resolve()
-    
+
     print(f"Initializing Provara Vault at: {target}")
+    
+    # Handle encrypted vault
+    if args.encrypted:
+        from .crypto_shred import create_encrypted_vault
+        create_encrypted_vault(target, args.actor or "sovereign_genesis", args.mode)
+        print(f"Encryption enabled (mode: {args.mode})")
+    
     # Fix: bootstrap_backpack uses 'actor', not 'actor_name'
     # Also Path(args.path) should be passed as Path or string
     result = bootstrap_backpack(
@@ -107,7 +115,7 @@ def cmd_init(args: argparse.Namespace) -> None:
         include_quorum=args.quorum,
         quiet=False
     )
-    
+
     # result is a BootstrapResult object, not a dict
     if result.success:
         print("\nSUCCESS: Vault created and verified.")
@@ -126,7 +134,7 @@ def cmd_init(args: argparse.Namespace) -> None:
                 "private_key_b64": result.quorum_private_key_b64,
                 "algorithm": "Ed25519"
             })
-        
+
         key_output = {"keys": keys_list}
 
         # Default save location is identity/private_keys.json inside the vault
@@ -137,7 +145,7 @@ def cmd_init(args: argparse.Namespace) -> None:
 
         keys_file.write_text(json.dumps(key_output, indent=2))
         print(f"Private keys saved to: {keys_file}")
-        
+
         print("IMPORTANT: Secure your private keys. If lost, vault access is permanent read-only.")
     else:
         _cli_error(
@@ -154,7 +162,7 @@ def cmd_verify(args: argparse.Namespace) -> None:
         args: Parsed CLI arguments with target vault and verbosity.
     """
     target = Path(args.path).resolve()
-    
+
     # 1. Structural check with descriptive errors
     from .backpack_integrity import validate_vault_structure
     try:
@@ -172,7 +180,7 @@ def cmd_verify(args: argparse.Namespace) -> None:
             if candidate.is_dir() and (candidate / "merkle_root.txt").exists():
                 m_root = (candidate / "merkle_root.txt").read_text(encoding="utf-8").strip()
                 vault_registry[m_root] = candidate
-        
+
         results = verify_vault_chain(target, vault_registry)
         for report in results:
             if report["status"] == "FAIL":
@@ -184,20 +192,26 @@ def cmd_verify(args: argparse.Namespace) -> None:
     sys.path.insert(0, str(_repo_root / "tests"))
     from backpack_compliance_v1 import TestBackpackComplianceV1
     import unittest
-    
+
     print(f"Verifying vault integrity: {target}")
     TestBackpackComplianceV1.backpack_path = str(target)
-    
+
     # Create a test suite with the compliance tests
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBackpackComplianceV1)
-    
+
     # Run the tests quietly or verbosely
     verbosity = 2 if args.verbose else 1
     runner = unittest.TextTestRunner(verbosity=verbosity)
     result = runner.run(suite)
-    
+
     if result.wasSuccessful():
         print("\nPASS: All 17 integrity checks passed.")
+
+        # Show shredded events info
+        from .crypto_shred import count_shredded_events
+        total, shredded = count_shredded_events(target)
+        if shredded > 0:
+            print(f"\nShredded Events: {shredded} of {total} events (content unrecoverable)")
         
         if args.show_redacted:
             # Load events and show redaction info
@@ -224,6 +238,99 @@ def cmd_verify(args: argparse.Namespace) -> None:
             "review failing checks in output and repair the vault before continuing",
             "PROTOCOL_PROFILE.txt §11",
         )
+
+
+def cmd_shred(args: argparse.Namespace) -> None:
+    """Handle ``provara shred`` crypto-shredding for GDPR erasure.
+
+    Args:
+        args: Parsed CLI arguments.
+    """
+    vault_path = Path(args.path).resolve()
+    keyfile_path = Path(args.keyfile).resolve()
+
+    if not vault_path.exists():
+        _cli_error(
+            "Vault not found",
+            f"No vault directory at {vault_path}",
+            "Create a vault with `provara init` or check the path",
+            "docs/CRYPTO_SHREDDING.md",
+        )
+
+    from .crypto_shred import shred_event, shred_actor, is_vault_encrypted
+
+    # Check if vault has encryption enabled
+    if not is_vault_encrypted(vault_path):
+        _cli_error(
+            "Vault not encrypted",
+            "Crypto-shredding requires an encryption-enabled vault",
+            "Create a new vault with `provara init --encrypted`",
+            "docs/CRYPTO_SHREDDING.md",
+        )
+
+    # Validate arguments
+    if not args.event and not args.actor:
+        _cli_error(
+            "Missing target",
+            "Must specify either --event or --actor",
+            "Use `provara shred --event evt_...` or `provara shred --actor actor_...`",
+            "docs/CRYPTO_SHREDDING.md",
+        )
+
+    if args.event and args.actor:
+        _cli_error(
+            "Conflicting targets",
+            "Cannot specify both --event and --actor",
+            "Use either `--event evt_...` or `--actor actor_...`",
+            "docs/CRYPTO_SHREDDING.md",
+        )
+
+    try:
+        if args.event:
+            result = shred_event(
+                vault_path=vault_path,
+                event_id=args.event,
+                keyfile_path=keyfile_path,
+                reason=args.reason,
+                reason_detail=args.detail,
+                authority=args.authority,
+            )
+            print(f"Event shredded: {result['event_id']}")
+            print(f"Target event: {args.event}")
+            print(f"Reason: {args.reason}")
+            print("Content is now cryptographically unrecoverable.")
+
+        elif args.actor:
+            result = shred_actor(
+                vault_path=vault_path,
+                actor_id=args.actor,
+                keyfile_path=keyfile_path,
+                reason=args.reason,
+                reason_detail=args.detail,
+                authority=args.authority,
+            )
+            events_affected = result.get("payload", {}).get("events_affected", 0)
+            print(f"Actor shredded: {result['event_id']}")
+            print(f"Target actor: {args.actor}")
+            print(f"Events affected: {events_affected}")
+            print(f"Reason: {args.reason}")
+            print("All actor event content is now cryptographically unrecoverable.")
+
+    except ValueError as e:
+        _cli_error(
+            "Shred operation failed",
+            str(e),
+            "Verify event/actor ID and retry",
+            "docs/CRYPTO_SHREDDING.md",
+        )
+    except FileNotFoundError as e:
+        _cli_error(
+            "File not found",
+            str(e),
+            "Check vault and keyfile paths",
+            "docs/CRYPTO_SHREDDING.md",
+        )
+
 
 def cmd_backup(args: argparse.Namespace) -> None:
     """Handle ``provara backup``.
@@ -565,6 +672,22 @@ def cmd_append(args: argparse.Namespace) -> None:
         
     print(f"Appended event {signed['event_id']} (type={signed['type']})")
     
+    # Optional RFC 3161 Timestamp
+    if getattr(args, "timestamp", False):
+        try:
+            import hashlib
+            from .canonical_json import canonical_bytes
+            event_hash = hashlib.sha256(canonical_bytes(signed)).digest()
+            tsa_url = getattr(args, "tsa_url", "http://timestamp.digicert.com")
+            print(f"Requesting RFC 3161 timestamp from {tsa_url}...")
+            token = request_timestamp(event_hash, tsa_url=tsa_url)
+            store_timestamp(vault, signed['event_id'], token)
+            print(f"Timestamp stored for {signed['event_id']}")
+        except ImportError as e:
+            print(f"WARNING: Skipping timestamp: {e}")
+        except Exception as e:
+            print(f"WARNING: Failed to request timestamp: {e}")
+
     # Auto-regenerate manifest
     cmd_manifest(args)
 
@@ -956,6 +1079,70 @@ def cmd_rotate_vault(args: argparse.Namespace) -> None:
         sys.exit(1)
 
 
+def cmd_verify_timestamps(args: argparse.Namespace) -> None:
+    """Handle ``provara verify-timestamps``."""
+    vault = Path(args.path).resolve()
+    try:
+        results = verify_all_timestamps(vault)
+        if not results:
+            print("No stored RFC 3161 timestamps found.")
+            return
+
+        valid_count = sum(1 for r in results if r.valid)
+        print(f"Verified {len(results)} timestamps: {valid_count} VALID, {len(results) - valid_count} INVALID")
+        
+        for res in results:
+            status = "PASS" if res.valid else "FAIL"
+            ts_str = res.timestamp.isoformat() if res.timestamp else "N/A"
+            print(f"  [{status}] {res.event_id}: {ts_str} (TSA: {res.tsa_name})")
+            if res.error:
+                print(f"    Error: {res.error}")
+                
+        if valid_count < len(results):
+            sys.exit(1)
+    except ImportError as e:
+        _cli_error("Dependency missing", str(e), "pip install provara-protocol[timestamps]", "RFC 3161")
+    except Exception as e:
+        print(f"Error verifying timestamps: {e}")
+        sys.exit(1)
+
+
+def cmd_timestamp_existing(args: argparse.Namespace) -> None:
+    """Handle ``provara timestamp <vault> <event_id>``."""
+    vault = Path(args.path).resolve()
+    event_id = args.event_id
+    tsa_url = getattr(args, "tsa_url", "http://timestamp.digicert.com")
+
+    # Load event to get its hash
+    from .sync_v0 import iter_events
+    from .canonical_json import canonical_bytes
+    import hashlib
+
+    events_file = vault / "events" / "events.ndjson"
+    target_event = None
+    if events_file.exists():
+        for event in iter_events(events_file):
+            if event.get("event_id") == event_id:
+                target_event = event
+                break
+    
+    if not target_event:
+        _cli_error("Event not found", f"Could not find event {event_id} in vault log.", "Provide a valid event_id", "RFC 3161")
+
+    try:
+        event_hash = hashlib.sha256(canonical_bytes(target_event)).digest()
+        print(f"Requesting RFC 3161 timestamp for {event_id} from {tsa_url}...")
+        token = request_timestamp(event_hash, tsa_url=tsa_url)
+        store_timestamp(vault, event_id, token)
+        print(f"Timestamp stored for {event_id}")
+    except ImportError as e:
+        _cli_error("Dependency missing", str(e), "pip install provara-protocol[timestamps]", "RFC 3161")
+    except Exception as e:
+        print(f"Error requesting timestamp: {e}")
+        sys.exit(1)
+
+
+
 def cmd_forensic_export(args: argparse.Namespace) -> None:
     """Handle ``provara forensic-export``."""
     from .forensic_export import forensic_export
@@ -997,14 +1184,29 @@ def main() -> None:
     p_init.add_argument("--actor", help="Human-readable actor name")
     p_init.add_argument("--quorum", action="store_true", help="Generate recovery keypair")
     p_init.add_argument("--private-keys", help="Path to save private keys")
-    
+    p_init.add_argument("--encrypted", action="store_true", help="Enable payload encryption (AES-256-GCM)")
+    p_init.add_argument("--mode", choices=["per-event", "per-actor"], default="per-event",
+                        help="Encryption mode (requires --encrypted)")
+
     # verify
     p_verify = sub.add_parser("verify", help="Verify vault integrity")
     p_verify.add_argument("path", help="Path to vault")
     p_verify.add_argument("-v", "--verbose", action="store_true")
     p_verify.add_argument("--show-redacted", action="store_true", help="Show metadata for redacted events")
     p_verify.add_argument("--follow-predecessors", action="store_true", help="Verify entire archival chain")
-    
+
+    # shred
+    p_shred = sub.add_parser("shred", help="Crypto-shred event(s) for GDPR erasure")
+    p_shred.add_argument("path", help="Path to vault")
+    p_shred.add_argument("--event", help="Event ID to shred")
+    p_shred.add_argument("--actor", help="Actor ID whose events to shred")
+    p_shred.add_argument("--reason", default="GDPR_ERASURE",
+                         choices=["GDPR_ERASURE", "LEGAL_ORDER", "VOLUNTARY_WITHDRAWAL", "PII_EXPOSURE", "OTHER"],
+                         help="Erasure reason")
+    p_shred.add_argument("--detail", help="Optional free-text explanation")
+    p_shred.add_argument("--authority", help="Authority authorizing erasure")
+    p_shred.add_argument("--keyfile", required=True, help="Path to private keys JSON")
+
     # seal
     p_seal = sub.add_parser("seal", help="Permanently seal a vault")
     p_seal.add_argument("path", help="Path to vault")
@@ -1083,6 +1285,8 @@ def main() -> None:
     p_app.add_argument("--key-id", help="Key ID to sign with (defaults to first)")
     p_app.add_argument("--actor", help="Human-readable actor identifier")
     p_app.add_argument("--confidence", type=float, help="Confidence score (0.0-1.0)")
+    p_app.add_argument("--timestamp", action="store_true", help="Request RFC 3161 trusted timestamp")
+    p_app.add_argument("--tsa-url", help="Custom TSA URL (defaults to DigiCert)")
 
     # market-alpha
     p_ma = sub.add_parser("market-alpha", help="Record a market signal")
@@ -1160,6 +1364,17 @@ def main() -> None:
         "--my-encryption-private-key",
         help="My X25519 private key (Base64). Defaults to selected key value.",
     )
+
+    # verify-timestamps
+    p_vt = sub.add_parser("verify-timestamps", help="Verify all RFC 3161 timestamps in a vault")
+    p_vt.add_argument("path", help="Path to vault")
+
+    # timestamp (existing)
+    p_te = sub.add_parser("timestamp", help="Request RFC 3161 timestamp for an existing event")
+    p_te.add_argument("path", help="Path to vault")
+    p_te.add_argument("event_id", help="Event ID to timestamp")
+    p_te.add_argument("--tsa-url", help="Custom TSA URL")
+
 
     # plugins
     p_plugins = sub.add_parser("plugins", help="Manage plugins")
@@ -1248,6 +1463,7 @@ def main() -> None:
     
     if args.command == "init": cmd_init(args)
     elif args.command == "verify": cmd_verify(args)
+    elif args.command == "shred": cmd_shred(args)
     elif args.command == "seal": cmd_seal(args)
     elif args.command == "rotate-vault": cmd_rotate_vault(args)
     elif args.command == "backup": cmd_backup(args)
@@ -1269,6 +1485,8 @@ def main() -> None:
     elif args.command == "agent-loop": cmd_agent_loop(args)
     elif args.command == "send-message": cmd_send_message(args)
     elif args.command == "read-messages": cmd_read_messages(args)
+    elif args.command == "verify-timestamps": cmd_verify_timestamps(args)
+    elif args.command == "timestamp": cmd_timestamp_existing(args)
     elif args.command == "plugins":
         if args.plugins_command == "list":
             cmd_plugins_list(args)
