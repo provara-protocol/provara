@@ -47,6 +47,12 @@ dev = [
     "hypothesis>=6.0",
     "mkdocs-material>=9.0",
 ]
+timestamps = [
+    "rfc3161-client>=1.0",
+]
+mcp = [
+    "mcp>=1.0",
+]
 
 [project.scripts]
 provara = "provara.cli:main"

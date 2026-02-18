@@ -1,0 +1,336 @@
+{
+  "schemaVersion": "v0",
+  "name": "provara-vault",
+  "displayName": "Provara Vault",
+  "description": "Tamper-evident, cryptographic memory vault for AI agents. Every event is Ed25519-signed, SHA-256 chained, and RFC 8785-canonicalized — independently verifiable, impossible to silently alter.",
+  "version": "1.0.1",
+  "homepage": "https://github.com/provara-protocol/provara",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/provara-protocol/provara"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "memory",
+    "audit",
+    "cryptography",
+    "ed25519",
+    "tamper-evident",
+    "provenance",
+    "agent-memory"
+  ],
+  "install": {
+    "type": "pip",
+    "package": "provara-protocol[mcp]",
+    "command": "provara-mcp"
+  },
+  "transport": {
+    "stdio": {
+      "command": "provara-mcp"
+    },
+    "sse": {
+      "command": "provara-mcp",
+      "args": ["--transport", "sse", "--port", "8765"]
+    },
+    "streamable-http": {
+      "command": "provara-mcp",
+      "args": ["--transport", "streamable-http", "--port", "9000"]
+    }
+  },
+  "tools": [
+    {
+      "name": "init_vault",
+      "description": "Initialize a new Provara vault. Creates directory structure, generates an Ed25519 keypair, and writes a signed GENESIS event.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "description": "Absolute path where the vault directory will be created"
+          },
+          "actor_name": {
+            "type": "string",
+            "description": "Name of the actor/agent for the GENESIS event",
+            "default": "default"
+          }
+        },
+        "required": ["vault_path"]
+      }
+    },
+    {
+      "name": "verify_vault",
+      "description": "Verify the cryptographic integrity of a Provara vault. Checks Ed25519 signatures, SHA-256 chain linkage, Merkle root, and vault structure.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "description": "Absolute path to an existing Provara vault directory"
+          }
+        },
+        "required": ["vault_path"]
+      }
+    },
+    {
+      "name": "query_events",
+      "description": "Query vault events with optional filters. Filters are AND-combined. Uses SQLite index for efficient lookups.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "description": "Absolute path to an existing Provara vault directory"
+          },
+          "actor": {
+            "type": "string",
+            "description": "Filter by actor/agent name"
+          },
+          "event_type": {
+            "type": "string",
+            "description": "Filter by event type (e.g. OBSERVATION, CORRECTION)"
+          },
+          "after": {
+            "type": "string",
+            "description": "ISO 8601 start timestamp (inclusive)"
+          },
+          "before": {
+            "type": "string",
+            "description": "ISO 8601 end timestamp (inclusive)"
+          }
+        },
+        "required": ["vault_path"]
+      }
+    },
+    {
+      "name": "get_vault_status",
+      "description": "Get a vault summary: event count, actors, event types, and chain heads. Uses SQLite index for fast aggregation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "description": "Absolute path to an existing Provara vault directory"
+          }
+        },
+        "required": ["vault_path"]
+      }
+    },
+    {
+      "name": "forensic_export",
+      "description": "Export a vault as a self-contained forensic evidence bundle with a standalone verify.py that requires only the cryptography package.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "description": "Absolute path to an existing Provara vault directory"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "Absolute path for the new bundle directory (must not exist)"
+          }
+        },
+        "required": ["vault_path", "output_path"]
+      }
+    },
+    {
+      "name": "append_event",
+      "description": "Sign and append a PSMC memory event to a vault. Returns event_id, hash, timestamp, and state_hash.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "description": "Absolute path to an existing Provara vault directory"
+          },
+          "event_type": {
+            "type": "string",
+            "description": "Event type string (e.g. OBSERVATION, DECISION, CORRECTION)"
+          },
+          "data": {
+            "type": "object",
+            "description": "Event payload as a JSON object"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Optional list of tags for categorization"
+          },
+          "emit_provara": {
+            "type": "boolean",
+            "description": "Also write a native Provara event alongside the PSMC event",
+            "default": false
+          }
+        },
+        "required": ["vault_path", "event_type", "data"]
+      }
+    },
+    {
+      "name": "verify_chain",
+      "description": "Verify PSMC hash-and-signature chain integrity. Returns {valid: bool}.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "description": "Absolute path to an existing Provara vault directory"
+          }
+        },
+        "required": ["vault_path"]
+      }
+    },
+    {
+      "name": "generate_digest",
+      "description": "Generate a weekly Markdown digest of recent PSMC memory events.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "description": "Absolute path to an existing Provara vault directory"
+          },
+          "weeks": {
+            "type": "integer",
+            "description": "Number of weeks to include in the digest",
+            "default": 1,
+            "minimum": 1
+          }
+        },
+        "required": ["vault_path"]
+      }
+    },
+    {
+      "name": "export_digest",
+      "description": "Alias for generate_digest. Generate a weekly Markdown digest of recent PSMC memory events.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "description": "Absolute path to an existing Provara vault directory"
+          },
+          "weeks": {
+            "type": "integer",
+            "description": "Number of weeks to include in the digest",
+            "default": 1,
+            "minimum": 1
+          }
+        },
+        "required": ["vault_path"]
+      }
+    },
+    {
+      "name": "snapshot_belief",
+      "description": "Compute a deterministic PSMC vault state snapshot and content-addressed state_hash.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "description": "Absolute path to an existing Provara vault directory"
+          }
+        },
+        "required": ["vault_path"]
+      }
+    },
+    {
+      "name": "snapshot_state",
+      "description": "Alias for snapshot_belief. Compute vault state and hash.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "description": "Absolute path to an existing Provara vault directory"
+          }
+        },
+        "required": ["vault_path"]
+      }
+    },
+    {
+      "name": "query_timeline",
+      "description": "Query PSMC vault events with optional type and time-range filters.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "description": "Absolute path to an existing Provara vault directory"
+          },
+          "event_type": {
+            "type": "string",
+            "description": "Filter by event type"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "ISO 8601 start timestamp"
+          },
+          "end_time": {
+            "type": "string",
+            "description": "ISO 8601 end timestamp"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of events to return",
+            "minimum": 1
+          }
+        },
+        "required": ["vault_path"]
+      }
+    },
+    {
+      "name": "list_conflicts",
+      "description": "List conflicting high-confidence PSMC evidence entries.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "description": "Absolute path to an existing Provara vault directory"
+          }
+        },
+        "required": ["vault_path"]
+      }
+    },
+    {
+      "name": "export_markdown",
+      "description": "Export the entire PSMC vault history as formatted Markdown.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "description": "Absolute path to an existing Provara vault directory"
+          }
+        },
+        "required": ["vault_path"]
+      }
+    },
+    {
+      "name": "checkpoint_vault",
+      "description": "Sign and save a new PSMC state snapshot for faster future loading.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "description": "Absolute path to an existing Provara vault directory"
+          }
+        },
+        "required": ["vault_path"]
+      }
+    }
+  ],
+  "resources": [
+    {
+      "uriTemplate": "vault://{vault_path}/events",
+      "name": "vault-events",
+      "description": "All vault events as a JSON document (vault_path = absolute path)"
+    },
+    {
+      "uriTemplate": "vault://{vault_path}/status",
+      "name": "vault-status",
+      "description": "Vault summary as a JSON document (vault_path = absolute path)"
+    }
+  ]
+}

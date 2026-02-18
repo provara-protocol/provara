@@ -40,19 +40,13 @@ Add to `claude_desktop_config.json` (location varies by OS):
 {
   "mcpServers": {
     "provara": {
-      "command": "python",
-      "args": [
-        "-m",
-        "provara.mcp",
-        "--transport",
-        "stdio",
-        "--vault-path",
-        "/absolute/path/to/claude_research_vault"
-      ]
+      "command": "provara-mcp"
     }
   }
 }
 ```
+
+> **Note:** Vault path is passed per tool call, not at server startup. This lets Claude Desktop work with multiple vaults simultaneously.
 
 **Restart Claude Desktop** after saving the config.
 
