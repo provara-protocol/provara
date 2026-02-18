@@ -503,6 +503,43 @@ def cmd_timestamp(args: argparse.Namespace) -> None:
     )
     print(f"Recorded TIMESTAMP_ANCHOR: {signed['event_id']}")
 
+
+def cmd_scitt_statement(args: argparse.Namespace) -> None:
+    from .scitt import record_scitt_statement
+    vault = Path(args.path).resolve()
+    keys = Path(args.keyfile).resolve()
+    signed = record_scitt_statement(
+        vault, keys,
+        statement_hash=args.statement_hash,
+        content_type=args.content_type,
+        subject=args.subject,
+        issuer=args.issuer,
+        cose_envelope_b64=args.cose_envelope_b64,
+        actor=args.actor,
+    )
+    print(f"Recorded SCITT signed_statement: {signed['event_id']}")
+
+
+def cmd_scitt_receipt(args: argparse.Namespace) -> None:
+    from .scitt import record_scitt_receipt
+    vault = Path(args.path).resolve()
+    keys = Path(args.keyfile).resolve()
+    # --inclusion-proof accepts a JSON object/array or a plain string identifier
+    try:
+        inclusion_proof = json.loads(args.inclusion_proof)
+    except (json.JSONDecodeError, TypeError):
+        inclusion_proof = args.inclusion_proof
+    signed = record_scitt_receipt(
+        vault, keys,
+        statement_event_id=args.statement_event_id,
+        transparency_service=args.transparency_service,
+        inclusion_proof=inclusion_proof,
+        receipt_b64=args.receipt_b64,
+        actor=args.actor,
+    )
+    print(f"Recorded SCITT receipt: {signed['event_id']}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="provara", description="Provara Protocol CLI")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -632,7 +669,58 @@ def main() -> None:
     p_ts.add_argument("--keyfile", required=True, help="Path to your private keys JSON")
     p_ts.add_argument("--tsa", help="TSA URL (defaults to freetsa.org)")
     p_ts.add_argument("--actor", default="timestamp_authority")
-    
+
+    # scitt — IETF SCITT compatibility (Phase 1)
+    p_scitt = sub.add_parser("scitt", help="IETF SCITT compatibility commands")
+    scitt_sub = p_scitt.add_subparsers(dest="scitt_command", required=True)
+
+    p_scitt_stmt = scitt_sub.add_parser(
+        "statement", help="Record a SCITT Signed Statement as a Provara event"
+    )
+    p_scitt_stmt.add_argument("path", help="Path to vault")
+    p_scitt_stmt.add_argument("--keyfile", required=True, help="Path to your private keys JSON")
+    p_scitt_stmt.add_argument(
+        "--statement-hash", required=True,
+        help="SHA-256 hex digest of the original statement (64 hex chars)"
+    )
+    p_scitt_stmt.add_argument(
+        "--content-type", required=True,
+        help="MIME type of the statement (e.g. application/json)"
+    )
+    p_scitt_stmt.add_argument("--subject", required=True, help="What the statement is about")
+    p_scitt_stmt.add_argument(
+        "--issuer", required=True,
+        help="Who made the statement (DID, key ID, or free string)"
+    )
+    p_scitt_stmt.add_argument(
+        "--cose-envelope-b64", default=None,
+        help="Base64-encoded COSE Sign1 envelope (optional)"
+    )
+    p_scitt_stmt.add_argument("--actor", default="scitt_agent")
+
+    p_scitt_rcpt = scitt_sub.add_parser(
+        "receipt", help="Record a SCITT Receipt as a Provara event"
+    )
+    p_scitt_rcpt.add_argument("path", help="Path to vault")
+    p_scitt_rcpt.add_argument("--keyfile", required=True, help="Path to your private keys JSON")
+    p_scitt_rcpt.add_argument(
+        "--statement-event-id", required=True,
+        help="Provara event_id of the signed_statement event (evt_...)"
+    )
+    p_scitt_rcpt.add_argument(
+        "--transparency-service", required=True,
+        help="URL or identifier of the transparency service"
+    )
+    p_scitt_rcpt.add_argument(
+        "--inclusion-proof", required=True,
+        help="Proof data from the TS — plain string or JSON object/array"
+    )
+    p_scitt_rcpt.add_argument(
+        "--receipt-b64", default=None,
+        help="Base64-encoded CBOR receipt (optional)"
+    )
+    p_scitt_rcpt.add_argument("--actor", default="scitt_agent")
+
     args = parser.parse_args()
     
     if args.command == "init": cmd_init(args)
@@ -653,9 +741,11 @@ def main() -> None:
     elif args.command == "send-message": cmd_send_message(args)
     elif args.command == "read-messages": cmd_read_messages(args)
     elif args.command == "timestamp": cmd_timestamp(args)
-
-    # ... after other subparsers ...
-    # Wait, I need to add the actual subparser definitions too.
+    elif args.command == "scitt":
+        if args.scitt_command == "statement":
+            cmd_scitt_statement(args)
+        elif args.scitt_command == "receipt":
+            cmd_scitt_receipt(args)
 
 if __name__ == "__main__":
     main()
