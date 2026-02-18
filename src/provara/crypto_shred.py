@@ -380,12 +380,15 @@ def shred_event(
     payload = target_event.get("payload", {})
     if isinstance(payload, dict) and payload.get("_privacy") == "aes-gcm-v1":
         kid = payload.get("kid")
+        if kid is None:
+            raise ValueError(f"Event {event_id} missing key ID")
+        assert isinstance(kid, str)
         if not key_store.key_exists(kid):
             raise ValueError(f"Event {event_id} already shredded")
     
     # Get key ID for shredding
     kid = payload.get("kid") if isinstance(payload, dict) else None
-    if not kid:
+    if not kid or not isinstance(kid, str):
         raise ValueError(f"Event {event_id} is not encrypted")
     
     # Create shred event
@@ -606,7 +609,7 @@ def is_vault_encrypted(vault_path: Path) -> bool:
         return False
     
     config = json.loads(config_path.read_text())
-    return config.get("encryption_enabled", False)
+    return bool(config.get("encryption_enabled", False))
 
 
 def get_encryption_mode(vault_path: Path) -> Optional[str]:
@@ -623,7 +626,8 @@ def get_encryption_mode(vault_path: Path) -> Optional[str]:
         return None
     
     config = json.loads(config_path.read_text())
-    return config.get("encryption_mode")
+    result = config.get("encryption_mode")
+    return str(result) if result else None
 
 
 # ---------------------------------------------------------------------------

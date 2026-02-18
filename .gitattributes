@@ -15,7 +15,7 @@
 *.sh text eol=lf
 *.yaml text eol=lf
 *.yml text eol=lf
-tests/fixtures/ text eol=lf
+tests/fixtures/** text eol=lf
 
 # Windows scripts — keep CRLF
 *.bat text eol=crlf

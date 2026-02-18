@@ -1,0 +1,61 @@
+# Example: verify a Provara vault on every push and pull request.
+#
+# Add this file to your repository at:
+#   .github/workflows/verify-vault.yml
+#
+# The action will:
+#   1. Set up Python and install provara-protocol
+#   2. Run full cryptographic verification (signatures + chain + Merkle)
+#   3. Post a summary comment on pull requests
+#   4. Fail the workflow if integrity checks fail
+#
+# Usage:
+#   - Replace './my-vault' with the actual path to your vault directory.
+#   - Set 'fail-on-error: false' if you want the step to be advisory only.
+#   - Set 'verify-timestamps: true' to also verify RFC 3161 timestamps.
+
+name: Verify Vault
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write    # needed for PR comment
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify Provara vault
+        id: vault-check
+        uses: provara-protocol/provara/.github/actions/provara-verify@main
+        with:
+          vault-path: './my-vault'
+          fail-on-error: 'true'
+          verify-timestamps: 'false'
+          output-report: 'vault-report.json'
+
+      - name: Print verification result
+        run: |
+          echo "Status:    ${{ steps.vault-check.outputs.status }}"
+          echo "Events:    ${{ steps.vault-check.outputs.event-count }}"
+          echo "Actors:    ${{ steps.vault-check.outputs.actor-count }}"
+          echo "Chain OK:  ${{ steps.vault-check.outputs.chain-integrity }}"
+          echo "Sigs  OK:  ${{ steps.vault-check.outputs.signature-integrity }}"
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vault-verification-report
+          path: vault-report.json
+          retention-days: 30
+

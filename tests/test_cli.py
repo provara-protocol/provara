@@ -26,9 +26,6 @@ from provara.cli import (
 )
 from provara.reducer_v1 import reduce_stream, save_checkpoint
 
-# Use the batch wrapper to test real invocation
-PROVARA_CMD = str(Path("provara.bat").resolve())
-
 class TestCLIEndToEnd(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
@@ -43,11 +40,8 @@ class TestCLIEndToEnd(unittest.TestCase):
         shutil.rmtree(self.tmp, ignore_errors=True)
         
     def run_provara(self, args):
-        # On Windows, run batch file via cmd /c
-        if sys.platform == "win32":
-            cmd = ["cmd", "/c", PROVARA_CMD] + args
-        else:
-            cmd = [PROVARA_CMD] + args
+        # Run via sys.executable -m provara for cross-platform reliability
+        cmd = [sys.executable, "-m", "provara"] + args
             
         result = subprocess.run(
             cmd, 
@@ -155,6 +149,8 @@ class TestCLIDirectCoverage(unittest.TestCase):
             "format": "json",
             "target_version": "latest",
             "dry_run": False,
+            "encrypted": False,
+            "mode": "per-event",
         }
         defaults.update(kwargs)
         return argparse.Namespace(**defaults)
