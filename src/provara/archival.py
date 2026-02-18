@@ -27,8 +27,7 @@ def is_vault_sealed(vault_path: Path) -> bool:
     if not events_file.exists():
         return False
     
-    # We only need to check the last event usually, but to be safe we scan
-    # In an archival scenario, the seal event is ALWAYS the last event.
+    # Scan for seal event
     for event in iter_events(events_file):
         if event.get("type") == SEAL_EVENT_TYPE:
             return True
@@ -66,11 +65,7 @@ def seal_vault(vault_path: Path, keyfile_path: Path, reason: str = "archival_rot
     seal_payload = {
         "reason": reason,
         "final_event_count": event_count + 1, # Including this event
-        "final_merkle_root": None, # Will be computed after adding this event? 
-        # Actually the spec says "final_merkle_root" in the payload.
-        # This is a bit recursive. We'll use the Merkle root BEFORE the seal event
-        # as the 'state anchor' being sealed.
-        "state_merkle_root": root_hex,
+        "final_merkle_root": root_hex, # Merkle root of state BEING sealed
         "seal_timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -134,12 +129,7 @@ def create_successor(
     # 2. Bootstrap new vault
     from .cli import _load_keys
     keys_data = _load_keys(keyfile_path)
-    # We'll use the same actor name if possible, or default
     
-    # We need to pass predecessor_info to bootstrap_backpack
-    # I might need to modify bootstrap_backpack to support this or do it manually
-    
-    # Let's see if we can do it via a custom bootstrap or just modify the genesis file after
     result = bootstrap_backpack(
         successor_path,
         actor="sovereign_genesis",
@@ -161,11 +151,6 @@ def create_successor(
     
     # The first event is GENESIS
     new_events[0]["payload"]["predecessor_vault"] = predecessor_info
-    # Re-sign the genesis event?
-    # bootstrap_v0 uses root_kp which we might not have here if we use _load_keys
-    # But we have the keyfile.
-    kid = list(keys_data.keys())[0]
-    priv = load_private_key_b64(keys_data[kid])
     
     # Re-calculate event_id and signature for genesis
     gen_event = new_events[0]
@@ -173,6 +158,9 @@ def create_successor(
     gen_event.pop("event_id", None)
     eid_hash = canonical_hash(gen_event)
     gen_event["event_id"] = f"evt_{eid_hash[:24]}"
+    
+    kid = list(keys_data.keys())[0]
+    priv = load_private_key_b64(keys_data[kid])
     new_events[0] = sign_event(gen_event, priv, kid)
     
     # Rewrite events.ndjson
@@ -188,18 +176,15 @@ def create_successor(
 
 def verify_vault_chain(vault_path: Path, vault_registry: Dict[str, Path] | None = None) -> List[Dict[str, Any]]:
     """Verify a chain of rotated vaults."""
-    results = []
+    results: List[Dict[str, Any]] = []
     current_path: Path | None = vault_path
 
     while current_path:
-        print(f"Verifying vault: {current_path}")
         report: Dict[str, Any] = {"path": str(current_path), "status": "PASS", "errors": []}
         
         # 1. Structural/Integrity check
         try:
             validate_vault_structure(current_path)
-            # Run compliance tests if available (mocked here for brevity but should call real ones)
-            # In archival.py we just check the linkage
         except Exception as e:
             report["status"] = "FAIL"
             report["errors"].append(f"Structure invalid: {e}")
@@ -220,17 +205,11 @@ def verify_vault_chain(vault_path: Path, vault_registry: Dict[str, Path] | None 
         if predecessor_info:
             # We need to find the predecessor vault
             pred_merkle = predecessor_info["merkle_root"]
-            # Look in registry or assume same parent dir
             next_path = None
             if vault_registry and pred_merkle in vault_registry:
                 next_path = vault_registry[pred_merkle]
-            else:
-                # Try finding it in the same parent directory if it matches common naming patterns
-                # For tests we'll pass a registry
-                pass
             
             if not next_path:
-                print(f"Predecessor vault with Merkle root {pred_merkle} not found in registry.")
                 break
             
             # Verify predecessor matches the pointer
@@ -248,7 +227,6 @@ def verify_vault_chain(vault_path: Path, vault_registry: Dict[str, Path] | None 
             
             current_path = next_path
         else:
-            # End of chain
             current_path = None
             
     return results

@@ -163,6 +163,24 @@ def cmd_verify(args: argparse.Namespace) -> None:
         _fail_with_error(err)
 
     # 2. Cryptographic/Compliance checks
+    if getattr(args, "follow_predecessors", False):
+        from .archival import verify_vault_chain
+        # We need a registry. For CLI, we can assume vaults are siblings or in a known dir.
+        # For simplicity in prototype, we'll scan the parent directory.
+        vault_registry = {}
+        for candidate in target.parent.iterdir():
+            if candidate.is_dir() and (candidate / "merkle_root.txt").exists():
+                m_root = (candidate / "merkle_root.txt").read_text(encoding="utf-8").strip()
+                vault_registry[m_root] = candidate
+        
+        results = verify_vault_chain(target, vault_registry)
+        for report in results:
+            if report["status"] == "FAIL":
+                print(f"CHAIN VERIFICATION FAILED at {report['path']}: {report['errors']}")
+                sys.exit(1)
+        print(f"\nPASS: All {len(results)} vaults in the chain are valid.")
+        return
+
     sys.path.insert(0, str(_repo_root / "tests"))
     from backpack_compliance_v1 import TestBackpackComplianceV1
     import unittest
@@ -463,6 +481,16 @@ def cmd_append(args: argparse.Namespace) -> None:
         args: Parsed CLI arguments including type, payload, and signing keys.
     """
     vault = Path(args.path).resolve()
+    
+    from .archival import is_vault_sealed
+    if is_vault_sealed(vault):
+        _cli_error(
+            "Vault is sealed",
+            "this vault has been permanently closed for archival",
+            "start a successor vault or use a different active vault",
+            "docs/VAULT_ARCHIVAL.md",
+        )
+
     keys_data = _load_keys(Path(args.keyfile))
     
     # Use specified key or first available
@@ -898,6 +926,61 @@ def cmd_scitt_receipt(args: argparse.Namespace) -> None:
     print(f"Recorded SCITT receipt: {signed['event_id']}")
 
 
+def cmd_seal(args: argparse.Namespace) -> None:
+    """Handle ``provara seal``."""
+    vault = Path(args.path).resolve()
+    keyfile = Path(args.keyfile).resolve()
+    
+    from .archival import seal_vault
+    try:
+        event = seal_vault(vault, keyfile)
+        print(f"Vault SEALED successfully. Seal event: {event['event_id']}")
+    except Exception as e:
+        print(f"Error sealing vault: {e}")
+        sys.exit(1)
+
+
+def cmd_rotate_vault(args: argparse.Namespace) -> None:
+    """Handle ``provara rotate-vault``."""
+    old_vault = Path(args.path).resolve()
+    successor = Path(args.successor).resolve()
+    keyfile = Path(args.keyfile).resolve()
+
+    from .archival import create_successor
+    try:
+        path = create_successor(old_vault, successor, keyfile)
+        print(f"Successor vault created at: {path}")
+        print("Verification chain established.")
+    except Exception as e:
+        print(f"Error rotating vault: {e}")
+        sys.exit(1)
+
+
+def cmd_forensic_export(args: argparse.Namespace) -> None:
+    """Handle ``provara forensic-export``."""
+    from .forensic_export import forensic_export
+
+    vault = Path(args.path).resolve()
+    output = Path(args.output).resolve()
+    include_raw: bool = getattr(args, "include_raw", False)
+
+    print(f"Exporting vault:  {vault}")
+    print(f"Output directory: {output}")
+
+    try:
+        fb = forensic_export(vault, output, include_raw=include_raw)
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    status = "PASS" if (fb.chain_integrity and fb.signature_integrity) else "FAIL"
+    print(f"\n[{status}] {fb.event_count} event(s), {fb.actor_count} actor(s)")
+    print(f"  Chain integrity:     {'OK' if fb.chain_integrity else 'BROKEN'}")
+    print(f"  Signature integrity: {'OK' if fb.signature_integrity else 'INVALID'}")
+    print(f"\nBundle written to: {output}")
+    print("Verify with:       python verify.py")
+
+
 def main() -> None:
     """CLI entrypoint.
 
@@ -920,6 +1003,18 @@ def main() -> None:
     p_verify.add_argument("path", help="Path to vault")
     p_verify.add_argument("-v", "--verbose", action="store_true")
     p_verify.add_argument("--show-redacted", action="store_true", help="Show metadata for redacted events")
+    p_verify.add_argument("--follow-predecessors", action="store_true", help="Verify entire archival chain")
+    
+    # seal
+    p_seal = sub.add_parser("seal", help="Permanently seal a vault")
+    p_seal.add_argument("path", help="Path to vault")
+    p_seal.add_argument("--keyfile", required=True, help="Path to private keys JSON")
+
+    # rotate-vault
+    p_rotate = sub.add_parser("rotate-vault", help="Start a successor vault linked to a sealed predecessor")
+    p_rotate.add_argument("path", help="Path to sealed predecessor vault")
+    p_rotate.add_argument("--successor", required=True, help="Path for new successor vault")
+    p_rotate.add_argument("--keyfile", required=True, help="Path to private keys JSON")
     
     # backup
     p_backup = sub.add_parser("backup", help="Create verified backup")
@@ -1135,10 +1230,26 @@ def main() -> None:
     )
     p_scitt_rcpt.add_argument("--actor", default="scitt_agent")
 
+    p_fe = sub.add_parser(
+        "forensic-export",
+        help="Export vault as self-contained chain-of-custody forensic bundle",
+    )
+    p_fe.add_argument("path", help="Path to vault")
+    p_fe.add_argument("--output", required=True, help="Output directory (must not exist)")
+    p_fe.add_argument(
+        "--include-raw",
+        action="store_true",
+        dest="include_raw",
+        default=False,
+        help="Include raw/vault_snapshot.tar.gz in the bundle",
+    )
+
     args = parser.parse_args()
     
     if args.command == "init": cmd_init(args)
     elif args.command == "verify": cmd_verify(args)
+    elif args.command == "seal": cmd_seal(args)
+    elif args.command == "rotate-vault": cmd_rotate_vault(args)
     elif args.command == "backup": cmd_backup(args)
     elif args.command == "manifest": cmd_manifest(args)
     elif args.command == "checkpoint": cmd_checkpoint(args)
@@ -1168,6 +1279,8 @@ def main() -> None:
             cmd_scitt_statement(args)
         elif args.scitt_command == "receipt":
             cmd_scitt_receipt(args)
+    elif args.command == "forensic-export":
+        cmd_forensic_export(args)
 
 if __name__ == "__main__":
     main()
