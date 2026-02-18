@@ -14,6 +14,8 @@ from provara.cli import (
     _get_timestamp,
     _load_keys,
     cmd_manifest,
+    cmd_migrate,
+    cmd_query,
     cmd_replay,
     cmd_reduce,
     cmd_append,
@@ -144,6 +146,15 @@ class TestCLIDirectCoverage(unittest.TestCase):
             "private_keys": None,
             "from_checkpoint": None,
             "snapshot_interval": 10000,
+            "event_type": None,
+            "after": None,
+            "before": None,
+            "content_key": None,
+            "content_value": None,
+            "rebuild_index": False,
+            "format": "json",
+            "target_version": "latest",
+            "dry_run": False,
         }
         defaults.update(kwargs)
         return argparse.Namespace(**defaults)
@@ -204,6 +215,41 @@ class TestCLIDirectCoverage(unittest.TestCase):
             cmd_reduce(self._ns(from_checkpoint=str(cp_path), snapshot_interval=1))
         state = json.loads(buf.getvalue())
         self.assertGreaterEqual(state["event_count"], snapshots[0].event_count)
+
+    # --- cmd_query ---
+
+    def test_cmd_query_by_actor_json(self) -> None:
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            cmd_query(self._ns(actor="test_actor", rebuild_index=True, format="json"))
+        rows = json.loads(buf.getvalue())
+        self.assertGreaterEqual(len(rows), 1)
+        self.assertTrue(all(r["actor"] == "test_actor" for r in rows))
+
+    def test_cmd_query_auto_builds_index(self) -> None:
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            cmd_query(self._ns(actor="test_actor", rebuild_index=False, format="json"))
+        rows = json.loads(buf.getvalue())
+        self.assertGreaterEqual(len(rows), 1)
+
+    def test_cmd_query_table_format(self) -> None:
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            cmd_query(self._ns(actor="test_actor", rebuild_index=True, format="table"))
+        output = buf.getvalue()
+        self.assertIn("event_id", output)
+        self.assertIn("type", output)
+
+    # --- cmd_migrate ---
+
+    def test_cmd_migrate_dry_run(self) -> None:
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            cmd_migrate(self._ns(target_version="1.1", dry_run=True))
+        report = json.loads(buf.getvalue())
+        self.assertEqual(report["target_version"], "1.1")
+        self.assertEqual(report["migration_event_id"], "")
 
     # --- cmd_append ---
 
