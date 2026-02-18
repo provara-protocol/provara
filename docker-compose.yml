@@ -1,0 +1,10 @@
+services:
+  provara-server:
+    build: .
+    ports:
+      - "8765:8765"
+    volumes:
+      - ./vault:/app/vault
+    environment:
+      - PROVARA_VAULT_PATH=/app/vault
+    restart: unless-stopped

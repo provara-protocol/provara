@@ -1,0 +1,90 @@
+name: MCP Docker Image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Dockerfile"
+      - "docker-compose.yml"
+      - "tools/mcp_server/**"
+      - "tools/psmc/**"
+      - "src/provara/**"
+      - "pyproject.toml"
+      - ".github/workflows/docker-mcp.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "Dockerfile"
+      - "docker-compose.yml"
+      - "tools/mcp_server/**"
+      - "tools/psmc/**"
+      - "src/provara/**"
+      - "pyproject.toml"
+      - ".github/workflows/docker-mcp.yml"
+  workflow_dispatch:
+
+jobs:
+  build-and-smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image for ${{ matrix.platform }}
+        run: |
+          PLATFORM_TAG="${{ matrix.platform }}"
+          PLATFORM_TAG="${PLATFORM_TAG//\//-}"
+          docker buildx build \
+            --platform "${{ matrix.platform }}" \
+            --tag "provara/mcp-server:ci-${PLATFORM_TAG}" \
+            --load \
+            .
+
+      - name: Smoke test MCP server startup
+        run: |
+          PLATFORM_TAG="${{ matrix.platform }}"
+          PLATFORM_TAG="${PLATFORM_TAG//\//-}"
+          IMAGE="provara/mcp-server:ci-${PLATFORM_TAG}"
+
+          START_MS=$(date +%s%3N)
+          docker run -d --rm --name mcp-smoke -p 8765:8765 "$IMAGE" >/dev/null
+
+          READY=0
+          for _ in $(seq 1 60); do
+            if curl -fsS "http://127.0.0.1:8765/health" >/dev/null; then
+              READY=1
+              break
+            fi
+            sleep 1
+          done
+
+          END_MS=$(date +%s%3N)
+          STARTUP_MS=$((END_MS - START_MS))
+          SIZE_BYTES=$(docker image inspect "$IMAGE" --format '{{.Size}}')
+          SIZE_MB=$(awk "BEGIN { printf \"%.2f\", $SIZE_BYTES/1024/1024 }")
+
+          if [ "$READY" -ne 1 ]; then
+            echo "Container failed health check"
+            docker logs mcp-smoke || true
+            docker stop mcp-smoke || true
+            exit 1
+          fi
+
+          echo "### MCP Docker Metrics (${{ matrix.platform }})" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Image: \`$IMAGE\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Size: \`${SIZE_BYTES}\` bytes (~${SIZE_MB} MiB)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Startup to healthy: \`${STARTUP_MS}\` ms" >> "$GITHUB_STEP_SUMMARY"
+
+          docker stop mcp-smoke >/dev/null

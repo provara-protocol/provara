@@ -103,5 +103,19 @@ class TestMCPServerExpansion(unittest.TestCase):
         self.assertIn("markdown", content)
         self.assertTrue(content["markdown"].startswith("# Sovereign Memory Export"))
 
+    def test_tools_call_includes_structured_content(self):
+        """MCP tool responses should expose structuredContent for typed clients."""
+        proc = self._get_proc()
+        resp = _stdio_request(proc, "tools/call", {
+            "name": "verify_chain",
+            "arguments": {"vault_path": str(self.vault_path)}
+        }, request_id=1)
+        _stop_proc(proc)
+
+        self.assertIn("result", resp)
+        self.assertIn("structuredContent", resp["result"])
+        self.assertIsInstance(resp["result"]["structuredContent"], dict)
+        self.assertIn("valid", resp["result"]["structuredContent"])
+
 if __name__ == "__main__":
     unittest.main()
