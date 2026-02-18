@@ -121,7 +121,7 @@ def _psmc_required() -> None:
 # ---------------------------------------------------------------------------
 
 
-@mcp.tool()  # type: ignore[misc]
+@mcp.tool()
 def init_vault(vault_path: str, actor_name: str = "default") -> str:
     """Initialize a new Provara vault at the given path.
 
@@ -143,7 +143,7 @@ def init_vault(vault_path: str, actor_name: str = "default") -> str:
     return json.dumps({"success": False, "errors": result.errors})
 
 
-@mcp.tool()  # type: ignore[misc]
+@mcp.tool()
 def verify_vault(vault_path: str) -> str:
     """Verify the cryptographic integrity of a Provara vault.
 
@@ -162,7 +162,7 @@ def verify_vault(vault_path: str) -> str:
         )
 
 
-@mcp.tool()  # type: ignore[misc]
+@mcp.tool()
 def query_events(
     vault_path: str,
     actor: str | None = None,
@@ -208,7 +208,7 @@ def query_events(
     return json.dumps({"events": filtered, "count": len(filtered)})
 
 
-@mcp.tool()  # type: ignore[misc]
+@mcp.tool()
 def get_vault_status(vault_path: str) -> str:
     """Get a vault summary: event count, actors, event types, and chain heads.
 
@@ -237,7 +237,7 @@ def get_vault_status(vault_path: str) -> str:
     )
 
 
-@mcp.tool()  # type: ignore[misc]
+@mcp.tool()
 def forensic_export(vault_path: str, output_path: str) -> str:
     """Export a vault as a self-contained forensic evidence bundle.
 
@@ -273,7 +273,7 @@ def forensic_export(vault_path: str, output_path: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-@mcp.tool()  # type: ignore[misc]
+@mcp.tool()
 def append_event(
     vault_path: str,
     event_type: str,
@@ -305,7 +305,7 @@ def append_event(
     )
 
 
-@mcp.tool()  # type: ignore[misc]
+@mcp.tool()
 def verify_chain(vault_path: str) -> str:
     """Verify PSMC hash-and-signature chain integrity.
 
@@ -317,7 +317,7 @@ def verify_chain(vault_path: str) -> str:
     return json.dumps({"valid": bool(ok)})
 
 
-@mcp.tool()  # type: ignore[misc]
+@mcp.tool()
 def generate_digest(vault_path: str, weeks: int = 1) -> str:
     """Generate a weekly digest of recent PSMC memory events as Markdown.
 
@@ -331,7 +331,7 @@ def generate_digest(vault_path: str, weeks: int = 1) -> str:
     return json.dumps({"digest": digest})
 
 
-@mcp.tool()  # type: ignore[misc]
+@mcp.tool()
 def export_digest(vault_path: str, weeks: int = 1) -> str:
     """Alias for generate_digest — generate a weekly Markdown digest.
 
@@ -340,7 +340,7 @@ def export_digest(vault_path: str, weeks: int = 1) -> str:
     return generate_digest(vault_path, weeks=weeks)  # type: ignore[no-any-return]
 
 
-@mcp.tool()  # type: ignore[misc]
+@mcp.tool()
 def snapshot_belief(vault_path: str) -> str:
     """Compute a deterministic PSMC vault snapshot and state hash.
 
@@ -351,7 +351,7 @@ def snapshot_belief(vault_path: str) -> str:
     return json.dumps(_psmc_compute_vault_state(vp))
 
 
-@mcp.tool()  # type: ignore[misc]
+@mcp.tool()
 def snapshot_state(vault_path: str) -> str:
     """Alias for snapshot_belief — compute vault state and hash.
 
@@ -360,7 +360,7 @@ def snapshot_state(vault_path: str) -> str:
     return snapshot_belief(vault_path)  # type: ignore[no-any-return]
 
 
-@mcp.tool()  # type: ignore[misc]
+@mcp.tool()
 def query_timeline(
     vault_path: str,
     event_type: str | None = None,
@@ -384,7 +384,7 @@ def query_timeline(
     return json.dumps({"events": events})
 
 
-@mcp.tool()  # type: ignore[misc]
+@mcp.tool()
 def list_conflicts(vault_path: str) -> str:
     """List conflicting high-confidence PSMC evidence entries.
 
@@ -396,7 +396,7 @@ def list_conflicts(vault_path: str) -> str:
     return json.dumps({"conflicts": conflicts})
 
 
-@mcp.tool()  # type: ignore[misc]
+@mcp.tool()
 def export_markdown(vault_path: str) -> str:
     """Export the entire PSMC vault history as formatted Markdown.
 
@@ -408,7 +408,7 @@ def export_markdown(vault_path: str) -> str:
     return json.dumps({"markdown": content})
 
 
-@mcp.tool()  # type: ignore[misc]
+@mcp.tool()
 def checkpoint_vault(vault_path: str) -> str:
     """Sign and save a new PSMC state snapshot for faster future loading.
 
@@ -424,7 +424,7 @@ def checkpoint_vault(vault_path: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-@mcp.resource("vault://{vault_path}/events")  # type: ignore[misc]
+@mcp.resource("vault://{vault_path}/events")
 def get_events_resource(vault_path: str) -> str:
     """Return all vault events as a JSON document.
 
@@ -446,7 +446,7 @@ def get_events_resource(vault_path: str) -> str:
     )
 
 
-@mcp.resource("vault://{vault_path}/status")  # type: ignore[misc]
+@mcp.resource("vault://{vault_path}/status")
 def get_status_resource(vault_path: str) -> str:
     """Return vault status as a JSON document.
 

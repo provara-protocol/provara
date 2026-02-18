@@ -16,6 +16,7 @@ try:
     import rfc3161_client
     HAS_RFC3161 = True
 except ImportError:
+    rfc3161_client = None  # noqa: N816 — module-level sentinel
     HAS_RFC3161 = False
 
 logger = logging.getLogger(__name__)
