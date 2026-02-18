@@ -34,6 +34,7 @@ my_private_keys.json
 # User-created backpacks (generated, not part of the kit)
 My_Backpack/
 Backups/
+.index/
 
 # Internal business documents
 HUNT_INFORMATION_SYSTEMS_BLUEPRINT.md

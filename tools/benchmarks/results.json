@@ -1,0 +1,199 @@
+{
+  "timestamp_utc": "2026-02-18T16:07:46.696898+00:00",
+  "python_version": "3.12.10",
+  "platform": {
+    "system": "Windows",
+    "release": "11",
+    "version": "10.0.26200",
+    "machine": "AMD64",
+    "processor": "AMD64 Family 25 Model 117 Stepping 2, AuthenticAMD",
+    "cpu_count": 16
+  },
+  "seed": 1337,
+  "rows": [
+    {
+      "benchmark": "vault_creation",
+      "size": 100,
+      "total_seconds": 0.018232899994472973,
+      "throughput": 5484.591043131563,
+      "peak_memory_mb": null,
+      "speedup": null
+    },
+    {
+      "benchmark": "vault_creation",
+      "size": 1000,
+      "total_seconds": 0.016377199994167313,
+      "throughput": 61060.49876390023,
+      "peak_memory_mb": null,
+      "speedup": null
+    },
+    {
+      "benchmark": "vault_creation",
+      "size": 10000,
+      "total_seconds": 0.0647910999978194,
+      "throughput": 154342.18589183636,
+      "peak_memory_mb": null,
+      "speedup": null
+    },
+    {
+      "benchmark": "vault_creation",
+      "size": 100000,
+      "total_seconds": 0.5841166000027442,
+      "throughput": 171198.69560209414,
+      "peak_memory_mb": null,
+      "speedup": null
+    },
+    {
+      "benchmark": "chain_verification",
+      "size": 100,
+      "total_seconds": 0.0007069999992381781,
+      "throughput": 141442.71585255183,
+      "peak_memory_mb": null,
+      "speedup": null
+    },
+    {
+      "benchmark": "chain_verification",
+      "size": 1000,
+      "total_seconds": 0.004415900009917095,
+      "throughput": 226454.40289730974,
+      "peak_memory_mb": null,
+      "speedup": null
+    },
+    {
+      "benchmark": "chain_verification",
+      "size": 10000,
+      "total_seconds": 0.040063499996904284,
+      "throughput": 249603.7540597477,
+      "peak_memory_mb": null,
+      "speedup": null
+    },
+    {
+      "benchmark": "chain_verification",
+      "size": 100000,
+      "total_seconds": 0.5316218999942066,
+      "throughput": 188103.61273884645,
+      "peak_memory_mb": null,
+      "speedup": null
+    },
+    {
+      "benchmark": "streaming_reduce_v1",
+      "size": 100,
+      "total_seconds": 0.0016177000070456415,
+      "throughput": 61816.15847466496,
+      "peak_memory_mb": 38.6484375,
+      "speedup": null
+    },
+    {
+      "benchmark": "full_reduce_v0",
+      "size": 100,
+      "total_seconds": 0.0011125999881187454,
+      "throughput": 89879.56234754805,
+      "peak_memory_mb": 38.69921875,
+      "speedup": null
+    },
+    {
+      "benchmark": "streaming_reduce_v1",
+      "size": 1000,
+      "total_seconds": 0.013428300007944927,
+      "throughput": 74469.59029872318,
+      "peak_memory_mb": 38.69921875,
+      "speedup": null
+    },
+    {
+      "benchmark": "full_reduce_v0",
+      "size": 1000,
+      "total_seconds": 0.015236899998853914,
+      "throughput": 65630.14786965969,
+      "peak_memory_mb": 39.3203125,
+      "speedup": null
+    },
+    {
+      "benchmark": "streaming_reduce_v1",
+      "size": 10000,
+      "total_seconds": 0.1466495000058785,
+      "throughput": 68189.79948516119,
+      "peak_memory_mb": 39.34375,
+      "speedup": null
+    },
+    {
+      "benchmark": "full_reduce_v0",
+      "size": 10000,
+      "total_seconds": 0.8580712000111816,
+      "throughput": 11654.044559320588,
+      "peak_memory_mb": 55.70703125,
+      "speedup": null
+    },
+    {
+      "benchmark": "streaming_reduce_v1",
+      "size": 100000,
+      "total_seconds": 1.9580696999910288,
+      "throughput": 51070.70499097053,
+      "peak_memory_mb": 56.1640625,
+      "speedup": null
+    },
+    {
+      "benchmark": "full_reduce_v0",
+      "size": 100000,
+      "total_seconds": 157.37400860000344,
+      "throughput": 635.4289433788866,
+      "peak_memory_mb": 279.1796875,
+      "speedup": null
+    },
+    {
+      "benchmark": "checkpoint_resume",
+      "size": 100,
+      "total_seconds": 0.001148700001067482,
+      "throughput": 87054.93158097887,
+      "peak_memory_mb": null,
+      "speedup": 1.592060588058767
+    },
+    {
+      "benchmark": "checkpoint_resume",
+      "size": 1000,
+      "total_seconds": 0.013579699996626005,
+      "throughput": 73639.32931128514,
+      "peak_memory_mb": null,
+      "speedup": 1.8772726936928907
+    },
+    {
+      "benchmark": "checkpoint_resume",
+      "size": 10000,
+      "total_seconds": 0.14327319999574684,
+      "throughput": 69796.72402303331,
+      "peak_memory_mb": null,
+      "speedup": 1.9906947007922953
+    },
+    {
+      "benchmark": "checkpoint_resume",
+      "size": 100000,
+      "total_seconds": 1.501038200003677,
+      "throughput": 66620.55635876225,
+      "peak_memory_mb": null,
+      "speedup": 1.757122370364601
+    },
+    {
+      "benchmark": "canonical_json",
+      "size": 1000,
+      "total_seconds": 0.004358599995612167,
+      "throughput": 229431.46905123367,
+      "peak_memory_mb": null,
+      "speedup": null
+    },
+    {
+      "benchmark": "canonical_json",
+      "size": 10000,
+      "total_seconds": 0.044586800009710714,
+      "throughput": 224281.6259032284,
+      "peak_memory_mb": null,
+      "speedup": null
+    },
+    {
+      "benchmark": "canonical_json",
+      "size": 100000,
+      "total_seconds": 0.43076160000055097,
+      "throughput": 232146.96946030494,
+      "peak_memory_mb": null,
+      "speedup": null
+    }
+  ]
+}
