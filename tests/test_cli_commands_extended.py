@@ -20,12 +20,8 @@ def vault_path(tmp_path):
 
 @pytest.fixture
 def keyfile(vault_path):
-    # market.py expects simple {kid: priv} format
-    # cli.py saves complex {"keys": [...]} format
-    # We create a simple one for market functions
     complex_keys = json.loads((vault_path / "identity" / "private_keys.json").read_text())
     simple_keys = {k["key_id"]: k["private_key_b64"] for k in complex_keys["keys"]}
-    
     simple_path = vault_path / "identity" / "simple_keys.json"
     simple_path.write_text(json.dumps(simple_keys))
     return simple_path
@@ -35,24 +31,24 @@ def complex_keyfile(vault_path):
     return vault_path / "identity" / "private_keys.json"
 
 def test_all_commands_basic(vault_path, keyfile, complex_keyfile, tmp_path):
-    # market-alpha (uses simple format)
+    # market-alpha
     cmd_market_alpha(argparse.Namespace(
         path=str(vault_path), keyfile=str(keyfile), ticker="BTC", signal="LONG",
         conviction=0.9, horizon="1d", rationale="test", actor="analyst"
     ))
     
-    # hedge-fund-sim (uses simple format)
+    # hedge-fund-sim
     cmd_hedge_fund_sim(argparse.Namespace(
         path=str(vault_path), keyfile=str(keyfile), sim_id="s1", strategy="strat1",
         returns=5.5, ticker="BTC", actor="sim"
     ))
     
-    # oracle-validate (uses simple format)
+    # oracle-validate
     cmd_oracle_validate(argparse.Namespace(
         path=str(vault_path), keyfile=str(keyfile), actor="oracle"
     ))
     
-    # append (uses _load_keys which handles complex format)
+    # append
     cmd_append(argparse.Namespace(
         path=str(vault_path), type="OBSERVATION", data='{"foo":"bar"}',
         keyfile=str(complex_keyfile), key_id=None, actor="tester", confidence=1.0
@@ -72,7 +68,7 @@ def test_all_commands_basic(vault_path, keyfile, complex_keyfile, tmp_path):
     # check-safety
     cmd_check_safety(argparse.Namespace(path=str(vault_path), action="REPLAY"))
     
-    # agent-loop (uses simple format)
+    # agent-loop
     cmd_agent_loop(argparse.Namespace(
         path=str(vault_path), keyfile=str(keyfile), actor="bot", cycles=1
     ))
@@ -100,7 +96,7 @@ def test_all_commands_basic(vault_path, keyfile, complex_keyfile, tmp_path):
     stmt_id = last_event["event_id"]
     cmd_scitt_receipt(argparse.Namespace(
         path=str(vault_path), keyfile=str(keyfile), statement_event_id=stmt_id,
-        transparency_service="https://ts.example.com", inclusion_proof='{"root": "abc123"}',
+        transparency_service="https://ts.example.com", inclusion_proof='{"root":"mock"}',
         receipt_b64=None, actor="scitt"
     ))
     
