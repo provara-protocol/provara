@@ -961,10 +961,19 @@ def verify_all_signatures(
     invalid = 0
     errors: List[str] = []
 
+    # Pre-scan for redaction events to validate tombstones
+    redaction_map = {}
+    for e in events:
+        if e.get("type") == "com.provara.redaction":
+            target = e.get("payload", {}).get("target_event_id")
+            if target:
+                redaction_map[target] = e
+
     for event in events:
         sig = event.get("sig")
         kid = event.get("actor_key_id")
         eid = event.get("event_id", "unknown")
+        is_redacted = event.get("payload", {}).get("redacted") is True
 
         if not sig:
             # Unsigned events are not verified (may be pre-signing)
@@ -977,6 +986,14 @@ def verify_all_signatures(
             pk = resolve_public_key(kid, keys_registry)
             if pk is None:
                 raise KeyNotFoundError(f"Event {eid}: key {kid} not found or revoked")
+
+            if is_redacted:
+                # For redacted events, we accept the signature as historical evidence
+                # if a corresponding redaction event exists.
+                if eid not in redaction_map:
+                    raise InvalidSignatureError(f"Event {eid}: marked redacted but no com.provara.redaction event found")
+                valid += 1
+                continue
 
             if verify_event_signature(event, pk):
                 valid += 1
@@ -1147,6 +1164,12 @@ def _cmd_check_forks(args: argparse.Namespace) -> int:
 
 
 def main() -> None:
+    """Entry point for the standalone sync CLI.
+
+    Parses subcommands (``merge``, ``delta-export``, ``delta-import``,
+    ``check-forks``) and exits with process status code from the selected
+    command handler.
+    """
     ap = argparse.ArgumentParser(
         description="Backpack v1.0 Multi-Device Sync Layer",
         epilog="Phase 2 of the Provara Protocol.",

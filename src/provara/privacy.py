@@ -34,10 +34,24 @@ class PrivacyKeyStore:
             """)
 
     def store_key(self, key_id: str, key_bytes: bytes) -> None:
+        """Persist a generated data-encryption key.
+
+        Args:
+            key_id: Stable key identifier used in encrypted wrappers.
+            key_bytes: Raw AES key bytes.
+        """
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("INSERT INTO keys (key_id, key_bytes) VALUES (?, ?)", (key_id, key_bytes))
 
     def get_key(self, key_id: str) -> Optional[bytes]:
+        """Load key bytes for a wrapper key ID.
+
+        Args:
+            key_id: Wrapper key identifier.
+
+        Returns:
+            Optional[bytes]: Key bytes or ``None`` if key was shredded/missing.
+        """
         with sqlite3.connect(self.db_path) as conn:
             cur = conn.execute("SELECT key_bytes FROM keys WHERE key_id = ?", (key_id,))
             row = cur.fetchone()
@@ -56,14 +70,20 @@ class PrivacyWrapper:
         self.keystore = PrivacyKeyStore(vault_path)
 
     def encrypt(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Returns a wrapper dict:
-        {
-            "_privacy": "aes-gcm-v1",
-            "kid": "<uuid>",
-            "nonce": "<b64>",
-            "ciphertext": "<b64>"
-        }
+        """Encrypt a payload and persist a one-time key in the sidecar store.
+
+        Args:
+            data: JSON-serializable dictionary payload.
+
+        Returns:
+            Dict[str, Any]: Encrypted wrapper containing scheme, key ID, nonce,
+            and ciphertext.
+
+        Raises:
+            TypeError: If payload cannot be serialized.
+
+        Example:
+            wrapper = PrivacyWrapper(vault).encrypt({"ssn": "redacted"})
         """
         import uuid
         key = AESGCM.generate_key(bit_length=256)
@@ -85,8 +105,17 @@ class PrivacyWrapper:
         }
 
     def decrypt(self, wrapper: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """
-        Returns decrypted dict or None if key is shredded.
+        """Decrypt a privacy wrapper payload when key material is still present.
+
+        Args:
+            wrapper: Encrypted wrapper produced by ``encrypt``.
+
+        Returns:
+            Optional[Dict[str, Any]]: Decrypted payload, or ``None`` if key was
+            shredded or ciphertext is invalid.
+
+        Raises:
+            ValueError: If wrapper uses an unsupported privacy scheme.
         """
         if wrapper.get("_privacy") != "aes-gcm-v1":
             raise ValueError("Unsupported privacy scheme")
@@ -110,4 +139,12 @@ class PrivacyWrapper:
             return None
 
     def shred(self, kid: str) -> bool:
+        """Delete a key so wrapped data becomes cryptographically unreadable.
+
+        Args:
+            kid: Wrapper key ID to shred.
+
+        Returns:
+            bool: True when a key was deleted, else False.
+        """
         return self.keystore.shred_key(kid)
