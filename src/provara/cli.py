@@ -37,6 +37,7 @@ from .canonical_json import canonical_dumps, canonical_hash
 from .manifest_generator import build_manifest, manifest_leaves
 from .backpack_integrity import merkle_root_hex, MANIFEST_EXCLUDE, canonical_json_bytes
 from .reducer_v0 import SovereignReducerV0
+from .reducer_v1 import reduce_stream
 from .checkpoint_v0 import create_checkpoint, save_checkpoint, load_latest_checkpoint, verify_checkpoint
 from .sync_v0 import load_events, write_events
 from .export import export_vault_scitt_compat
@@ -353,6 +354,26 @@ def cmd_replay(args: argparse.Namespace) -> None:
     reducer.apply_events(events)
     state = reducer.export_state()
     print(json.dumps(state, indent=2))
+
+
+def cmd_reduce(args: argparse.Namespace) -> None:
+    """Handle ``provara reduce`` streaming state reconstruction."""
+    vault = Path(args.path).resolve()
+    checkpoint = Path(args.from_checkpoint).resolve() if args.from_checkpoint else None
+
+    final_state = None
+    for snapshot in reduce_stream(
+        vault,
+        checkpoint=checkpoint,
+        snapshot_interval=args.snapshot_interval,
+    ):
+        final_state = snapshot
+
+    if final_state is None:
+        print("{}")
+        return
+
+    print(json.dumps(final_state.to_dict(), indent=2))
 
 def cmd_append(args: argparse.Namespace) -> None:
     """Handle ``provara append`` event creation/signing.
@@ -793,6 +814,12 @@ def main() -> None:
     p_replay = sub.add_parser("replay", help="Show derived belief state")
     p_replay.add_argument("path", help="Path to vault")
 
+    # reduce
+    p_reduce = sub.add_parser("reduce", help="Stream-reduce event log and print reducer_v1 state")
+    p_reduce.add_argument("path", help="Path to vault")
+    p_reduce.add_argument("--from-checkpoint", help="Path to reducer_v1 checkpoint JSON")
+    p_reduce.add_argument("--snapshot-interval", type=int, default=10000, help="Emit interval in events")
+
     # redact
     p_red = sub.add_parser("redact", help="Redact an event content (GDPR Article 17)")
     p_red.add_argument("path", help="Path to vault")
@@ -967,6 +994,7 @@ def main() -> None:
     elif args.command == "manifest": cmd_manifest(args)
     elif args.command == "checkpoint": cmd_checkpoint(args)
     elif args.command == "replay": cmd_replay(args)
+    elif args.command == "reduce": cmd_reduce(args)
     elif args.command == "append": cmd_append(args)
     elif args.command == "redact": cmd_redact(args)
     elif args.command == "market-alpha": cmd_market_alpha(args)

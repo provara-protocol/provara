@@ -15,12 +15,14 @@ from provara.cli import (
     _load_keys,
     cmd_manifest,
     cmd_replay,
+    cmd_reduce,
     cmd_append,
     cmd_checkpoint,
     cmd_resume,
     cmd_init,
     cmd_backup,
 )
+from provara.reducer_v1 import reduce_stream, save_checkpoint
 
 # Use the batch wrapper to test real invocation
 PROVARA_CMD = str(Path("provara.bat").resolve())
@@ -140,6 +142,8 @@ class TestCLIDirectCoverage(unittest.TestCase):
             "uid": "cli-coverage-test",
             "quorum": False,
             "private_keys": None,
+            "from_checkpoint": None,
+            "snapshot_interval": 10000,
         }
         defaults.update(kwargs)
         return argparse.Namespace(**defaults)
@@ -179,6 +183,27 @@ class TestCLIDirectCoverage(unittest.TestCase):
         state = json.loads(buf.getvalue())
         self.assertIn("metadata", state)
         self.assertGreaterEqual(state["metadata"]["event_count"], 1)
+
+    # --- cmd_reduce ---
+
+    def test_cmd_reduce_returns_stream_state(self) -> None:
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            cmd_reduce(self._ns(snapshot_interval=1))
+        state = json.loads(buf.getvalue())
+        self.assertIn("event_count", state)
+        self.assertIn("merkle_root", state)
+
+    def test_cmd_reduce_with_checkpoint(self) -> None:
+        snapshots = list(reduce_stream(self.vault_dir, snapshot_interval=1))
+        cp_path = self.vault_dir / "checkpoints" / "stream.chk"
+        save_checkpoint(cp_path, snapshots[0])
+
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            cmd_reduce(self._ns(from_checkpoint=str(cp_path), snapshot_interval=1))
+        state = json.loads(buf.getvalue())
+        self.assertGreaterEqual(state["event_count"], snapshots[0].event_count)
 
     # --- cmd_append ---
 
