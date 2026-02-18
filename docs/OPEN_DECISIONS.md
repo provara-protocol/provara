@@ -116,3 +116,98 @@ Recommendation: Define two hashes in next revision and keep current hash as lega
 1. Normatively document pipeline ordering: signature/key verification precedes reducer application.
 2. Freeze merge ordering and missing-`event_id` fallback language in the human-readable protocol spec.
 3. Resolve state-hash scope mismatch explicitly before non-Python ports rely on ambiguous text.
+
+---
+
+## Rust Implementation Findings (2026-02-18)
+
+During implementation of `provara-rs` (Lane 5B), the following spec ambiguities were discovered:
+
+### 9) Minus Zero Handling in Canonical JSON
+
+**Description:** The conformance suite includes a test for `-0.0` vs `0.0`. The Python implementation preserves `-0.0` as distinct from `0.0`, but IEEE 754 semantics consider them equal.
+
+**Current Rust implementation choice:** The Rust implementation normalizes `-0.0` to `0.0` (via the `if s == "-0" { s = "0".to_string(); }` check).
+
+**Alternative approaches:**
+- Preserve `-0.0` as byte-distinct from `0.0` (matches Python behavior)
+- Always normalize to `0.0` (matches JSON spec intent)
+- Document as implementation-defined
+
+**Recommendation:** For v1.0, preserve Python behavior (keep `-0.0` distinct). This requires updating the Rust implementation to not normalize minus zero. The conformance test `number_formatting_minus_zero` expects `-0.0` to be preserved.
+
+**Status:** ⚠️ **ACTION REQUIRED** — Rust implementation needs update to match Python behavior.
+
+### 10) Event ID Test Vector Uses Different Actor Format
+
+**Description:** The test vector `event_id_derivation_01` uses `"actor": "bp1_actor_id"` which is not a valid key ID format (should be `bp1_` + 16 hex chars).
+
+**Current Rust implementation choice:** The test accepts any string as actor, since actor validation is separate from event ID derivation.
+
+**Alternative approaches:**
+- Validate actor format before computing event ID
+- Treat test vector as illustrative, not normative
+- Update test vector to use valid key ID format
+
+**Recommendation:** The test vector is illustrative. The Rust implementation correctly derives event ID regardless of actor format. Consider updating test vector to use a valid key ID format for clarity.
+
+**Status:** ℹ️ **DOCUMENTED** — No code change needed, but test vector could be clearer.
+
+### 11) Ed25519 Test Vector Uses Fixed Key Pair
+
+**Description:** The test vector `ed25519_sign_verify_01` provides a public key and expected signature, but signatures are non-deterministic without a fixed seed. The expected signature cannot be verified without the corresponding private key.
+
+**Current Rust implementation choice:** The test generates a random keypair and tests sign/verify round-trip, but does not validate against the expected signature in the test vector.
+
+**Alternative approaches:**
+- Include private key in test vector (for deterministic signing)
+- Use a known-answer test with pre-computed signature
+- Skip signature validation against expected value
+
+**Recommendation:** Update test vector to include the private key (Base64 encoded) so implementations can reproduce the exact signature. Alternatively, provide a separate signature verification test with known message/signature/public_key triplet.
+
+**Status:** ⚠️ **ACTION REQUIRED** — Test vector needs private key for full validation.
+
+### 12) Reducer Determinism Test Vector is Simplified
+
+**Description:** The test vector `reducer_determinism_01` expects a state hash computed from a simplified state structure (`{"canonical": {...}, "events_processed": N}`), but the Python reducer includes additional fields.
+
+**Current Rust implementation choice:** The Rust implementation computes state hash from a minimal state structure, which may not match the Python reference implementation's full state hash.
+
+**Alternative approaches:**
+- Define full reducer state structure in test vector
+- Provide expected intermediate state after each event
+- Separate "state hash computation" from "reducer logic" tests
+
+**Recommendation:** This test vector validates the concept of reducer determinism, not the exact Python reducer implementation. A full reducer test would require the complete state structure including all four namespaces (canonical, local, contested, archived).
+
+**Status:** ℹ️ **DOCUMENTED** — Test vector is illustrative. Full reducer conformance requires separate test suite.
+
+### 13) Merkle Root Test Vector Has Typo
+
+**Description:** The test vector `merkle_root_01` has a hash value with incorrect casing: `"315f5bdb76d078c43b8ac00c33e22F06d20353842d059013e96196a84f33161"` contains uppercase `F` which is non-standard for hex encoding.
+
+**Current Rust implementation choice:** The implementation lowercases all hex output, but accepts mixed-case input.
+
+**Alternative approaches:**
+- Normalize hex input to lowercase before comparison
+- Fix test vector to use consistent lowercase
+- Document hex encoding as case-insensitive
+
+**Recommendation:** Fix test vector to use consistent lowercase hex encoding. The Provara spec requires "64 lowercase hexadecimal characters".
+
+**Status:** ⚠️ **ACTION REQUIRED** — Test vector should be corrected to lowercase.
+
+---
+
+## Summary of Required Actions
+
+| ID | Issue | Severity | Action |
+|----|-------|----------|--------|
+| 9 | Minus zero handling | Medium | Update Rust to preserve `-0.0` |
+| 10 | Actor format in test vector | Low | Document as illustrative |
+| 11 | Missing private key in signature test | High | Add private key to test vector |
+| 12 | Simplified reducer test | Medium | Document limitations |
+| 13 | Mixed-case hex in test vector | Low | Fix test vector to lowercase |
+
+**Owner review required:** Items 9, 11, and 13 require decisions or test vector updates.
