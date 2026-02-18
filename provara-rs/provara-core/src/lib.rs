@@ -117,6 +117,11 @@ impl KeyPair {
     pub fn sign(&self, message: &[u8]) -> Signature {
         self.signing_key.sign(message)
     }
+
+    /// Get the raw seed bytes (32-byte private key material)
+    pub fn seed_bytes(&self) -> [u8; 32] {
+        self.signing_key.to_bytes()
+    }
 }
 
 /// Derive a key ID from public key bytes according to Provara spec
@@ -246,35 +251,47 @@ pub fn derive_event_id(event: &Event) -> Result<String, ProvaraError> {
     Ok(format!("evt_{}", hex_chars))
 }
 
-/// Create a fully signed event
+/// Create a fully signed event with optional timestamp
+pub fn create_event_full(
+    event_type: &str,
+    keypair: &KeyPair,
+    prev_event_hash: Option<String>,
+    payload: Value,
+    timestamp_utc: Option<String>,
+) -> Result<Event, ProvaraError> {
+    let actor = keypair.key_id()?;
+
+    let mut event = Event::new(event_type, &actor, prev_event_hash, payload);
+    event.timestamp_utc = timestamp_utc;
+
+    // Compute event_id
+    event.event_id = derive_event_id(&event)?;
+
+    // Compute signing payload (event without signature, but WITH event_id)
+    let signing_payload = event.signing_payload()?;
+    let canonical_bytes = canonicalize(&signing_payload)?;
+
+    // Hash the canonical bytes
+    let hash = sha256_hash(&canonical_bytes);
+
+    // Sign the hash
+    let signature = keypair.sign(&hash);
+
+    // Encode signature as Base64
+    use base64::Engine as _;
+    event.signature = Some(base64::engine::general_purpose::STANDARD.encode(signature.to_bytes()));
+
+    Ok(event)
+}
+
+/// Create a fully signed event (no timestamp)
 pub fn create_event(
     event_type: &str,
     keypair: &KeyPair,
     prev_event_hash: Option<String>,
     payload: Value,
 ) -> Result<Event, ProvaraError> {
-    let actor = keypair.key_id()?;
-    
-    let mut event = Event::new(event_type, &actor, prev_event_hash, payload);
-    
-    // Compute event_id
-    event.event_id = derive_event_id(&event)?;
-    
-    // Compute signing payload (event without signature, but WITH event_id)
-    let signing_payload = event.signing_payload()?;
-    let canonical_bytes = canonicalize(&signing_payload)?;
-    
-    // Hash the canonical bytes
-    let hash = sha256_hash(&canonical_bytes);
-    
-    // Sign the hash
-    let signature = keypair.sign(&hash);
-    
-    // Encode signature as Base64
-    use base64::Engine as _;
-    event.signature = Some(base64::engine::general_purpose::STANDARD.encode(signature.to_bytes()));
-    
-    Ok(event)
+    create_event_full(event_type, keypair, prev_event_hash, payload, None)
 }
 
 /// Verify an event's signature
@@ -445,6 +462,10 @@ pub fn import_public_key_b64(key_b64: &str) -> Result<[u8; 32], ProvaraError> {
     Ok(key)
 }
 
+// ---------------------------------------------------------------------------
+// WASM bindings — browser-compatible functions exposed via wasm-bindgen
+// ---------------------------------------------------------------------------
+
 #[cfg(feature = "wasm")]
 #[wasm_bindgen]
 pub struct WasmKeyPair {
@@ -458,51 +479,150 @@ impl WasmKeyPair {
     pub fn new() -> Self {
         use rand_core::OsRng;
         WasmKeyPair {
-            inner: KeyPair::generate(&mut OsRng {}),
+            inner: KeyPair::generate(&mut OsRng),
         }
     }
-    
+
     #[wasm_bindgen(getter)]
     pub fn key_id(&self) -> Result<String, JsValue> {
         self.inner.key_id().map_err(|e| JsValue::from_str(&e.to_string()))
     }
-    
+
     #[wasm_bindgen(getter)]
-    pub fn public_key_hex(&self) -> String {
-        hex::encode(self.inner.public_key())
+    pub fn public_key_b64(&self) -> String {
+        use base64::Engine as _;
+        base64::engine::general_purpose::STANDARD.encode(self.inner.public_key())
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn private_key_b64(&self) -> String {
+        use base64::Engine as _;
+        base64::engine::general_purpose::STANDARD.encode(self.inner.seed_bytes())
     }
 }
 
+/// Generate a new Ed25519 keypair.
+/// Returns a plain JS object: { key_id: string, public_key_b64: string, private_key_b64: string }
+#[cfg(feature = "wasm")]
+#[wasm_bindgen]
+pub fn generate_keypair_js() -> Result<JsValue, JsValue> {
+    use rand_core::OsRng;
+    use base64::Engine as _;
+
+    let kp = KeyPair::generate(&mut OsRng);
+    let key_id = kp.key_id().map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let public_key_b64 = base64::engine::general_purpose::STANDARD.encode(kp.public_key());
+    let private_key_b64 = base64::engine::general_purpose::STANDARD.encode(kp.seed_bytes());
+
+    let obj = js_sys::Object::new();
+    js_sys::Reflect::set(&obj, &"key_id".into(), &key_id.into())?;
+    js_sys::Reflect::set(&obj, &"public_key_b64".into(), &public_key_b64.into())?;
+    js_sys::Reflect::set(&obj, &"private_key_b64".into(), &private_key_b64.into())?;
+
+    Ok(obj.into())
+}
+
+/// Create and sign a Provara event.
+///
+/// - event_type: "OBSERVATION" | "ATTESTATION" | "RETRACTION" | …
+/// - payload_json: JSON string for the event payload
+/// - prev_event_hash: event_id of the previous event by this actor, or null
+/// - private_key_b64: Base64-encoded 32-byte Ed25519 seed
+/// - timestamp_utc: ISO 8601 UTC timestamp string (e.g. new Date().toISOString())
+///
+/// Returns the signed event as a JSON string.
 #[cfg(feature = "wasm")]
 #[wasm_bindgen]
 pub fn create_event_js(
     event_type: &str,
-    payload: &JsValue,
+    payload_json: &str,
     prev_event_hash: Option<String>,
+    private_key_b64: &str,
+    timestamp_utc: Option<String>,
 ) -> Result<JsValue, JsValue> {
-    use rand_core::OsRng;
-    
-    let keypair = KeyPair::generate(&mut OsRng {});
-    let payload_value: Value = serde_json::from_str(
-        &payload.as_string().ok_or("Invalid payload")?
-    ).map_err(|e| JsValue::from_str(&format!("Invalid JSON: {}", e)))?;
-    
-    let event = create_event(event_type, &keypair, prev_event_hash, payload_value)
+    use base64::Engine as _;
+
+    let key_bytes = base64::engine::general_purpose::STANDARD
+        .decode(private_key_b64)
+        .map_err(|e| JsValue::from_str(&format!("Invalid private key: {}", e)))?;
+
+    if key_bytes.len() != 32 {
+        return Err(JsValue::from_str(&format!(
+            "Private key must be 32 bytes, got {}",
+            key_bytes.len()
+        )));
+    }
+
+    let mut seed = [0u8; 32];
+    seed.copy_from_slice(&key_bytes);
+
+    let keypair = KeyPair::from_bytes(&seed)
         .map_err(|e| JsValue::from_str(&e.to_string()))?;
-    
-    serde_json::to_value(&event)
-        .map(|v| JsValue::from_str(&v.to_string()))
-        .map_err(|e| JsValue::from_str(&format!("Serialization failed: {}", e)))
+
+    let payload: Value = serde_json::from_str(payload_json)
+        .map_err(|e| JsValue::from_str(&format!("Invalid payload JSON: {}", e)))?;
+
+    let event = create_event_full(event_type, &keypair, prev_event_hash, payload, timestamp_utc)
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+
+    let event_json = serde_json::to_string(&event)
+        .map_err(|e| JsValue::from_str(&format!("Serialization failed: {}", e)))?;
+
+    Ok(JsValue::from_str(&event_json))
 }
 
+/// Verify an event's Ed25519 signature.
+/// - event_json: JSON string of the signed event
+/// - public_key_b64: Base64-encoded 32-byte public key
+///
+/// Returns true if valid, throws on invalid JSON or key format.
 #[cfg(feature = "wasm")]
 #[wasm_bindgen]
-pub fn verify_chain_js(events_json: &str) -> Result<bool, JsValue> {
+pub fn verify_event_js(event_json: &str, public_key_b64: &str) -> Result<bool, JsValue> {
+    let event: Event = serde_json::from_str(event_json)
+        .map_err(|e| JsValue::from_str(&format!("Invalid event JSON: {}", e)))?;
+
+    let pub_key = import_public_key_b64(public_key_b64)
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+
+    verify_event_signature(&event, &pub_key)
+        .map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Verify causal chain integrity for an array of events.
+/// - events_json: JSON array string of events
+///
+/// Returns a JS object: { valid: boolean, errors: string[] }
+#[cfg(feature = "wasm")]
+#[wasm_bindgen]
+pub fn verify_chain_js(events_json: &str) -> Result<JsValue, JsValue> {
     let events: Vec<Event> = serde_json::from_str(events_json)
         .map_err(|e| JsValue::from_str(&format!("Invalid JSON: {}", e)))?;
-    
-    verify_causal_chain(&events)
-        .map(|_| true)
+
+    let mut valid = true;
+    let errors_arr = js_sys::Array::new();
+
+    if let Err(e) = verify_causal_chain(&events) {
+        valid = false;
+        errors_arr.push(&JsValue::from_str(&e.to_string()));
+    }
+
+    let result = js_sys::Object::new();
+    js_sys::Reflect::set(&result, &"valid".into(), &JsValue::from_bool(valid))?;
+    js_sys::Reflect::set(&result, &"errors".into(), &errors_arr.into())?;
+
+    Ok(result.into())
+}
+
+/// Compute RFC 8785 canonical JSON of the input JSON string.
+/// Returns the canonical UTF-8 string.
+#[cfg(feature = "wasm")]
+#[wasm_bindgen]
+pub fn canonical_json_js(input_json: &str) -> Result<String, JsValue> {
+    let value: Value = serde_json::from_str(input_json)
+        .map_err(|e| JsValue::from_str(&format!("Invalid JSON: {}", e)))?;
+
+    canonical_to_string(&value)
         .map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
