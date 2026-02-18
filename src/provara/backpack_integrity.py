@@ -17,6 +17,8 @@ import os
 from pathlib import Path
 from typing import Any, List
 
+from .errors import VaultStructureInvalidError
+
 # ---------------------------------------------------------------------------
 # Canonical JSON (delegates to canonical_json.py when available,
 # self-contained fallback for standalone use)
@@ -126,15 +128,36 @@ def is_symlink_safe(path: Path, root: Path) -> bool:
         return False
 
 
+def validate_vault_structure(vault_path: Path) -> None:
+    """
+    Verify that the vault has the required Provara v1.0 layout.
+    Raises VaultStructureInvalidError if requirements are missing.
+    """
+    missing = []
+    for rel_path in SPEC_REQUIRED_FILES:
+        full_path = vault_path / rel_path
+        if not full_path.exists():
+            missing.append(rel_path)
+    
+    if missing:
+        raise VaultStructureInvalidError(f"Missing files: {', '.join(missing)}")
+    
+    # Check for required directories
+    for rel_dir in ["events", "identity", "policies"]:
+        if not (vault_path / rel_dir).is_dir():
+            raise VaultStructureInvalidError(f"Missing required directory: {rel_dir}/")
+
+
 # ---------------------------------------------------------------------------
 # Spec constants
 # ---------------------------------------------------------------------------
 
-# Files excluded from manifest hashing (they ARE the manifest)
+# Files excluded from manifest hashing (they ARE the manifest or local identity)
 MANIFEST_EXCLUDE = frozenset({
     "manifest.json",
     "manifest.sig",
     "merkle_root.txt",
+    "identity/private_keys.json",
 })
 
 # Files required by Backpack v1.0 spec

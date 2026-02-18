@@ -27,7 +27,6 @@ from .backpack_signing import (
 from .backpack_integrity import merkle_root_hex
 from .reducer_v0 import SovereignReducerV0 as SovereignReducer
 from .bootstrap_v0 import bootstrap_backpack
-from .sync_v0 import sync_backpacks, load_events
 from .checkpoint_v0 import create_checkpoint, load_latest_checkpoint
 from .perception_v0 import emit_perception_event, PerceptionTier
 from .market import record_market_alpha, record_hedge_fund_sim
@@ -587,6 +586,18 @@ def check_safety(vault_path: str | Path, action_type: str) -> Dict[str, Any]:
         result = check_safety("My_Backpack", "SYNC_IN")
     """
     return Vault(vault_path).check_safety(action_type)
+
+
+def sync_backpacks(*args: Any, **kwargs: Any) -> Any:
+    """Lazy wrapper around ``provara.sync_v0.sync_backpacks``."""
+    from .sync_v0 import sync_backpacks as _sync_backpacks
+    return _sync_backpacks(*args, **kwargs)
+
+
+def load_events(*args: Any, **kwargs: Any) -> Any:
+    """Lazy wrapper around ``provara.sync_v0.load_events``."""
+    from .sync_v0 import load_events as _load_events
+    return _load_events(*args, **kwargs)
 
 
 __version__ = "1.0.0"
