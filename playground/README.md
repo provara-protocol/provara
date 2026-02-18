@@ -1,83 +1,36 @@
 # Provara Interactive Playground
 
-Browser-based, zero-install Provara vault editor and visualizer.
+This is a browser-based WASM playground for the Provara Protocol. It allows users to create vaults, append events, and verify causal chains entirely in the browser.
 
-## Quick Start
+## Tech Stack
 
-```bash
-# Install dependencies
-npm install
+- **Framework**: [Next.js](https://nextjs.org/)
+- **Styling**: Tailwind CSS
+- **Core Logic**: Rust via WASM (`provara-rs`)
+- **Icons**: Lucide React
 
-# Start dev server
-npm run dev
+## Development
 
-# Build for production
-npm run build
-```
+1.  **Build the WASM core**:
+    ```bash
+    npm run wasm:build
+    ```
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
+3.  **Run the development server**:
+    ```bash
+    npm run dev
+    ```
+
+## Project Structure
+
+- `src/components`: UI components (Vault visualizer, Event editor, etc.)
+- `src/hooks`: React hooks for vault state management.
+- `src/lib/wasm`: Generated WASM bindings from `provara-rs`.
+- `src/lib/store.ts`: Client-side state for the current vault session.
 
 ## Architecture
 
-See [`docs/PLAYGROUND_ARCHITECTURE.md`](../../docs/PLAYGROUND_ARCHITECTURE.md) for detailed design.
-
-### Directory Structure
-
-```
-playground/
-├── src/
-│   ├── components/        # React components
-│   │   ├── Header.tsx
-│   │   ├── LeftSidebar.tsx
-│   │   ├── CentralCanvas.tsx
-│   │   └── RightSidebar.tsx
-│   ├── store/             # Zustand state management
-│   │   └── playground.ts
-│   ├── App.tsx            # Main app component
-│   ├── main.tsx           # Entry point
-│   └── index.css          # Tailwind styles
-├── public/                # Static assets
-├── index.html             # HTML template
-├── package.json
-├── vite.config.ts
-├── tsconfig.json
-└── tailwind.config.ts
-```
-
-## Features (MVP)
-
-- ✅ Create cryptographic keypairs locally
-- ✅ Append events (OBSERVATION, ATTESTATION, etc.)
-- ✅ Real-time chain verification (when WASM integrated)
-- ✅ Event list view with JSON inspector
-- ✅ Vault export as NDJSON
-- ✅ Dark mode support
-- 🚧 D3 chain visualization (Phase 2)
-- 🚧 Merkle tree viewer (Phase 2)
-
-## Integration with WASM
-
-Once `provara-rs/provara-core` is built and published:
-
-```bash
-npm run wasm:build
-npm install @provara/core
-```
-
-Then in components, import and use the WASM functions:
-
-```typescript
-import * as Provara from '@provara/core';
-
-const signed = Provara.sign_event(eventJson, privateKeyB64);
-const verified = Provara.verify_chain(eventsJson);
-```
-
-## Performance Targets
-
-- Load time: <2s
-- Key generation: <100ms
-- Event creation: <50ms
-- Chain verification (100 events): <250ms
-
-## License
-
-Apache 2.0
+The playground is **Zero Backend**. All cryptographic operations and vault storage (in `localStorage`) happen on the client side. This demonstrates the self-sovereign nature of the protocol.

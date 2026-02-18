@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing — Provara Family Vault</title>
+<meta name="description" content="Simple, honest pricing for the Provara Family Vault. Choose the plan that fits your family's needs. One-time and monthly options available.">
+<meta name="theme-color" content="#5b4dc7">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+<style>
+/* Reusing core styles from main page */
+/* ... truncated for brevity but including essential parts ... */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #5b4dc7;
+  --primary-light: #7c6fd4;
+  --primary-dark: #4a3da6;
+  --primary-bg: #f0edf9;
+  --secondary: #10b981;
+  --secondary-dark: #0d9668;
+  --text: #1e1b33;
+  --text-muted: #5c5775;
+  --text-light: #8a849d;
+  --bg: #fafaf9;
+  --bg-white: #ffffff;
+  --bg-warm: #f5f3f0;
+  --border: #e8e5e0;
+  --border-light: #f0ede8;
+  --shadow-sm: 0 1px 3px rgba(91, 77, 199, 0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(91, 77, 199, 0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(91, 77, 199, 0.12), 0 4px 12px rgba(0,0,0,0.04);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --max-width: 1140px;
+  --nav-height: 72px;
+}
+body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.65; font-size: 16px; overflow-x: hidden; }
+.container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+.section { padding: 80px 0; }
+h1, h2, h3 { line-height: 1.25; font-weight: 700; }
+h1 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 1rem; }
+p { color: var(--text-muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 28px; border-radius: var(--radius-md); font-weight: 600; text-decoration: none; transition: all 0.2s; }
+.btn-primary { background: var(--secondary); color: #fff; }
+.btn-primary:hover { background: var(--secondary-dark); transform: translateY(-1px); }
+.nav { height: var(--nav-height); background: rgba(250, 250, 249, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-light); position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
+.nav-inner { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; height: 100%; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand { font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; color: var(--text); }
+.nav-logo { width: 32px; height: 32px; background: var(--primary); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); }
+.nav-links a:hover { color: var(--primary); }
+
+.pricing-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; margin-top: 48px; }
+.pricing-card { background: var(--bg-white); border: 1.5px solid var(--border); border-radius: var(--radius-xl); padding: 48px; display: flex; flex-direction: column; transition: all 0.3s; }
+.pricing-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.pricing-card.featured { border-color: var(--primary); box-shadow: var(--shadow-lg); }
+.tier-name { color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.85rem; margin-bottom: 12px; }
+.price { display: flex; align-items: baseline; gap: 4px; margin-bottom: 24px; }
+.amount { font-size: 3rem; font-weight: 800; color: var(--text); }
+.period { color: var(--text-light); font-weight: 500; }
+.description { margin-bottom: 32px; font-size: 1rem; height: 3.5rem; }
+.feature-list { list-style: none; margin-bottom: 40px; flex-grow: 1; }
+.feature-list li { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; font-size: 0.95rem; }
+.feature-list li svg { width: 20px; height: 20px; color: var(--secondary); flex-shrink: 0; margin-top: 2px; }
+.pricing-footer { text-align: center; margin-top: 64px; }
+.comparison-table { width: 100%; border-collapse: collapse; margin-top: 64px; background: var(--bg-white); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-light); }
+.comparison-table th, .comparison-table td { padding: 20px 24px; text-align: left; border-bottom: 1px solid var(--border-light); }
+.comparison-table th { background: var(--bg-warm); font-weight: 700; color: var(--text); }
+.comparison-table tr:last-child td { border-bottom: none; }
+.check { color: var(--secondary); font-weight: bold; }
+
+footer { background: var(--bg-white); padding: 64px 0 32px; border-top: 1px solid var(--border-light); margin-top: 80px; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
+.footer-col h4 { margin-bottom: 20px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 12px; }
+.footer-col a { color: var(--text-muted); font-size: 0.9rem; }
+.footer-bottom { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-light); }
+
+@media (max-width: 768px) {
+  .pricing-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">
+      <div class="nav-logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      Provara
+    </a>
+    <ul class="nav-links">
+      <li><a href="/#features">Features</a></li>
+      <li><a href="/how-it-works/">How It Works</a></li>
+      <li><a href="/use-cases/">Use Cases</a></li>
+      <li><a href="/pricing/">Pricing</a></li>
+    </ul>
+    <a href="/signup/" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.85rem;">Join Waitlist</a>
+  </div>
+</nav>
+
+<section class="section">
+  <div class="container">
+    <div style="text-align: center; max-width: 700px; margin: 0 auto 64px;">
+      <h1 style="margin-top: 40px;">Simple, Honest Pricing</h1>
+      <p style="font-size: 1.2rem;">Choose the plan that fits your family's legacy. No hidden fees, no data mining, no surprises.</p>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- Personal -->
+      <div class="pricing-card">
+        <div class="tier-name">Personal</div>
+        <div class="price">
+          <span class="amount">$49</span>
+          <span class="period">one-time</span>
+        </div>
+        <p class="description">For individuals who want to secure their personal digital legacy forever.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> 1 Personal Vault</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Unlimited Records & Files</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Cryptographic Verification</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Offline-First Storage</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Lifetime Updates</li>
+        </ul>
+        <a href="/signup/?plan=personal" class="btn btn-secondary" style="border: 1.5px solid var(--border); color: var(--text);">Join Waitlist</a>
+      </div>
+
+      <!-- Family -->
+      <div class="pricing-card featured">
+        <div style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #fff; padding: 4px 16px; border-radius: 100px; font-size: 0.75rem; font-weight: 700;">MOST POPULAR</div>
+        <div class="tier-name">Family</div>
+        <div class="price">
+          <span class="amount">$5</span>
+          <span class="period">/month</span>
+        </div>
+        <p class="description">For families who want to build a shared, multi-generational memory vault.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Up to 5 Family Members</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Shared & Private Folders</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Inheritance & Emergency Access</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Cloud Sync (End-to-End Encrypted)</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Priority Human Support</li>
+        </ul>
+        <a href="/signup/?plan=family" class="btn btn-primary">Join Waitlist</a>
+      </div>
+    </div>
+
+    <h2 style="text-align: center; margin-top: 80px;">Plan Comparison</h2>
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Personal</th>
+          <th>Family</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Vault Count</td>
+          <td>1</td>
+          <td>Unlimited</td>
+        </tr>
+        <tr>
+          <td>Storage</td>
+          <td>Local Device</td>
+          <td>Local + Encrypted Cloud Sync</td>
+        </tr>
+        <tr>
+          <td>Actors (Users)</td>
+          <td>1</td>
+          <td>Up to 5</td>
+        </tr>
+        <tr>
+          <td>Cryptographic Signatures</td>
+          <td class="check">✓</td>
+          <td class="check">✓</td>
+        </tr>
+        <tr>
+          <td>Tamper Evidence</td>
+          <td class="check">✓</td>
+          <td class="check">✓</td>
+        </tr>
+        <tr>
+          <td>Inheritance Logic</td>
+          <td>-</td>
+          <td class="check">✓</td>
+        </tr>
+        <tr>
+          <td>Support</td>
+          <td>Community</td>
+          <td>Priority</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pricing-footer">
+      <h3>Ready to secure your legacy?</h3>
+      <p style="margin-bottom: 32px;">Join 500+ families already on the waitlist for the Provara v1.0 launch.</p>
+      <a href="/signup/" class="btn btn-primary" style="padding: 16px 48px; font-size: 1.1rem;">Secure My Spot</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col" style="grid-column: span 1;">
+        <div class="nav-brand" style="margin-bottom: 16px;">
+          <div class="nav-logo" style="width: 24px; height: 24px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          Provara
+        </div>
+        <p style="font-size: 0.85rem;">Sovereign Memory. Verifiable Continuity. Designed for 50-year readability.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/#features">Features</a></li>
+          <li><a href="/how-it-works/">How It Works</a></li>
+          <li><a href="/pricing/">Pricing</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Trust</h4>
+        <ul>
+          <li><a href="https://provara.dev">Protocol Spec</a></li>
+          <li><a href="/security/">Security</a></li>
+          <li><a href="/privacy/">Privacy</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="https://huntinformationsystems.com">Hunt Information Systems</a></li>
+          <li><a href="mailto:hello@provara.app">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Hunt Information Systems LLC. All rights reserved.</span>
+      <span>Built with Provara Protocol v1.0</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

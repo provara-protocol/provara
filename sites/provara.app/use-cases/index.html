@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Use Cases — Provara Family Vault</title>
+<meta name="description" content="Discover how families, AI agents, and individuals use Provara to protect their most important memories and evidence.">
+<meta name="theme-color" content="#5b4dc7">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+<style>
+/* Reusing core styles */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #5b4dc7;
+  --primary-light: #7c6fd4;
+  --primary-bg: #f0edf9;
+  --secondary: #10b981;
+  --text: #1e1b33;
+  --text-muted: #5c5775;
+  --bg: #fafaf9;
+  --bg-white: #ffffff;
+  --border-light: #f0ede8;
+  --radius-xl: 28px;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --max-width: 1140px;
+  --nav-height: 72px;
+}
+body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.65; }
+.container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+.section { padding: 100px 0; }
+h1, h2, h3 { line-height: 1.25; font-weight: 700; color: var(--text); }
+h1 { font-size: 3rem; margin-bottom: 1.5rem; }
+p { color: var(--text-muted); margin-bottom: 1.5rem; }
+.nav { height: var(--nav-height); background: rgba(250, 250, 249, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-light); position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
+.nav-inner { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; height: 100%; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand { font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; }
+.nav-logo { width: 32px; height: 32px; background: var(--primary); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); text-decoration: none; }
+.btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 28px; border-radius: 12px; font-weight: 600; text-decoration: none; }
+.btn-primary { background: var(--secondary); color: #fff; }
+
+.use-case-card { background: var(--bg-white); border-radius: var(--radius-xl); padding: 48px; margin-bottom: 48px; border: 1px solid var(--border-light); display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+.use-case-card:nth-child(even) { direction: rtl; }
+.use-case-card:nth-child(even) .content { direction: ltr; }
+.icon-box { width: 64px; height: 64px; background: var(--primary-bg); color: var(--primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
+
+footer { background: var(--bg-white); padding: 64px 0 32px; border-top: 1px solid var(--border-light); margin-top: 80px; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
+.footer-col h4 { margin-bottom: 20px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 12px; }
+.footer-col a { color: var(--text-muted); font-size: 0.9rem; text-decoration: none; }
+
+@media (max-width: 768px) {
+  .use-case-card { grid-template-columns: 1fr; padding: 32px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">
+      <div class="nav-logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      Provara
+    </a>
+    <ul class="nav-links">
+      <li><a href="/#features">Features</a></li>
+      <li><a href="/how-it-works/">How It Works</a></li>
+      <li><a href="/use-cases/">Use Cases</a></li>
+      <li><a href="/pricing/">Pricing</a></li>
+    </ul>
+    <a href="/signup/" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.85rem;">Join Waitlist</a>
+  </div>
+</nav>
+
+<section class="section" style="padding-top: 140px;">
+  <div class="container">
+    <h1 style="text-align: center; margin-bottom: 80px;">Built for What Matters</h1>
+
+    <!-- Case 1: Family Heritage -->
+    <div class="use-case-card">
+      <div class="content">
+        <div class="icon-box">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h2>Multi-Generational Heritage</h2>
+        <p>Family photos and stories shouldn't just live on a social media platform that might not exist in 20 years. Provara allows you to create a cryptographically signed heritage vault that can be passed down to your grandchildren.</p>
+        <p>Every memory is timestamped and verified, ensuring your family history remains authentic and untampered.</p>
+      </div>
+      <div style="background: var(--primary-bg); height: 300px; border-radius: 20px;"></div>
+    </div>
+
+    <!-- Case 2: Digital Inheritance -->
+    <div class="use-case-card">
+      <div class="content">
+        <div class="icon-box">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h2>Digital Estate & Inheritance</h2>
+        <p>Ensure your loved ones have access to your digital life when it matters most. Securely store recovery phrases, account lists, and legal documents.</p>
+        <p>With Provara's inheritance logic, you can designate trusted actors who can unlock specific sections of your vault under conditions you define, without ever needing a central authority.</p>
+      </div>
+      <div style="background: rgba(16, 185, 129, 0.1); height: 300px; border-radius: 20px;"></div>
+    </div>
+
+    <!-- Case 3: AI Agent Memory -->
+    <div class="use-case-card">
+      <div class="content">
+        <div class="icon-box">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h2>Verifiable AI Agent Memory</h2>
+        <p>As AI agents become part of our daily lives, they need a memory layer that we can trust. Provara provides a tamper-evident event log for AI observations and decisions.</p>
+        <p>Verify that your AI assistant is operating within its policy boundaries and has a consistent, auditable history of its actions.</p>
+      </div>
+      <div style="background: #1a1730; height: 300px; border-radius: 20px;"></div>
+    </div>
+
+    <div style="text-align: center; margin-top: 80px;">
+      <a href="/signup/" class="btn btn-primary" style="padding: 16px 48px; font-size: 1.1rem;">Start Your Vault Today</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col" style="grid-column: span 1;">
+        <div class="nav-brand" style="margin-bottom: 16px;">
+          <div class="nav-logo" style="width: 24px; height: 24px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          Provara
+        </div>
+        <p style="font-size: 0.85rem;">Sovereign Memory. Verifiable Continuity. Designed for 50-year readability.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/#features">Features</a></li>
+          <li><a href="/how-it-works/">How It Works</a></li>
+          <li><a href="/pricing/">Pricing</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Trust</h4>
+        <ul>
+          <li><a href="https://provara.dev">Protocol Spec</a></li>
+          <li><a href="/security/">Security</a></li>
+          <li><a href="/privacy/">Privacy</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="https://huntinformationsystems.com">Hunt Information Systems</a></li>
+          <li><a href="mailto:hello@provara.app">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
