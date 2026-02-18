@@ -49,6 +49,10 @@ def redact_event(
         
     all_events = load_events(events_path)
     
+    from .archival import is_vault_sealed
+    if is_vault_sealed(vault_path):
+        raise RuntimeError(f"Vault at {vault_path} is SEALED.")
+    
     target_event = None
     target_index = -1
     for i, e in enumerate(all_events):

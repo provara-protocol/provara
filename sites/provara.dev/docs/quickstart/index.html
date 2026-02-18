@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quickstart | Provara Docs</title>
+  <meta name="description" content="Provara quickstart.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Quickstart | Provara Docs">
+  <meta property="og:description" content="Provara quickstart.">
+  <meta property="og:url" content="https://provara.dev/docs/quickstart/">
+  <link rel="canonical" href="https://provara.dev/docs/quickstart/">
+  <link rel="alternate" type="application/rss+xml" title="Provara Blog" href="https://provara.dev/rss.xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  
+</head>
+<body class="doc-page">
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand">Provara</a>
+    <nav>
+      <a href="/spec/v1.0/">Spec v1.0</a>
+      <a href="/docs/">Docs</a>
+      <a href="/blog/">Blog</a>
+      <a href="https://github.com/provara-protocol/provara">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+<div class="doc-layout">
+  <aside class="sidebar">
+<h2>Documentation</h2>
+<ul>
+  <li><a href="/docs/">Hub</a></li>
+  <li><a href="/docs/quickstart/">Quickstart</a></li>
+  <li><a href="/docs/tutorials/">Tutorials</a></li>
+  <li><a href="/docs/api-reference/">API Reference</a></li>
+  <li><a href="/docs/cookbook/">Cookbook</a></li>
+</ul>
+</aside>
+  <article class="prose"><h1 id="provara-60-second-quickstart">Provara 60-Second Quickstart</h1>
+<p><strong>Goal:</strong> From zero to verified vault in under 60 seconds.</p>
+<p><strong>Prerequisites:</strong></p>
+<ul>
+<li>Python 3.10+</li>
+<li><code>pip install provara-protocol</code></li>
+</ul>
+<hr>
+<h2 id="the-fast-path">The Fast Path</h2>
+<pre><code>
+# 1. Install (10 seconds)
+pip install provara-protocol
+
+# 2. Create vault (5 seconds)
+provara init my_vault --actor &quot;alice&quot;
+
+# 3. Append first event (10 seconds)
+provara append my_vault \
+  --type OBSERVATION \
+  --data &#x27;{&quot;subject&quot;: &quot;hello&quot;, &quot;predicate&quot;: &quot;world&quot;, &quot;value&quot;: &quot;first event&quot;}&#x27; \
+  --keyfile my_vault/identity/private_keys.json
+
+# 4. Verify (5 seconds)
+provara verify my_vault
+
+# 5. See state (5 seconds)
+provara replay my_vault
+</code></pre>
+<p><strong>Done.</strong> You now have a tamper-evident vault with:</p>
+<ul>
+<li>Ed25519-signed events</li>
+<li>SHA-256 hash chain</li>
+<li>RFC 8785 canonical JSON</li>
+<li>Verifiable integrity</li>
+</ul>
+<hr>
+<h2 id="expected-output">Expected Output</h2>
+<h3 id="step-2-init">Step 2: Init</h3>
+<pre><code>
+Initializing Provara Vault at: /path/to/my_vault
+[bootstrap] Generating Ed25519 root keypair...
+[bootstrap] Creating directory structure...
+[bootstrap] Writing genesis.json...
+[bootstrap] Writing keys.json...
+[bootstrap] Bootstrap complete. UID=&lt;unique_id&gt;
+[bootstrap] Root key: bp1_abc123...
+
+SUCCESS: Vault created and verified.
+</code></pre>
+<h3 id="step-3-append">Step 3: Append</h3>
+<pre><code>
+[append] Event appended successfully
+[append] Event ID: evt_abc123...
+[append] Actor: alice
+[append] Type: OBSERVATION
+</code></pre>
+<h3 id="step-4-verify">Step 4: Verify</h3>
+<pre><code>
+[verify] Checking causal chains...
+[verify] Checking signatures...
+[verify] Checking Merkle root...
+[verify] Vault integrity: VALID
+[verify] Events verified: 2
+</code></pre>
+<h3 id="step-5-replay">Step 5: Replay</h3>
+<pre><code>
+{
+  &quot;canonical&quot;: {},
+  &quot;local&quot;: {
+    &quot;hello:world&quot;: {
+      &quot;value&quot;: &quot;first event&quot;,
+      &quot;confidence&quot;: 1.0,
+      &quot;actor&quot;: &quot;alice&quot;
+    }
+  },
+  &quot;contested&quot;: {},
+  &quot;archived&quot;: {},
+  &quot;metadata&quot;: {
+    &quot;state_hash&quot;: &quot;abc123...&quot;,
+    &quot;event_count&quot;: 2
+  }
+}
+</code></pre>
+<hr>
+<h2 id="what-you-built">What You Built</h2>
+<pre><code>
+my_vault/
+├── identity/
+│   ├── keys.json          # Public key registry
+│   ├── genesis.json       # Genesis event
+│   └── private_keys.json  # Your private keys (guard this!)
+├── events/
+│   └── events.ndjson      # Append-only event log
+├── state/
+│   └── state.json         # Current derived state
+└── manifest.json          # Merkle root + signatures
+</code></pre>
+<hr>
+<h2 id="next-steps">Next Steps</h2>
+<h3 id="add-more-events">Add More Events</h3>
+<pre><code>
+provara append my_vault \
+  --type OBSERVATION \
+  --data &#x27;{&quot;subject&quot;: &quot;temperature&quot;, &quot;predicate&quot;: &quot;reading&quot;, &quot;value&quot;: 22.5}&#x27; \
+  --keyfile my_vault/identity/private_keys.json
+</code></pre>
+<h3 id="create-checkpoint">Create Checkpoint</h3>
+<pre><code>
+provara checkpoint my_vault \
+  --keyfile my_vault/identity/private_keys.json
+</code></pre>
+<h3 id="make-backup">Make Backup</h3>
+<pre><code>
+provara backup my_vault --to ./backups
+</code></pre>
+<h3 id="anchor-to-timestamp-authority">Anchor to Timestamp Authority</h3>
+<pre><code>
+provara timestamp my_vault \
+  --keyfile my_vault/identity/private_keys.json \
+  --tsa https://freetsa.org/tsr
+</code></pre>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="command-not-found-provara">&quot;Command not found: provara&quot;</h3>
+<pre><code>
+# Ensure pip installed to PATH
+pip show provara-protocol
+</code></pre>
+<h3 id="private-keys-file-not-found">&quot;Private keys file not found&quot;</h3>
+<pre><code>
+# Keys are saved in vault/identity/private_keys.json
+# Use that path for --keyfile
+</code></pre>
+<h3 id="invalid-signature">&quot;Invalid signature&quot;</h3>
+<pre><code>
+# Ensure you&#x27;re using the correct keyfile
+# Keys are actor-specific
+</code></pre>
+<hr>
+<h2 id="learn-more">Learn More</h2>
+<ul>
+<li><strong>Full Documentation:</strong> https://provara.dev/docs</li>
+<li><strong>Cookbook:</strong> <a href="./docs/cookbook/"><code>docs/cookbook/</code></a> — Real-world recipes</li>
+<li><strong>Protocol Spec:</strong> <a href="./PROTOCOL_PROFILE.txt"><code>PROTOCOL_PROFILE.txt</code></a> — Cryptographic details</li>
+<li><strong>GitHub:</strong> https://github.com/provara-protocol/provara</li>
+</ul>
+<hr>
+<p><strong>That&#x27;s it.</strong> You&#x27;ve created your first tamper-evident vault. Everything you append is now cryptographically anchored and verifiable for the next 50 years.</p>
+<p><em>&quot;Truth is not merged. Evidence is merged. Truth is recomputed.&quot;</em></p></article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Apache 2.0. <a href="https://github.com/provara-protocol/provara">GitHub</a>. Anthropic-free zone.</p>
+  </div>
+</footer>
+</body>
+</html>

@@ -210,6 +210,11 @@ def rotate_key(
         )
         return result
 
+    from .archival import is_vault_sealed
+    if is_vault_sealed(backpack_root):
+        result.errors.append(f"Vault at {backpack_root} is SEALED.")
+        return result
+
     keys_path = backpack_root / "identity" / "keys.json"
     events_path = backpack_root / "events" / "events.ndjson"
 

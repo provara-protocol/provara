@@ -185,6 +185,10 @@ def _append_scitt_event(
     """Build, sign, and append a SCITT event. Returns the signed event."""
     events_file = vault_path / "events" / "events.ndjson"
 
+    from .archival import is_vault_sealed
+    if is_vault_sealed(vault_path):
+        raise RuntimeError(f"Vault at {vault_path} is SEALED.")
+
     kid, priv = _load_key_from_file(keyfile_path)
 
     # Find prev_hash for this actor

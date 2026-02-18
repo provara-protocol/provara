@@ -73,6 +73,11 @@ def _append_market_event(
     value: Dict[str, Any],
     actor: str,
 ) -> Dict[str, Any]:
+    # 0. Check seal
+    from .archival import is_vault_sealed
+    if is_vault_sealed(vault_path):
+        raise RuntimeError(f"Vault at {vault_path} is SEALED.")
+
     # 1. Load keys — handle both {"keys":[...]} and flat {kid: b64} formats
     import json
     raw = json.loads(keyfile.read_text())

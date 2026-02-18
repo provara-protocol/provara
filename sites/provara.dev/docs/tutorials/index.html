@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tutorials | Provara Docs</title>
+  <meta name="description" content="Provara tutorials index.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Tutorials | Provara Docs">
+  <meta property="og:description" content="Provara tutorials index.">
+  <meta property="og:url" content="https://provara.dev/docs/tutorials/">
+  <link rel="canonical" href="https://provara.dev/docs/tutorials/">
+  <link rel="alternate" type="application/rss+xml" title="Provara Blog" href="https://provara.dev/rss.xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  
+</head>
+<body class="doc-page">
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand">Provara</a>
+    <nav>
+      <a href="/spec/v1.0/">Spec v1.0</a>
+      <a href="/docs/">Docs</a>
+      <a href="/blog/">Blog</a>
+      <a href="https://github.com/provara-protocol/provara">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+<div class="doc-layout">
+  <aside class="sidebar">
+<h2>Documentation</h2>
+<ul>
+  <li><a href="/docs/">Hub</a></li>
+  <li><a href="/docs/quickstart/">Quickstart</a></li>
+  <li><a href="/docs/tutorials/">Tutorials</a></li>
+  <li><a href="/docs/api-reference/">API Reference</a></li>
+  <li><a href="/docs/cookbook/">Cookbook</a></li>
+</ul>
+</aside>
+  <article class="prose"><h1 id="provara-tutorials">Provara Tutorials</h1>
+<p><strong>Learn Provara in under 25 minutes total.</strong></p>
+<p>Each tutorial is standalone and takes ~5 minutes. Complete them in order for a progressive learning experience, or jump to the one that matches your use case.</p>
+<hr>
+<h2 id="tutorial-series">Tutorial Series</h2>
+<table><thead><tr>
+<th>#</th>
+<th>Tutorial</th>
+<th>Time</th>
+<th>Focus</th>
+</tr></thead><tbody>
+<tr>
+<td>1</td>
+<td><a href="01_first_vault.md">Your First Vault</a></td>
+<td>4 min</td>
+<td>Create vault, append events, verify chain</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="02_multi_actor_dispute.md">Multi-Actor Dispute</a></td>
+<td>5 min</td>
+<td>Conflicting observations, attestation resolution</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="03_checkpoint_query.md">Checkpoint &amp; Query</a></td>
+<td>4 min</td>
+<td>Fast state recovery, event queries</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="04_mcp_integration.md">MCP Integration</a></td>
+<td>5 min</td>
+<td>AI agent memory via Model Context Protocol</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="05_anchor.md">Anchor to L2</a></td>
+<td>4 min</td>
+<td>RFC 3161 timestamps, blockchain anchoring</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="learning-paths">Learning Paths</h2>
+<h3 id="for-developers-new-to-provara">For Developers New to Provara</h3>
+<p>Start here:</p>
+<ol>
+<li><strong>Tutorial 1:</strong> Your First Vault — understand the basics</li>
+<li><strong>Tutorial 3:</strong> Checkpoint &amp; Query — learn to work with events</li>
+<li><strong>Tutorial 2:</strong> Multi-Actor Dispute — understand conflict resolution</li>
+<li><strong>Tutorial 4:</strong> MCP Integration — connect to AI agents</li>
+<li><strong>Tutorial 5:</strong> Anchor to L2 — add external trust anchors</li>
+</ol>
+<h3 id="for-ai-agent-builders">For AI Agent Builders</h3>
+<p>Jump to:</p>
+<ol>
+<li><strong>Tutorial 1:</strong> Your First Vault — quick start</li>
+<li><strong>Tutorial 4:</strong> MCP Integration — connect your agent</li>
+<li><strong>Tutorial 5:</strong> Anchor to L2 — add verifiable timestamps</li>
+</ol>
+<h3 id="for-legalcompliance-use-cases">For Legal/Compliance Use Cases</h3>
+<p>Focus on:</p>
+<ol>
+<li><strong>Tutorial 1:</strong> Your First Vault — basics</li>
+<li><strong>Tutorial 5:</strong> Anchor to L2 — timestamps and legal admissibility</li>
+<li><strong>Tutorial 3:</strong> Checkpoint &amp; Query — evidence retrieval</li>
+</ol>
+<hr>
+<h2 id="prerequisites">Prerequisites</h2>
+<table><thead><tr>
+<th>Tutorial</th>
+<th>Requires</th>
+</tr></thead><tbody>
+<tr>
+<td>1</td>
+<td>Python 3.10+, pip</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Tutorial 1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Tutorial 1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Tutorial 1, Node.js 18+ (for MCP host)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Tutorial 1, basic blockchain concepts</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="quick-start">Quick Start</h2>
+<pre><code>
+# Install Provara
+pip install provara-protocol
+
+# Create your first vault
+provara init my_vault --actor &quot;alice&quot; --private-keys alice_keys.json
+
+# Append an event
+provara append my_vault \
+  --type OBSERVATION \
+  --data &#x27;{&quot;subject&quot;: &quot;getting_started&quot;, &quot;predicate&quot;: &quot;status&quot;, &quot;value&quot;: &quot;ready&quot;}&#x27; \
+  --keyfile alice_keys.json
+
+# Verify integrity
+provara verify my_vault
+</code></pre>
+<hr>
+<h2 id="what-youll-learn">What You&#x27;ll Learn</h2>
+<p>By completing all tutorials:</p>
+<ol>
+<li><strong>Vault Creation:</strong> Initialize tamper-evident event logs</li>
+<li><strong>Event Appending:</strong> Add signed observations, assertions, attestations</li>
+<li><strong>Conflict Resolution:</strong> Handle multi-agent disputes</li>
+<li><strong>State Management:</strong> Checkpoints, queries, fast recovery</li>
+<li><strong>External Anchors:</strong> RFC 3161 timestamps, L2 blockchain commitments</li>
+<li><strong>MCP Integration:</strong> Connect AI agents to verifiable memory</li>
+</ol>
+<hr>
+<h2 id="next-steps-after-tutorials">Next Steps After Tutorials</h2>
+<ul>
+<li><strong>Protocol Spec:</strong> <a href="../BACKPACK_PROTOCOL_v1.0.md"><code>BACKPACK_PROTOCOL_v1.0.md</code></a></li>
+<li><strong>API Reference:</strong> <a href="../api/"><code>../api/</code></a></li>
+<li><strong>Comparison Matrix:</strong> <a href="../COMPARISON.md"><code>../COMPARISON.md</code></a> (coming soon)</li>
+<li><strong>GitHub Repo:</strong> https://github.com/provara-protocol/provara</li>
+</ul>
+<hr>
+<h2 id="support">Support</h2>
+<ul>
+<li><strong>Issues:</strong> https://github.com/provara-protocol/provara/issues</li>
+<li><strong>Documentation:</strong> https://provara.dev/docs</li>
+<li><strong>Protocol Spec:</strong> https://provara.dev/spec/v1.0</li>
+</ul></article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Apache 2.0. <a href="https://github.com/provara-protocol/provara">GitHub</a>. Anthropic-free zone.</p>
+  </div>
+</footer>
+</body>
+</html>

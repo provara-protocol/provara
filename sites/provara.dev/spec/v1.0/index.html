@@ -1,99 +1,990 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Provara Protocol v1.0 Specification</title>
-  <meta name="description" content="Provara Protocol v1.0 normative specification, designed for 50-year readability and deterministic implementation.">
-  <link rel="stylesheet" href="../../shared/tokens.css">
-  <link rel="stylesheet" href="../../shared/components.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Provara Protocol Spec v1.0</title>
+  <meta name="description" content="Version-locked Provara Protocol specification for citation.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Provara Protocol Spec v1.0">
+  <meta property="og:description" content="Version-locked Provara Protocol specification for citation.">
+  <meta property="og:url" content="https://provara.dev/spec/v1.0/">
+  <link rel="canonical" href="https://provara.dev/spec/v1.0/">
+  <link rel="alternate" type="application/rss+xml" title="Provara Blog" href="https://provara.dev/rss.xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  
+<meta name="DC.title" content="BACKPACK Protocol v1.0">
+<meta name="DC.identifier" content="https://provara.dev/spec/v1.0/">
+<meta name="DC.publisher" content="Provara">
+<meta name="DC.language" content="en">
+<meta name="citation_title" content="BACKPACK Protocol v1.0">
+<meta name="citation_public_url" content="https://provara.dev/spec/v1.0/">
+
 </head>
-<body>
-  <div class="pv-shell">
-    <header class="pv-topbar">
-      <div><strong>Provara</strong> / Protocol v1.0</div>
-      <div>Version-locked reference: <code>/spec/v1.0</code></div>
-    </header>
-
-    <h1 class="pv-title">Provara Protocol v1.0</h1>
-    <p class="pv-subtitle">This page is a durable, implementation-facing publication. Normative language uses RFC 2119/8174 keywords. Explanatory content is non-binding.</p>
-
-    <div class="pv-grid">
-      <aside class="pv-toc" aria-label="Table of contents">
-        <h2>Contents</h2>
-        <ol>
-          <li><a href="#scope">Scope</a></li>
-          <li><a href="#invariants">Cryptographic Invariants</a></li>
-          <li><a href="#events">Event Model</a></li>
-          <li><a href="#reducer">Reducer Determinism</a></li>
-          <li><a href="#verification">Verification Checklist</a></li>
-        </ol>
-      </aside>
-
-      <main class="pv-main">
-        <section id="scope">
-          <span class="pv-badge">NORMATIVE</span>
-          <span class="pv-badge">REFERENCE</span>
-          <h2>1. Scope</h2>
-          <p>The protocol defines append-only evidence logs, deterministic state reduction, and cryptographic verification semantics for local-first memory vaults.</p>
-          <div class="pv-callout must"><strong>MUST:</strong> Implementations MUST preserve append-only event history and MUST NOT rewrite historical events.</div>
-          <div class="pv-callout should"><strong>SHOULD:</strong> Implementations SHOULD keep protocol data human-readable in JSON/NDJSON form.</div>
-        </section>
-
-        <section id="invariants">
-          <span class="pv-badge">NORMATIVE</span>
-          <h2>2. Cryptographic Invariants</h2>
-          <div class="pv-status-row">
-            <div class="pv-status"><strong>Signing</strong>Ed25519 / RFC 8032</div>
-            <div class="pv-status"><strong>Hashing</strong>SHA-256 / FIPS 180-4</div>
-            <div class="pv-status"><strong>Serialization</strong>RFC 8785 Canonical JSON</div>
-          </div>
-          <div class="pv-callout must"><strong>MUST:</strong> `prev_hash` MUST equal SHA-256 over canonical JSON bytes of the prior event in the actor chain.</div>
-          <div class="pv-callout must"><strong>MUST:</strong> Event signatures MUST verify against active key material at signing time.</div>
-        </section>
-
-        <section id="events">
-          <span class="pv-badge">NORMATIVE</span>
-          <span class="pv-badge">EXAMPLE</span>
-          <h2>3. Event Model</h2>
-          <p>Events are append-only records in NDJSON. Each record carries actor identity, causal linkage, payload, and signature proof.</p>
-          <pre class="pv-protocol-block">{
-  "event_id": "evt_...",
-  "type": "OBSERVATION",
-  "actor": "agent_01",
-  "prev_event_hash": "evt_prev_...",
-  "payload": {
-    "subject": "memory:key",
-    "predicate": "observation",
-    "value": "example",
-    "confidence": 1.0,
-    "namespace": "local"
-  },
-  "sig": "base64..."
-}</pre>
-          <div class="pv-callout may"><strong>MAY:</strong> Implementations MAY expose additional UI metadata fields, but these MUST NOT alter canonical event semantics.</div>
-        </section>
-
-        <section id="reducer">
-          <span class="pv-badge">NORMATIVE</span>
-          <h2>4. Reducer Determinism</h2>
-          <p>Reducer output is a pure function of input event sequence. Identical input MUST produce identical state hash across compliant implementations.</p>
-          <div class="pv-callout must"><strong>MUST:</strong> Namespace transitions (`local`, `contested`, `canonical`, `archived`) MUST be reproducible from evidence replay only.</div>
-        </section>
-
-        <section id="verification">
-          <span class="pv-badge">REFERENCE</span>
-          <h2>5. Verification Checklist</h2>
-          <ol>
-            <li>Schema validation passes for all events.</li>
-            <li>Per-actor causal chains verify.</li>
-            <li>All signatures verify against key registry.</li>
-            <li>Reducer replay is deterministic.</li>
-          </ol>
-          <p>Authoritative normative source remains <code>PROTOCOL_PROFILE.txt</code> in repository root.</p>
-        </section>
-      </main>
-    </div>
+<body class="spec-page">
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand">Provara</a>
+    <nav>
+      <a href="/spec/v1.0/">Spec v1.0</a>
+      <a href="/docs/">Docs</a>
+      <a href="/blog/">Blog</a>
+      <a href="https://github.com/provara-protocol/provara">GitHub</a>
+    </nav>
   </div>
+</header>
+<main class="wrap">
+<div class="spec-banner">
+  <strong>Version-Locked URL:</strong> <code>https://provara.dev/spec/v1.0/</code> (immutable)
+</div>
+<div class="doc-layout">
+  <aside class="sidebar">
+    <h2>Contents</h2>
+    <ul class="toc"><li class="toc-l1"><a href="#backpack-protocol-v10">Backpack Protocol v1.0</a></li><li class="toc-l2"><a href="#normative-precedence">Normative Precedence</a></li><li class="toc-l2"><a href="#table-of-contents">Table of Contents</a></li><li class="toc-l2"><a href="#1-purpose">1. Purpose</a></li><li class="toc-l2"><a href="#2-concepts-and-vocabulary">2. Concepts and Vocabulary</a></li><li class="toc-l2"><a href="#3-cryptographic-stack">3. Cryptographic Stack</a></li><li class="toc-l3"><a href="#sha-256-rules">SHA-256 Rules</a></li><li class="toc-l3"><a href="#ed25519-rules">Ed25519 Rules</a></li><li class="toc-l3"><a href="#key-id-derivation">Key ID Derivation</a></li><li class="toc-l2"><a href="#4-canonical-json">4. Canonical JSON</a></li><li class="toc-l3"><a href="#rules-all-must-apply">Rules (all MUST apply)</a></li><li class="toc-l3"><a href="#example">Example</a></li><li class="toc-l3"><a href="#reference-implementation">Reference Implementation</a></li><li class="toc-l2"><a href="#5-event-identity">5. Event Identity</a></li><li class="toc-l3"><a href="#derivation-rule-must">Derivation Rule (MUST)</a></li><li class="toc-l3"><a href="#example">Example</a></li><li class="toc-l2"><a href="#6-causal-chain">6. Causal Chain</a></li><li class="toc-l3"><a href="#rules-all-must-apply">Rules (all MUST apply)</a></li><li class="toc-l3"><a href="#integrity-rule">Integrity Rule</a></li><li class="toc-l3"><a href="#fork-detection">Fork Detection</a></li><li class="toc-l2"><a href="#7-event-types">7. Event Types</a></li><li class="toc-l3"><a href="#core-types-no-prefix-required">Core Types (no prefix required)</a></li><li class="toc-l2"><a href="#8-the-reducer">8. The Reducer</a></li><li class="toc-l3"><a href="#four-namespace-state-model">Four-Namespace State Model</a></li><li class="toc-l3"><a href="#belief-keys">Belief Keys</a></li><li class="toc-l3"><a href="#conflict-detection">Conflict Detection</a></li><li class="toc-l3"><a href="#agreeing-evidence">Agreeing Evidence</a></li><li class="toc-l3"><a href="#state-hash">State Hash</a></li><li class="toc-l3"><a href="#reducer-invariants">Reducer Invariants</a></li><li class="toc-l2"><a href="#9-key-management">9. Key Management</a></li><li class="toc-l3"><a href="#key-registry-identitykeysjson">Key Registry (`identity/keys.json`)</a></li><li class="toc-l3"><a href="#key-rotation-protocol">Key Rotation Protocol</a></li><li class="toc-l3"><a href="#revoked-keys">Revoked Keys</a></li><li class="toc-l2"><a href="#10-merkle-tree">10. Merkle Tree</a></li><li class="toc-l3"><a href="#construction">Construction</a></li><li class="toc-l3"><a href="#empty-tree">Empty Tree</a></li><li class="toc-l3"><a href="#reference-implementation">Reference Implementation</a></li><li class="toc-l2"><a href="#11-manifest">11. Manifest</a></li><li class="toc-l3"><a href="#format">Format</a></li><li class="toc-l3"><a href="#excluded-files">Excluded Files</a></li><li class="toc-l3"><a href="#manifest-signature">Manifest Signature</a></li><li class="toc-l2"><a href="#12-safety-tiers">12. Safety Tiers</a></li><li class="toc-l3"><a href="#merge-ratchet">Merge Ratchet</a></li><li class="toc-l2"><a href="#13-sync-protocol">13. Sync Protocol</a></li><li class="toc-l3"><a href="#131-chain-validation-algorithm">13.1 Chain Validation Algorithm</a></li><li class="toc-l3"><a href="#132-algorithm-pseudocode">13.2 Algorithm Pseudocode</a></li><li class="toc-l3"><a href="#133-fencing-tokens">13.3 Fencing Tokens</a></li><li class="toc-l3"><a href="#delta-export-import">Delta Export / Import</a></li><li class="toc-l2"><a href="#14-event-permanence">14. Event Permanence</a></li><li class="toc-l2"><a href="#15-directory-structure">15. Directory Structure</a></li><li class="toc-l3"><a href="#path-safety">Path Safety</a></li><li class="toc-l2"><a href="#16-compliance-requirements">16. Compliance Requirements</a></li><li class="toc-l3"><a href="#161-error-taxonomy">16.1 Error Taxonomy</a></li><li class="toc-l3"><a href="#162-minimum-test-coverage">16.2 Minimum Test Coverage</a></li><li class="toc-l2"><a href="#17-reimplementation-guide">17. Reimplementation Guide</a></li><li class="toc-l3"><a href="#step-1-cryptographic-primitives">Step 1 — Cryptographic Primitives</a></li><li class="toc-l3"><a href="#step-2-validate-against-test-vectors">Step 2 — Validate Against Test Vectors</a></li><li class="toc-l3"><a href="#step-3-implement-the-reducer">Step 3 — Implement the Reducer</a></li><li class="toc-l3"><a href="#step-4-verify-determinism">Step 4 — Verify Determinism</a></li><li class="toc-l3"><a href="#step-5-pass-compliance-tests">Step 5 — Pass Compliance Tests</a></li><li class="toc-l3"><a href="#if-state-hashes-diverge">If State Hashes Diverge</a></li><li class="toc-l2"><a href="#18-security-considerations">18. Security Considerations</a></li><li class="toc-l3"><a href="#181-threat-model">18.1 Threat Model</a></li><li class="toc-l3"><a href="#182-mandatory-validation-order">18.2 Mandatory Validation Order</a></li><li class="toc-l3"><a href="#183-replay-and-duplication-attacks">18.3 Replay and Duplication Attacks</a></li><li class="toc-l3"><a href="#184-truncation-and-partial-snapshot-risk">18.4 Truncation and Partial Snapshot Risk</a></li><li class="toc-l3"><a href="#185-time-semantics-and-backdating">18.5 Time Semantics and Backdating</a></li><li class="toc-l3"><a href="#186-privacy-and-confidentiality">18.6 Privacy and Confidentiality</a></li><li class="toc-l3"><a href="#187-key-compromise-and-rotation-boundaries">18.7 Key Compromise and Rotation Boundaries</a></li><li class="toc-l3"><a href="#188-denial-of-service-considerations">18.8 Denial-of-Service Considerations</a></li><li class="toc-l3"><a href="#189-cryptographic-agility">18.9 Cryptographic Agility</a></li><li class="toc-l2"><a href="#19-extension-registry-process">19. Extension Registry Process</a></li><li class="toc-l2"><a href="#20-iana-style-considerations">20. IANA-Style Considerations</a></li></ul>
+  </aside>
+  <article class="prose spec-prose"><h1 id="backpack-protocol-v10">Backpack Protocol v1.0</h1>
+<p><strong>Profile:</strong> <code>PROVARA-1.0_PROFILE_A</code></p>
+<p><strong>Status:</strong> Normative reference implementation specification</p>
+<p><strong>Date:</strong> 2026-02-16</p>
+<p><strong>Source of truth:</strong> <a href="../PROTOCOL_PROFILE.txt"><code>PROTOCOL_PROFILE.txt</code></a> — immutable after distribution. This document is the human-readable companion.</p>
+<h2 id="normative-precedence">Normative Precedence</h2>
+<p>When materials disagree, use this precedence order:</p>
+<ol>
+<li><code>PROTOCOL_PROFILE.txt</code> (frozen normative profile, highest authority)</li>
+<li><code>docs/BACKPACK_PROTOCOL_v1.0.md</code> (human-readable protocol companion)</li>
+<li><code>docs/OPEN_DECISIONS.md</code> (resolved ambiguities and implementation choices)</li>
+<li>Reference implementation code and tests (<code>SNP_Core/bin</code>, <code>SNP_Core/test</code>)</li>
+</ol>
+<p>If a conflict exists between this document and the profile, the profile wins.</p>
+<hr>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#1-purpose">Purpose</a></li>
+<li><a href="#2-concepts-and-vocabulary">Concepts and Vocabulary</a></li>
+<li><a href="#3-cryptographic-stack">Cryptographic Stack</a></li>
+<li><a href="#4-canonical-json">Canonical JSON</a></li>
+<li><a href="#5-event-identity">Event Identity</a></li>
+<li><a href="#6-causal-chain">Causal Chain</a></li>
+<li><a href="#7-event-types">Event Types</a></li>
+<li><a href="#8-the-reducer">The Reducer</a></li>
+<li><a href="#9-key-management">Key Management</a></li>
+<li><a href="#10-merkle-tree">Merkle Tree</a></li>
+<li><a href="#11-manifest">Manifest</a></li>
+<li><a href="#12-safety-tiers">Safety Tiers</a></li>
+<li><a href="#13-sync-protocol">Sync Protocol</a></li>
+<li><a href="#14-event-permanence">Event Permanence</a></li>
+<li><a href="#15-directory-structure">Directory Structure</a></li>
+<li><a href="#16-compliance-requirements">Compliance Requirements</a></li>
+<li><a href="#17-reimplementation-guide">Reimplementation Guide</a></li>
+<li><a href="#18-security-considerations">Security Considerations</a></li>
+<li><a href="#19-extension-registry-process">Extension Registry Process</a></li>
+<li><a href="#20-iana-style-considerations">IANA-Style Considerations</a></li>
+</ol>
+<hr>
+<h2 id="1-purpose">1. Purpose</h2>
+<p>The Backpack Protocol defines a tamper-evident, append-only memory substrate for AI systems, sovereign identity, and long-lived digital institutions. A <em>backpack</em> (vault) is a directory of signed events. Given the same event log, any compliant implementation on any machine must produce byte-identical state.</p>
+<p><strong>Design axiom:</strong> <em>Truth is not merged. Evidence is merged. Truth is recomputed.</em></p>
+<p>Events are cryptographic evidence — signed, hashed, and causally chained. Beliefs about the world are derived by replaying evidence through a deterministic reducer. No belief is ever directly merged; only the underlying evidence is combined, and conclusions are recomputed fresh each time.</p>
+<hr>
+<h2 id="2-concepts-and-vocabulary">2. Concepts and Vocabulary</h2>
+<table><thead><tr>
+<th>Term</th>
+<th>Definition</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Vault / Backpack</strong></td>
+<td>A directory containing a compliant event log, identity files, policies, and manifest</td>
+</tr>
+<tr>
+<td><strong>Event</strong></td>
+<td>An immutable, content-addressed JSON record appended to the event log</td>
+</tr>
+<tr>
+<td><strong>Actor</strong></td>
+<td>The identity that authored an event (identified by <code>actor_key_id</code>)</td>
+</tr>
+<tr>
+<td><strong>Belief</strong></td>
+<td>A derived conclusion about the world — never stored directly, always recomputed from events</td>
+</tr>
+<tr>
+<td><strong>Namespace</strong></td>
+<td>One of four epistemic buckets: <code>canonical</code>, <code>local</code>, <code>contested</code>, <code>archived</code></td>
+</tr>
+<tr>
+<td><strong>Reducer</strong></td>
+<td>The pure function <code>f(events) → state</code> that deterministically produces beliefs</td>
+</tr>
+<tr>
+<td><strong>State hash</strong></td>
+<td>A SHA-256 digest of reducer output — byte-identical across all compliant implementations</td>
+</tr>
+<tr>
+<td><strong>Merkle root</strong></td>
+<td>A SHA-256 Merkle tree root over all backpack files — seals vault integrity</td>
+</tr>
+<tr>
+<td><strong>Manifest</strong></td>
+<td>A JSON file enumerating every backpack file with its SHA-256 hash and size</td>
+</tr>
+<tr>
+<td><strong>Fencing token</strong></td>
+<td>A signed, content-addressed token that prevents stale writes during sync</td>
+</tr>
+<tr>
+<td><strong>Key ID</strong></td>
+<td><code>bp1_</code> + first 16 hex chars of <code>SHA-256(raw_ed25519_public_key_bytes)</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="3-cryptographic-stack">3. Cryptographic Stack</h2>
+<p>All Profile A implementations MUST use exactly this stack. No substitutions are permitted.</p>
+<table><thead><tr>
+<th>Function</th>
+<th>Algorithm</th>
+<th>Specification</th>
+</tr></thead><tbody>
+<tr>
+<td>Hashing</td>
+<td>SHA-256</td>
+<td>FIPS 180-4</td>
+</tr>
+<tr>
+<td>Signing</td>
+<td>Ed25519</td>
+<td>RFC 8032</td>
+</tr>
+<tr>
+<td>Canonical JSON</td>
+<td>JCS subset</td>
+<td>RFC 8785</td>
+</tr>
+</tbody></table>
+<h3 id="sha-256-rules">SHA-256 Rules</h3>
+<ul>
+<li>Output: 64 lowercase hexadecimal characters</li>
+<li>Input: UTF-8 encoded bytes</li>
+<li>Used for: event IDs, file integrity, Merkle nodes, state hash, key ID derivation</li>
+</ul>
+<h3 id="ed25519-rules">Ed25519 Rules</h3>
+<ul>
+<li>Key size: 256-bit (32-byte public, 64-byte private with seed)</li>
+<li>Signatures: 64 bytes, Base64-encoded (standard alphabet with padding)</li>
+<li>Signing payload for events: <code>SHA-256(canonical_bytes(event_without_sig_field))</code></li>
+<li>The <code>sig</code> field MUST be excluded before signing</li>
+<li>The <code>event_id</code> field MUST be included in the signing payload</li>
+</ul>
+<h3 id="key-id-derivation">Key ID Derivation</h3>
+<pre><code>
+key_id = &quot;bp1_&quot; + SHA-256(raw_public_key_bytes)[:16 hex chars]
+</code></pre>
+<p>Example: <code>bp1_27a6549d43046062</code></p>
+<hr>
+<h2 id="4-canonical-json">4. Canonical JSON</h2>
+<p>All hashing and signing MUST use RFC 8785 canonical JSON. Two compliant implementations serializing the same logical object MUST produce byte-identical output.</p>
+<h3 id="rules-all-must-apply">Rules (all MUST apply)</h3>
+<ol>
+<li>Object keys MUST be sorted lexicographically by Unicode code point</li>
+<li>No whitespace between tokens</li>
+<li>No trailing commas</li>
+<li>Numbers MUST NOT have leading zeros, positive signs, or trailing decimal zeros</li>
+<li>Strings MUST use minimal escape sequences</li>
+<li>Encoding MUST be UTF-8 without BOM</li>
+<li>Null values MUST be preserved as <code>&quot;null&quot;</code> — MUST NOT be omitted</li>
+</ol>
+<h3 id="example">Example</h3>
+<p>Input object (logical):</p>
+<pre><code>
+{&quot;z&quot;: 3, &quot;a&quot;: 1, &quot;m&quot;: {&quot;y&quot;: 2, &quot;b&quot;: null}}
+</code></pre>
+<p>Canonical output:</p>
+<pre><code>
+{&quot;a&quot;:1,&quot;m&quot;:{&quot;b&quot;:null,&quot;y&quot;:2},&quot;z&quot;:3}
+</code></pre>
+<h3 id="reference-implementation">Reference Implementation</h3>
+<pre><code>
+import json
+
+def canonical_bytes(obj):
+    return json.dumps(
+        obj,
+        sort_keys=True,
+        separators=(&quot;,&quot;, &quot;:&quot;),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode(&quot;utf-8&quot;)
+</code></pre>
+<p>Cross-language note: For fractional values (floats), prefer integer encoding or string-wrapped decimals to guarantee byte-exact interoperability across languages.</p>
+<hr>
+<h2 id="5-event-identity">5. Event Identity</h2>
+<p>Events are content-addressed. Their ID is derived from their content.</p>
+<h3 id="derivation-rule-must">Derivation Rule (MUST)</h3>
+<ol>
+<li>Remove <code>event_id</code> and <code>sig</code> fields from the event object</li>
+<li>Compute canonical JSON bytes of the remaining object</li>
+<li><code>event_id = &quot;evt_&quot; + SHA-256(canonical_bytes)[:24 hex chars]</code></li>
+</ol>
+<p>This rule is deterministic: identical event content always produces the same <code>event_id</code>.</p>
+<h3 id="example">Example</h3>
+<pre><code>
+def derive_event_id(event: dict) -&gt; str:
+    hashable = {k: v for k, v in event.items() if k not in (&quot;event_id&quot;, &quot;sig&quot;)}
+    digest = hashlib.sha256(canonical_bytes(hashable)).hexdigest()
+    return f&quot;evt_{digest[:24]}&quot;
+</code></pre>
+<hr>
+<h2 id="6-causal-chain">6. Causal Chain</h2>
+<p>Each actor maintains a per-actor linked list of events via <code>prev_event_hash</code>.</p>
+<h3 id="rules-all-must-apply">Rules (all MUST apply)</h3>
+<ol>
+<li><strong>First event</strong> by an actor: <code>prev_event_hash</code> MUST be <code>null</code></li>
+<li><strong>Subsequent events</strong>: <code>prev_event_hash</code> MUST equal the <code>event_id</code> of that actor&#x27;s immediately preceding event</li>
+<li><strong>Cross-actor</strong>: <code>prev_event_hash</code> MUST NOT reference another actor&#x27;s events</li>
+</ol>
+<h3 id="integrity-rule">Integrity Rule</h3>
+<p>For any event E by actor A, if <code>E.prev_event_hash</code> is not null, there MUST exist an event P where:</p>
+<ul>
+<li><code>P.event_id == E.prev_event_hash</code></li>
+<li><code>P.actor == A</code></li>
+</ul>
+<p>Any gap or forgery breaks the chain and fails compliance.</p>
+<h3 id="fork-detection">Fork Detection</h3>
+<p>A <em>fork</em> occurs when two events by the same actor share the same <code>prev_event_hash</code>. This indicates concurrent offline operation. Forks are preserved in the merged log and surface in the <code>contested/</code> namespace after reducer replay.</p>
+<hr>
+<h2 id="7-event-types">7. Event Types</h2>
+<p>Machine-readable schema: <code>docs/schemas/provara_event_schema_v1.json</code></p>
+<h3 id="core-types-no-prefix-required">Core Types (no prefix required)</h3>
+<p>All core event types are reserved. Custom extensions MUST use reverse-domain prefixes (<code>com.example.my_type</code>).</p>
+<h4 id="genesis">GENESIS</h4>
+<p>The vault birth certificate. Every backpack has exactly one GENESIS event, written by <code>bootstrap_v0.py</code>.</p>
+<p>Required fields:</p>
+<pre><code>
+{
+  &quot;event_id&quot;: &quot;evt_...&quot;,
+  &quot;type&quot;: &quot;GENESIS&quot;,
+  &quot;namespace&quot;: &quot;canonical&quot;,
+  &quot;actor&quot;: &quot;&lt;actor_id&gt;&quot;,
+  &quot;actor_key_id&quot;: &quot;&lt;bp1_...&gt;&quot;,
+  &quot;ts_logical&quot;: 1,
+  &quot;prev_event_hash&quot;: null,
+  &quot;timestamp_utc&quot;: &quot;&lt;ISO 8601&gt;&quot;,
+  &quot;payload&quot;: {
+    &quot;uid&quot;: &quot;&lt;vault_uuid&gt;&quot;,
+    &quot;birth_timestamp&quot;: &quot;&lt;ISO 8601&gt;&quot;,
+    &quot;root_key_id&quot;: &quot;&lt;bp1_...&gt;&quot;,
+    &quot;protocol_version&quot;: &quot;1.0&quot;,
+    &quot;profile&quot;: &quot;PROVARA-1.0_PROFILE_A&quot;
+  },
+  &quot;sig&quot;: &quot;&lt;base64 ed25519&gt;&quot;
+}
+</code></pre>
+<h4 id="observation">OBSERVATION</h4>
+<p>A sensor, measurement, or belief claim with associated confidence.</p>
+<pre><code>
+{
+  &quot;type&quot;: &quot;OBSERVATION&quot;,
+  &quot;namespace&quot;: &quot;local&quot;,
+  &quot;payload&quot;: {
+    &quot;subject&quot;: &quot;&lt;entity&gt;&quot;,
+    &quot;predicate&quot;: &quot;&lt;property&gt;&quot;,
+    &quot;value&quot;: &quot;&lt;any JSON value&gt;&quot;,
+    &quot;confidence&quot;: 0.9,
+    &quot;timestamp&quot;: &quot;&lt;ISO 8601&gt;&quot;
+  }
+}
+</code></pre>
+<p>The belief key is <code>subject:predicate</code>. The reducer places observations in <code>local/</code>, moving them to <code>contested/</code> if conflicting high-confidence evidence accumulates.</p>
+<h4 id="assertion">ASSERTION</h4>
+<p>Functionally equivalent to OBSERVATION but defaults to lower confidence (0.35). Used for inferred or deduced beliefs rather than direct sensor readings.</p>
+<h4 id="attestation">ATTESTATION</h4>
+<p>Promotes a belief to the <code>canonical/</code> namespace. Requires institutional authority.</p>
+<pre><code>
+{
+  &quot;type&quot;: &quot;ATTESTATION&quot;,
+  &quot;namespace&quot;: &quot;canonical&quot;,
+  &quot;payload&quot;: {
+    &quot;subject&quot;: &quot;&lt;entity&gt;&quot;,
+    &quot;predicate&quot;: &quot;&lt;property&gt;&quot;,
+    &quot;value&quot;: &quot;&lt;attested value&gt;&quot;,
+    &quot;target_event_id&quot;: &quot;&lt;event_id of source evidence&gt;&quot;,
+    &quot;actor_key_id&quot;: &quot;&lt;bp1_...&gt;&quot;
+  }
+}
+</code></pre>
+<p>When a canonical belief already exists for a key, it is moved to <code>archived/</code> with <code>superseded_by</code> set to the new attestation event ID.</p>
+<h4 id="retraction">RETRACTION</h4>
+<p>Removes a belief from active namespaces. Canonical entries are archived as retracted.</p>
+<pre><code>
+{
+  &quot;type&quot;: &quot;RETRACTION&quot;,
+  &quot;payload&quot;: {
+    &quot;subject&quot;: &quot;&lt;entity&gt;&quot;,
+    &quot;predicate&quot;: &quot;&lt;property&gt;&quot;
+  }
+}
+</code></pre>
+<p>Effect:</p>
+<ul>
+<li>Removes from <code>local/</code> and <code>contested/</code></li>
+<li>If in <code>canonical/</code>: moves to <code>archived/</code> with <code>retracted: true</code> and <code>superseded_by: &lt;retraction_event_id&gt;</code></li>
+</ul>
+<h4 id="keyrevocation">KEY_REVOCATION</h4>
+<p>Part of the two-event key rotation protocol. Marks a key as revoked.</p>
+<pre><code>
+{
+  &quot;type&quot;: &quot;KEY_REVOCATION&quot;,
+  &quot;payload&quot;: {
+    &quot;revoked_key_id&quot;: &quot;&lt;bp1_...&gt;&quot;,
+    &quot;trust_boundary_event_id&quot;: &quot;&lt;last trusted event_id&gt;&quot;,
+    &quot;reason&quot;: &quot;compromised&quot;,
+    &quot;revoked_by&quot;: &quot;&lt;signing_key_id&gt;&quot;
+  }
+}
+</code></pre>
+<p>MUST be signed by a surviving trusted authority. The revoked key MUST NOT sign its own revocation.</p>
+<h4 id="keypromotion">KEY_PROMOTION</h4>
+<p>Second half of key rotation. Introduces the replacement key.</p>
+<pre><code>
+{
+  &quot;type&quot;: &quot;KEY_PROMOTION&quot;,
+  &quot;payload&quot;: {
+    &quot;new_key_id&quot;: &quot;&lt;bp1_...&gt;&quot;,
+    &quot;new_public_key_b64&quot;: &quot;&lt;base64&gt;&quot;,
+    &quot;algorithm&quot;: &quot;Ed25519&quot;,
+    &quot;roles&quot;: [&quot;root&quot;],
+    &quot;promoted_by&quot;: &quot;&lt;signing_key_id&gt;&quot;,
+    &quot;replaces_key_id&quot;: &quot;&lt;revoked_key_id&gt;&quot;
+  }
+}
+</code></pre>
+<p>The new key MUST NOT sign its own promotion. A surviving authority signs both rotation events.</p>
+<h4 id="reducerepoch">REDUCER_EPOCH</h4>
+<p>Records a reducer version transition for audit purposes.</p>
+<pre><code>
+{
+  &quot;type&quot;: &quot;REDUCER_EPOCH&quot;,
+  &quot;payload&quot;: {
+    &quot;epoch_id&quot;: &quot;&lt;epoch_identifier&gt;&quot;,
+    &quot;reducer_hash&quot;: &quot;sha256:&lt;hash_of_reducer_code&gt;&quot;,
+    &quot;effective_from_event_id&quot;: &quot;&lt;event_id&gt;&quot;,
+    &quot;ontology_versions&quot;: {&quot;perception&quot;: &quot;v1&quot;}
+  }
+}
+</code></pre>
+<hr>
+<h2 id="8-the-reducer">8. The Reducer</h2>
+<p>The reducer is a pure function: <code>f(events) → state</code>. Given the same event sequence, any compliant implementation MUST produce a byte-identical <code>state_hash</code>.</p>
+<h3 id="four-namespace-state-model">Four-Namespace State Model</h3>
+<table><thead><tr>
+<th>Namespace</th>
+<th>Meaning</th>
+<th>When Populated</th>
+</tr></thead><tbody>
+<tr>
+<td><code>canonical/</code></td>
+<td>Institutionally attested truth</td>
+<td>Via ATTESTATION event</td>
+</tr>
+<tr>
+<td><code>local/</code></td>
+<td>Node-local observations</td>
+<td>Via OBSERVATION (no conflict)</td>
+</tr>
+<tr>
+<td><code>contested/</code></td>
+<td>Conflicting high-confidence evidence</td>
+<td>When two conflicting observations both exceed the conflict threshold</td>
+</tr>
+<tr>
+<td><code>archived/</code></td>
+<td>Superseded canonical beliefs</td>
+<td>When a canonical entry is overwritten by new ATTESTATION or RETRACTION</td>
+</tr>
+</tbody></table>
+<h3 id="belief-keys">Belief Keys</h3>
+<p>Beliefs are indexed by <code>subject:predicate</code>. Example: <code>door_01:status</code>.</p>
+<h3 id="conflict-detection">Conflict Detection</h3>
+<p>The default conflict confidence threshold is <code>0.50</code>. An incoming observation triggers conflict if:</p>
+<ol>
+<li><strong>Conflicts with canonical</strong>: existing canonical value differs AND incoming confidence ≥ threshold</li>
+<li><strong>Conflicts with local</strong>: existing local value differs AND <code>max(existing_confidence, incoming_confidence)</code> ≥ threshold</li>
+</ol>
+<p>When conflict is detected, the key moves from <code>local/</code> to <code>contested/</code> with full evidence grouping.</p>
+<h3 id="agreeing-evidence">Agreeing Evidence</h3>
+<p>If a new observation agrees with the existing local value:</p>
+<ul>
+<li>If incoming confidence ≤ existing: keep existing, record evidence (no state change)</li>
+<li>If incoming confidence &gt; existing: update local to show higher confidence source</li>
+</ul>
+<h3 id="state-hash">State Hash</h3>
+<pre><code>
+state_hash = SHA-256(canonical_bytes(state_without_metadata.state_hash))
+</code></pre>
+<p>The hash covers all four namespaces plus non-hash metadata fields. It excludes <code>metadata.state_hash</code> itself (non-self-referential). An empty reducer (zero events) produces a valid, deterministic state hash.</p>
+<h3 id="reducer-invariants">Reducer Invariants</h3>
+<ol>
+<li>Same event sequence → byte-identical <code>state_hash</code></li>
+<li>Empty log → valid state hash, all namespaces empty, <code>event_count = 0</code></li>
+<li>Unknown event types: counted, ignored for state, logged to <code>_ignored_types</code></li>
+<li>Malformed events (non-dict, missing fields): skipped or handled gracefully — never crash</li>
+</ol>
+<hr>
+<h2 id="9-key-management">9. Key Management</h2>
+<h3 id="key-registry-identitykeysjson">Key Registry (<code>identity/keys.json</code>)</h3>
+<pre><code>
+{
+  &quot;keys&quot;: [
+    {
+      &quot;key_id&quot;: &quot;bp1_27a6549d43046062&quot;,
+      &quot;public_key_b64&quot;: &quot;&lt;base64&gt;&quot;,
+      &quot;algorithm&quot;: &quot;Ed25519&quot;,
+      &quot;roles&quot;: [&quot;root&quot;, &quot;attestation&quot;],
+      &quot;status&quot;: &quot;active&quot;,
+      &quot;created_at_utc&quot;: &quot;2026-02-13T00:00:00Z&quot;
+    }
+  ],
+  &quot;revocations&quot;: []
+}
+</code></pre>
+<h3 id="key-rotation-protocol">Key Rotation Protocol</h3>
+<p>Key rotation is a two-event atomic operation:</p>
+<ol>
+<li><strong>KEY_REVOCATION</strong> — signed by a surviving trusted authority (MUST NOT be the key being revoked)</li>
+<li><strong>KEY_PROMOTION</strong> — signed by the same surviving authority (MUST NOT be the new key)</li>
+</ol>
+<p><strong>Security invariant:</strong> A compromised key cannot authorize its own replacement. If an attacker could self-sign a KEY_PROMOTION, they could escalate from key compromise to permanent identity takeover.</p>
+<p><strong>Trust hierarchy (for signing rotation):</strong></p>
+<ol>
+<li>Non-compromised root key → signs rotation</li>
+<li>Root compromised, quorum keys survive → quorum signs</li>
+<li>All keys compromised → catastrophic identity death (new genesis required)</li>
+</ol>
+<h3 id="revoked-keys">Revoked Keys</h3>
+<p>After revocation, a key&#x27;s <code>status</code> changes to <code>&quot;revoked&quot;</code>. Revoked keys appear in the <code>revocations</code> list and MUST NOT be used to sign new events.</p>
+<hr>
+<h2 id="10-merkle-tree">10. Merkle Tree</h2>
+<p>The Merkle tree seals the integrity of all backpack files.</p>
+<h3 id="construction">Construction</h3>
+<ol>
+<li><strong>Leaves:</strong> For each file entry in the manifest: <code>leaf_hash = SHA-256(canonical_bytes({&quot;path&quot;: &quot;...&quot;, &quot;sha256&quot;: &quot;...&quot;, &quot;size&quot;: N}))</code></li>
+<li><strong>Ordering:</strong> Leaves MUST be sorted lexicographically by file path</li>
+<li><strong>Padding:</strong> If leaf count is odd, the last leaf is duplicated</li>
+<li><strong>Nodes:</strong> <code>node_hash = SHA-256(left_child_bytes || right_child_bytes)</code> — raw byte concatenation (32 + 32 bytes), NOT hex string concatenation</li>
+<li><strong>Root:</strong> A single 64-character lowercase hex string stored in <code>merkle_root.txt</code></li>
+</ol>
+<h3 id="empty-tree">Empty Tree</h3>
+<p>An empty tree (no files) produces: <code>SHA-256(b&quot;&quot;).hexdigest()</code></p>
+<h3 id="reference-implementation">Reference Implementation</h3>
+<pre><code>
+def merkle_root_hex(leaves: list[bytes]) -&gt; str:
+    if not leaves:
+        return hashlib.sha256(b&quot;&quot;).hexdigest()
+    level = [hashlib.sha256(leaf).digest() for leaf in leaves]
+    while len(level) &gt; 1:
+        next_level = []
+        for i in range(0, len(level), 2):
+            left = level[i]
+            right = level[i + 1] if i + 1 &lt; len(level) else level[i]
+            next_level.append(hashlib.sha256(left + right).digest())
+        level = next_level
+    return level[0].hex()
+</code></pre>
+<hr>
+<h2 id="11-manifest">11. Manifest</h2>
+<p><code>manifest.json</code> inventories every file in the backpack with its SHA-256 hash, file size, and relative path.</p>
+<h3 id="format">Format</h3>
+<pre><code>
+{
+  &quot;backpack_spec_version&quot;: &quot;1.0&quot;,
+  &quot;manifest_format&quot;: &quot;manifest.v0&quot;,
+  &quot;generated_at_utc&quot;: &quot;2026-02-13T00:00:00Z&quot;,
+  &quot;merkle_root&quot;: &quot;&lt;64 hex chars&gt;&quot;,
+  &quot;files&quot;: [
+    {
+      &quot;path&quot;: &quot;events/events.ndjson&quot;,
+      &quot;sha256&quot;: &quot;&lt;64 hex chars&gt;&quot;,
+      &quot;size&quot;: 1234
+    }
+  ]
+}
+</code></pre>
+<h3 id="excluded-files">Excluded Files</h3>
+<p><code>manifest.json</code>, <code>manifest.sig</code>, and <code>merkle_root.txt</code> are excluded from the file list (they cannot hash themselves).</p>
+<h3 id="manifest-signature">Manifest Signature</h3>
+<p><code>manifest.sig</code> is a detached Ed25519 signature over <code>SHA-256(merkle_root_bytes + canonical_bytes(manifest_header))</code>. It binds the manifest to a specific key and timestamp.</p>
+<hr>
+<h2 id="12-safety-tiers">12. Safety Tiers</h2>
+<p>The safety tier system governs what actions a vault can authorize offline.</p>
+<table><thead><tr>
+<th>Tier</th>
+<th>Risk</th>
+<th>Offline Allowed</th>
+<th>Gate</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>L0</strong></td>
+<td>Data-only, reversible</td>
+<td>Yes</td>
+<td>Local reducer</td>
+</tr>
+<tr>
+<td><strong>L1</strong></td>
+<td>Low-kinetic</td>
+<td>Yes (logged for review)</td>
+<td>Reducer + policy</td>
+</tr>
+<tr>
+<td><strong>L2</strong></td>
+<td>High-kinetic</td>
+<td>Lease window only</td>
+<td>Multi-sensor + signed policy</td>
+</tr>
+<tr>
+<td><strong>L3</strong></td>
+<td>Critical / irreversible</td>
+<td>No</td>
+<td>Human MFA or remote signature</td>
+</tr>
+</tbody></table>
+<h3 id="merge-ratchet">Merge Ratchet</h3>
+<p>Safety constraints only tighten automatically on merge (<code>most_restrictive_wins</code>). Loosening requires a signed <code>POLICY_UPDATE</code> by a key with L3 clearance. This is a one-way ratchet — you can always become more cautious, never less cautious without explicit authority.</p>
+<hr>
+<h2 id="13-sync-protocol">13. Sync Protocol</h2>
+<p>The sync protocol is a union merge with causal chain verification.</p>
+<h3 id="131-chain-validation-algorithm">13.1 Chain Validation Algorithm</h3>
+<p>To validate causal and cryptographic integrity, a conformant implementation MUST execute the following deterministic procedure:</p>
+<ol>
+<li>Parse all NDJSON lines as UTF-8 JSON objects.</li>
+<li>Build <code>event_by_id[event_id]</code> and fail on duplicate IDs.</li>
+<li>For each event:</li>
+</ol>
+<ul>
+<li>Recompute content-derived ID from the event with <code>event_id</code> and <code>sig</code> removed.</li>
+<li>Verify recomputed ID equals <code>event_id</code>.</li>
+</ul>
+<ol>
+<li>Build <code>actor_events[actor]</code> and sort each actor list by:</li>
+</ol>
+<ul>
+<li><code>timestamp_utc</code> (primary, ascending)</li>
+<li><code>event_id</code> (secondary, ascending)</li>
+</ul>
+<ol>
+<li>For each actor chain:</li>
+</ol>
+<ul>
+<li>First event MUST have <code>prev_event_hash = null</code>.</li>
+<li>Each subsequent event MUST set <code>prev_event_hash</code> to the immediately preceding event ID in that actor-sorted list.</li>
+<li><code>prev_event_hash</code> MUST reference an event by the same actor (cross-actor references are invalid).</li>
+</ul>
+<ol>
+<li>For each signed event:</li>
+</ol>
+<ul>
+<li>Resolve public key by <code>actor_key_id</code>.</li>
+<li>Reject missing, unknown, or revoked key IDs.</li>
+<li>Verify Ed25519 signature over canonical JSON bytes of event-without-<code>sig</code>.</li>
+</ul>
+<ol>
+<li>If all checks pass, the chain is valid; otherwise invalid with a specific error code (see §16.1).</li>
+</ol>
+<h3 id="132-algorithm-pseudocode">13.2 Algorithm Pseudocode</h3>
+<pre><code>
+function verify_vault(events):
+    event_by_id = {}
+    actor_events = {}
+
+    for e in events:
+        require_utf8_json(e)                                   # PROVARA_E007
+        require_required_fields(e)                             # PROVARA_E004
+        if e.event_id in event_by_id:
+            fail(PROVARA_E010, &quot;DUPLICATE_EVENT_ID&quot;)
+        event_by_id[e.event_id] = e
+
+        derived = derive_event_id(remove_fields(e, [&quot;event_id&quot;, &quot;sig&quot;]))
+        if derived != e.event_id:
+            fail(PROVARA_E001, &quot;HASH_MISMATCH&quot;)
+
+        actor_events[e.actor].append(e)
+
+    for actor in actor_events:
+        chain = sort(actor_events[actor], by=[&quot;timestamp_utc&quot;, &quot;event_id&quot;])
+        for i in range(0, len(chain)):
+            curr = chain[i]
+            if i == 0:
+                if curr.prev_event_hash is not null:
+                    fail(PROVARA_E002, &quot;BROKEN_CAUSAL_CHAIN&quot;)
+            else:
+                prev = chain[i - 1]
+                if curr.prev_event_hash != prev.event_id:
+                    fail(PROVARA_E002, &quot;BROKEN_CAUSAL_CHAIN&quot;)
+
+                # explicit same-actor check for referenced prev
+                linked = event_by_id.get(curr.prev_event_hash)
+                if linked is null or linked.actor != actor:
+                    fail(PROVARA_E011, &quot;CROSS_ACTOR_REFERENCE&quot;)
+
+            if has_field(curr, &quot;sig&quot;):
+                key = key_registry.get(curr.actor_key_id)
+                if key is null:
+                    fail(PROVARA_E012, &quot;UNKNOWN_KEY_ID&quot;)
+                if key.status == &quot;revoked&quot;:
+                    fail(PROVARA_E006, &quot;REVOKED_KEY_USE&quot;)
+                if !verify_ed25519_signature(curr, key.public_key):
+                    fail(PROVARA_E003, &quot;INVALID_SIGNATURE&quot;)
+
+    return ok()
+</code></pre>
+<h3 id="133-fencing-tokens">13.3 Fencing Tokens</h3>
+<p>Before writing to a backpack, generate a fencing token:</p>
+<pre><code>
+token_hash = SHA-256(latest_event_id + &quot;:&quot; + timestamp + &quot;:&quot; + nonce)
+sig = Ed25519_sign(token_hash, active_key)
+</code></pre>
+<p>Validation:</p>
+<ol>
+<li>Recompute <code>token_hash</code> from the fields</li>
+<li>Verify signature against key registry</li>
+<li>Verify <code>latest_event_id</code> still exists in the event log</li>
+</ol>
+<p>A stale token (referencing an event that was superseded by a merge) fails validation, preventing lost-update scenarios.</p>
+<h3 id="delta-export-import">Delta Export / Import</h3>
+<p>Delta bundles enable partial sync (only events after a known hash):</p>
+<pre><code>
+Header: {&quot;type&quot;: &quot;provara_delta_v1&quot;, &quot;since_hash&quot;: &quot;...&quot;, &quot;event_count&quot;: N, &quot;keys&quot;: [...]}
+Body:   One NDJSON line per event
+</code></pre>
+<p>Unknown event types MUST be preserved in the merged log. They MUST NOT affect core reducer state.</p>
+<hr>
+<h2 id="14-event-permanence">14. Event Permanence</h2>
+<p>Events MUST be permanent. Implementations MUST NOT delete events.</p>
+<table><thead><tr>
+<th>Data Type</th>
+<th>Retention</th>
+</tr></thead><tbody>
+<tr>
+<td>Events</td>
+<td>Permanent</td>
+</tr>
+<tr>
+<td>Checkpoints</td>
+<td>Permanent</td>
+</tr>
+<tr>
+<td>Perception raw data</td>
+<td>30-day default, oldest-first eviction (MAY vary)</td>
+</tr>
+<tr>
+<td>CAS artifacts</td>
+<td>Permanent if referenced; 90-day if unreferenced (MAY vary)</td>
+</tr>
+<tr>
+<td>State caches</td>
+<td>MAY be evicted (regeneratable from events)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="15-directory-structure">15. Directory Structure</h2>
+<pre><code>
+My_Backpack/
+├── identity/
+│   ├── genesis.json              # Birth certificate
+│   └── keys.json                 # Public key registry
+├── events/
+│   └── events.ndjson             # THE source of truth (append-only NDJSON)
+├── policies/
+│   ├── safety_policy.json        # L0-L3 kinetic risk tiers
+│   ├── retention_policy.json     # Data permanence rules
+│   ├── sync_contract.json        # Governance + authority ladder
+│   └── ontology/
+│       └── perception_ontology_v1.json
+├── state/                        # Regeneratable cache (may be absent)
+│   └── current_state.json
+├── artifacts/
+│   └── cas/                      # Content-addressed storage
+├── manifest.json                 # File inventory with SHA-256 hashes
+├── manifest.sig                  # Ed25519 signature over manifest
+└── merkle_root.txt               # Integrity anchor (single hex string)
+</code></pre>
+<h3 id="path-safety">Path Safety</h3>
+<p>All file paths in the manifest MUST:</p>
+<ul>
+<li>Be relative to the backpack root</li>
+<li>Not contain <code>..</code> or symlinks pointing outside the root</li>
+<li>Be lexicographically sorted in the manifest</li>
+</ul>
+<hr>
+<h2 id="16-compliance-requirements">16. Compliance Requirements</h2>
+<h3 id="161-error-taxonomy">16.1 Error Taxonomy</h3>
+<p>Standardized error codes for validation failures. Implementations SHOULD use these codes to ensure interoperability and clear auditing.</p>
+<table><thead><tr>
+<th>Code</th>
+<th>Label</th>
+<th>Description</th>
+</tr></thead><tbody>
+<tr>
+<td><code>PROVARA_E001</code></td>
+<td><code>HASH_MISMATCH</code></td>
+<td>Event ID does not match computed content hash</td>
+</tr>
+<tr>
+<td><code>PROVARA_E002</code></td>
+<td><code>BROKEN_CAUSAL_CHAIN</code></td>
+<td><code>prev_event_hash</code> does not link to correct previous event</td>
+</tr>
+<tr>
+<td><code>PROVARA_E003</code></td>
+<td><code>INVALID_SIGNATURE</code></td>
+<td>Signature verification failed for the given public key</td>
+</tr>
+<tr>
+<td><code>PROVARA_E004</code></td>
+<td><code>MISSING_FIELD</code></td>
+<td>A required top-level or payload field is missing</td>
+</tr>
+<tr>
+<td><code>PROVARA_E005</code></td>
+<td><code>UNAUTHORIZED_SIGNER</code></td>
+<td>The signing key does not have authority for the event type</td>
+</tr>
+<tr>
+<td><code>PROVARA_E006</code></td>
+<td><code>REVOKED_KEY_USE</code></td>
+<td>Event signed by a key that was revoked at the time of signing</td>
+</tr>
+<tr>
+<td><code>PROVARA_E007</code></td>
+<td><code>MALFORMED_JSON</code></td>
+<td>Event or file is not valid UTF-8 or standard JSON</td>
+</tr>
+<tr>
+<td><code>PROVARA_E008</code></td>
+<td><code>MERKLE_ROOT_MISMATCH</code></td>
+<td>Recomputed Merkle root does not match <code>merkle_root.txt</code></td>
+</tr>
+<tr>
+<td><code>PROVARA_E009</code></td>
+<td><code>UNSAFE_PATH</code></td>
+<td>Manifest entry path is absolute, traverses <code>..</code>, or escapes root</td>
+</tr>
+<tr>
+<td><code>PROVARA_E010</code></td>
+<td><code>DUPLICATE_EVENT_ID</code></td>
+<td>Duplicate <code>event_id</code> found in a log that requires uniqueness</td>
+</tr>
+<tr>
+<td><code>PROVARA_E011</code></td>
+<td><code>CROSS_ACTOR_REFERENCE</code></td>
+<td>Event references previous hash from a different actor chain</td>
+</tr>
+<tr>
+<td><code>PROVARA_E012</code></td>
+<td><code>UNKNOWN_KEY_ID</code></td>
+<td><code>actor_key_id</code> cannot be resolved in active key registry</td>
+</tr>
+</tbody></table>
+<p>Canonical source for these codes: <code>docs/ERROR_CODES.md</code></p>
+<h3 id="162-minimum-test-coverage">16.2 Minimum Test Coverage</h3>
+<table><thead><tr>
+<th>Category</th>
+<th>Tests</th>
+<th>Requirement</th>
+</tr></thead><tbody>
+<tr>
+<td>Directory structure</td>
+<td>2</td>
+<td>Required folders and files exist</td>
+</tr>
+<tr>
+<td>Identity schema</td>
+<td>2</td>
+<td>Genesis event and key registry validity</td>
+</tr>
+<tr>
+<td>Event schema + causal chain</td>
+<td>3</td>
+<td>Event format, uniqueness, causal ordering</td>
+</tr>
+<tr>
+<td>Manifest integrity + Merkle</td>
+<td>5</td>
+<td>File hashes, Merkle computation, no phantoms, path safety</td>
+</tr>
+<tr>
+<td>Safety policy structure</td>
+<td>2</td>
+<td>L0-L3 structure and ratchet constraints</td>
+</tr>
+<tr>
+<td>Sync contract schema</td>
+<td>1</td>
+<td>Governance schema validity</td>
+</tr>
+<tr>
+<td>Reducer determinism</td>
+<td>1</td>
+<td>Same events → identical state hash</td>
+</tr>
+<tr>
+<td>Retention permanence</td>
+<td>1</td>
+<td>Events are never deleted</td>
+</tr>
+</tbody></table>
+<p>Run against the reference backpack:</p>
+<pre><code>
+cd SNP_Core/test &amp;&amp; PYTHONPATH=../bin python backpack_compliance_v1.py ../examples/reference_backpack -v
+</code></pre>
+<hr>
+<h2 id="17-reimplementation-guide">17. Reimplementation Guide</h2>
+<p>To implement Provara v1.0 in another language:</p>
+<h3 id="step-1-cryptographic-primitives">Step 1 — Cryptographic Primitives</h3>
+<p>Implement:</p>
+<ul>
+<li>SHA-256 (FIPS 180-4)</li>
+<li>Ed25519 sign and verify (RFC 8032)</li>
+<li>RFC 8785 canonical JSON</li>
+</ul>
+<h3 id="step-2-validate-against-test-vectors">Step 2 — Validate Against Test Vectors</h3>
+<p>Validate your implementations against <code>test_vectors/vectors.json</code>. The 7 vectors cover canonical JSON, SHA-256, event ID derivation, key ID derivation, Ed25519 sign/verify, Merkle root, and reducer determinism.</p>
+<h3 id="step-3-implement-the-reducer">Step 3 — Implement the Reducer</h3>
+<p>Handle: <code>OBSERVATION</code>, <code>ASSERTION</code>, <code>ATTESTATION</code>, <code>RETRACTION</code>, <code>REDUCER_EPOCH</code>, <code>KEY_REVOCATION</code>, <code>KEY_PROMOTION</code></p>
+<p>For unknown event types: count them, do not modify namespace state, preserve in event log on merge.</p>
+<h3 id="step-4-verify-determinism">Step 4 — Verify Determinism</h3>
+<p>Run your reducer against the test vector event sequence. Compare your <code>state_hash</code> to the reference value. If they match, your implementation is correct. If they diverge, the canonical JSON or hash computation has a bug.</p>
+<h3 id="step-5-pass-compliance-tests">Step 5 — Pass Compliance Tests</h3>
+<p>Generate a backpack with your implementation and run the 17 compliance tests. If all pass, your implementation is conformant.</p>
+<h3 id="if-state-hashes-diverge">If State Hashes Diverge</h3>
+<p>Common causes:</p>
+<ol>
+<li><strong>Non-canonical JSON</strong> — check key sorting, whitespace, null handling</li>
+<li><strong>Float serialization</strong> — JSON float encoding differs across languages; use integers or string-wrapped values for fractional confidence scores</li>
+<li><strong>UTF-8 encoding</strong> — ensure no BOM, no alternate encodings</li>
+<li><strong>Missing metadata fields</strong> — <code>state_hash</code> excludes <code>metadata.state_hash</code> but includes all other metadata fields</li>
+</ol>
+<p>The Python reference implementation is the canonical source of truth for any ambiguity.</p>
+<hr>
+<h2 id="18-security-considerations">18. Security Considerations</h2>
+<h3 id="181-threat-model">18.1 Threat Model</h3>
+<table><thead><tr>
+<th>Threat</th>
+<th>Primary Defense</th>
+<th>Residual Risk / Operator Duty</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Payload/data tampering</strong></td>
+<td>Event signatures + manifest file hashes + Merkle root verification</td>
+<td>Private key compromise can still produce valid malicious events until revocation.</td>
+</tr>
+<tr>
+<td><strong>History re-ordering</strong></td>
+<td>Per-actor causal chain (<code>prev_event_hash</code>) + deterministic sort on replay</td>
+<td>Incorrect timestamp parsing in non-conformant ports can still cause divergence.</td>
+</tr>
+<tr>
+<td><strong>Silent deletion / truncation</strong></td>
+<td>Missing links (<code>prev_event_hash</code>) and manifest mismatch detection</td>
+<td>Deletion of newest tail events can appear as a stale snapshot if no external anchor/checkpoint is compared.</td>
+</tr>
+<tr>
+<td><strong>Identity takeover</strong></td>
+<td>Rotation requires surviving signer; self-promotion is prohibited</td>
+<td>If all authorities are compromised, identity continuity is cryptographically lost (new genesis required).</td>
+</tr>
+<tr>
+<td><strong>Stale-write overwrite</strong></td>
+<td>Fencing token includes latest event ID, timestamp, nonce, and signature</td>
+<td>Long offline windows increase merge complexity and contested state volume.</td>
+</tr>
+<tr>
+<td><strong>Fork-and-discard (equivocation)</strong></td>
+<td>Fork detection by identical actor + identical <code>prev_event_hash</code>; conflicting branches remain auditable</td>
+<td>Governance must define how forks are adjudicated and whether one branch is quarantined.</td>
+</tr>
+<tr>
+<td><strong>Time/backdating manipulation</strong></td>
+<td>Event ID is content-addressed and signed; chain linkage is authoritative, not wall-clock time</td>
+<td><code>timestamp_utc</code> is still untrusted metadata and can mislead human readers if not cross-checked.</td>
+</tr>
+<tr>
+<td><strong>Resource-exhaustion (DoS)</strong></td>
+<td>Streaming hash/verification, bounded input handling, malformed-line rejection</td>
+<td>Operators must enforce max event size, max payload depth, and replay quotas in production deployments.</td>
+</tr>
+<tr>
+<td><strong>Key ID collision attempt</strong></td>
+<td>Key IDs are SHA-256-derived; practical collision resistance at current security levels</td>
+<td>Profile migration plan needed if SHA-256 security assumptions materially degrade in future.</td>
+</tr>
+</tbody></table>
+<h3 id="182-mandatory-validation-order">18.2 Mandatory Validation Order</h3>
+<p>To reduce attack surface and ambiguous error handling, implementations SHOULD validate in this order:</p>
+<ol>
+<li>UTF-8 + JSON parse checks</li>
+<li>Required field checks</li>
+<li>Event ID recomputation checks</li>
+<li>Causal chain linkage checks</li>
+<li>Key resolution/revocation checks</li>
+<li>Signature verification checks</li>
+<li>Manifest and Merkle verification checks</li>
+</ol>
+<p>Fail closed at the first critical invariant break and emit the corresponding <code>PROVARA_E###</code> code.</p>
+<h3 id="183-replay-and-duplication-attacks">18.3 Replay and Duplication Attacks</h3>
+<p>Replay of already-seen events is constrained by unique <code>event_id</code> and dedup rules. Implementations MUST reject duplicate IDs in contexts that require uniqueness and MUST NOT permit duplicate events to mutate derived state more than once.</p>
+<p>For delta import/sync workflows, unknown event types are preserved, but replayed known events still require full ID/signature/chain validation before acceptance.</p>
+<h3 id="184-truncation-and-partial-snapshot-risk">18.4 Truncation and Partial Snapshot Risk</h3>
+<p>Protocol checks can prove integrity of what is present; they cannot prove the local copy is globally complete without comparison to a stronger anchor (signed checkpoint, remote peer state, or externally pinned digest).</p>
+<p>Operational guidance:</p>
+<ul>
+<li>Keep signed checkpoints.</li>
+<li>Compare latest known event IDs across peers.</li>
+<li>Treat unexplained chain-head regressions as incident conditions.</li>
+</ul>
+<h3 id="185-time-semantics-and-backdating">18.5 Time Semantics and Backdating</h3>
+<p><code>timestamp_utc</code> supports ordering and audit readability but is not a trust root. Chain linkage and signatures are authoritative. Implementations SHOULD prefer deterministic chain order (<code>timestamp_utc</code>, then <code>event_id</code>) and SHOULD log suspicious clock drift for operators.</p>
+<h3 id="186-privacy-and-confidentiality">18.6 Privacy and Confidentiality</h3>
+<p>Provara provides integrity and authenticity, not confidentiality. Events are plaintext JSON unless encrypted upstream.</p>
+<p>Recommendations:</p>
+<ul>
+<li>Encrypt sensitive payloads before event creation.</li>
+<li>Avoid direct storage of PII/secrets in <code>payload.value</code>.</li>
+<li>Separate key-management concerns from vault transport/storage concerns.</li>
+</ul>
+<h3 id="187-key-compromise-and-rotation-boundaries">18.7 Key Compromise and Rotation Boundaries</h3>
+<p>Key compromise is handled by <code>KEY_REVOCATION</code> + <code>KEY_PROMOTION</code> signed by surviving authority. Implementations SHOULD surface <code>trust_boundary_event_id</code> prominently in audit output to distinguish trusted pre-compromise history from post-compromise uncertainty.</p>
+<h3 id="188-denial-of-service-considerations">18.8 Denial-of-Service Considerations</h3>
+<p>Implementations SHOULD set explicit limits for:</p>
+<ul>
+<li>maximum event byte size</li>
+<li>maximum payload nesting depth</li>
+<li>maximum lines processed per import batch</li>
+<li>maximum replay wall-clock budget before checkpoint fallback</li>
+</ul>
+<p>Malformed input MUST be rejected or quarantined deterministically, never silently coerced into valid state transitions.</p>
+<h3 id="189-cryptographic-agility">18.9 Cryptographic Agility</h3>
+<p>Profile A fixes SHA-256 and Ed25519 for interoperability. Future profiles SHOULD define migration events and dual-signing windows for algorithm transition (including post-quantum profiles) without breaking append-only verification semantics.</p>
+<hr>
+<h2 id="19-extension-registry-process">19. Extension Registry Process</h2>
+<p>Custom event type and future core-type promotion workflow is defined in:</p>
+<ul>
+<li><code>docs/EXTENSION_REGISTRY.md</code></li>
+</ul>
+<p>This process is the canonical governance path for extension naming, acceptance, and promotion.</p>
+<hr>
+<h2 id="20-iana-style-considerations">20. IANA-Style Considerations</h2>
+<p>A standards-track stub (media type, URN, registry concepts) is maintained in:</p>
+<ul>
+<li><code>docs/IANA_CONSIDERATIONS.md</code></li>
+</ul>
+<p>This is informational for future interoperability and does not override v1.0 profile authority.</p>
+<hr>
+<p><em>Derived from <code>PROTOCOL_PROFILE.txt</code> (frozen normative spec). In case of conflict, the profile wins.</em></p></article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Apache 2.0. <a href="https://github.com/provara-protocol/provara">GitHub</a>. Anthropic-free zone.</p>
+  </div>
+</footer>
 </body>
 </html>
