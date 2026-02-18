@@ -1,15 +1,51 @@
 {
-  "name": "provara",
+  "name": "@provara/core",
   "version": "1.0.0",
-  "description": "Provara Protocol v1.0 — TypeScript implementation",
+  "description": "Self-sovereign cryptographic event logs — TypeScript implementation of Provara Protocol v1.0",
   "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "exports": {
-    ".": "./dist/src/index.js"
+    ".": {
+      "import": "./dist/src/index.js",
+      "types": "./dist/src/index.d.ts"
+    }
   },
   "scripts": {
     "build": "tsc",
     "test": "npm run build && node --test dist/tests/*.test.js",
     "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/provara-protocol/provara.git",
+    "directory": "provara-ts"
+  },
+  "homepage": "https://github.com/provara-protocol/provara/tree/main/provara-ts#readme",
+  "bugs": {
+    "url": "https://github.com/provara-protocol/provara/issues"
+  },
+  "keywords": [
+    "provara",
+    "cryptography",
+    "ed25519",
+    "event-log",
+    "canonical-json",
+    "rfc8785",
+    "jcs",
+    "merkle",
+    "scitt",
+    "mcp",
+    "sovereign"
+  ],
+  "license": "Apache-2.0",
+  "files": [
+    "dist/src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "devDependencies": {
     "@types/node": "^25.2.3",

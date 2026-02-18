@@ -18,6 +18,7 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_DIR = REPO_ROOT / "src"
 RUST_DIR = REPO_ROOT / "provara-rs"
+TS_DIR = REPO_ROOT / "provara-ts"
 RUST_BRIDGE_PKG = "provara-core"
 RUST_BRIDGE_BIN = "cross_impl"
 CANONICAL_VECTORS = REPO_ROOT / "test_vectors" / "canonical_conformance.json"
@@ -158,6 +159,139 @@ def _canonical_conformance() -> None:
             raise AssertionError(f"Rust canonical mismatch for {vector['id']}")
 
 
+def _ts_available() -> bool:
+    """Return True if provara-ts has been built (dist/src/index.js exists)."""
+    return (TS_DIR / "dist" / "src" / "index.js").exists()
+
+
+def _node_esm(script: str) -> str:
+    """Run an inline ESM Node.js script via stdin from the provara-ts/ directory.
+
+    Uses explicit bytes I/O with UTF-8 to avoid Windows CP-1252 codec issues
+    when Node.js outputs non-ASCII characters (e.g., £, €) to stdout.
+    """
+    proc = subprocess.run(
+        ["node", "--input-type=module"],
+        input=script.encode("utf-8"),
+        capture_output=True,
+        cwd=str(TS_DIR),
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"Node.js script failed:\n{proc.stderr.decode('utf-8', errors='replace').strip()}"
+        )
+    return proc.stdout.decode("utf-8")
+
+
+def _ts_canonical_conformance() -> None:
+    """Verify TS canonical JSON output matches Python byte-for-byte on all vectors."""
+    suite = json.loads(CANONICAL_VECTORS.read_text(encoding="utf-8"))
+    for vector in suite.get("vectors", []):
+        vid = vector["id"]
+        expected = bytes.fromhex(vector["expected_hex"]).decode("utf-8")
+
+        if vid == "number_formatting_minus_zero":
+            # JSON.parse collapses -0.0 → +0; must feed raw text to canonicalizeRaw
+            raw = '{"minus_zero":-0.0,"zero":0.0}'
+            script = (
+                'import { canonicalizeRaw } from "./dist/src/index.js";\n'
+                f'process.stdout.write(canonicalizeRaw({json.dumps(raw)}));\n'
+            )
+        else:
+            input_json = json.dumps(vector["input"], separators=(",", ":"))
+            script = (
+                'import { canonicalize } from "./dist/src/index.js";\n'
+                f'const v = JSON.parse({json.dumps(input_json)});\n'
+                "process.stdout.write(canonicalize(v));\n"
+            )
+
+        ts_result = _node_esm(script).strip()
+        if ts_result != expected:
+            raise AssertionError(
+                f"TS canonical mismatch for {vid}:\n"
+                f"  expected: {expected!r}\n"
+                f"  got:      {ts_result!r}"
+            )
+
+
+def _ts_verify_vault(vault: Path) -> None:
+    """Have the TS verifyVault function check a Python-created vault."""
+    vault_posix = vault.as_posix()
+    script = (
+        'import { verifyVault } from "./dist/src/index.js";\n'
+        f'const r = verifyVault({json.dumps(vault_posix)});\n'
+        "if (r.invalid > 0 || !r.chainsOk) {\n"
+        "  process.stderr.write(JSON.stringify(r.errors));\n"
+        "  process.exit(1);\n"
+        "}\n"
+        'process.stdout.write("ok");\n'
+    )
+    out = _node_esm(script).strip()
+    if out != "ok":
+        raise AssertionError(f"TS vault verification failed: {out}")
+
+
+def _ts_signing_interop() -> None:
+    """
+    Python signs canonical bytes of an event → TS verifies.
+    TS signs the same event → Python verifies.
+    Both implementations must produce signatures the other can accept.
+    """
+    private_key = Ed25519PrivateKey.generate()
+    priv_b64 = base64.b64encode(
+        private_key.private_bytes(
+            serialization.Encoding.Raw,
+            serialization.PrivateFormat.Raw,
+            serialization.NoEncryption(),
+        )
+    ).decode()
+    pub_b64 = base64.b64encode(
+        private_key.public_key().public_bytes(
+            serialization.Encoding.Raw,
+            serialization.PublicFormat.Raw,
+        )
+    ).decode()
+
+    event: dict[str, Any] = {
+        "type": "OBSERVATION",
+        "actor": "interop_actor",
+        "prev_event_hash": None,
+        "timestamp_utc": "2026-01-01T00:00:00+00:00",
+        "payload": {"subject": "x", "predicate": "y", "value": 1},
+        "event_id": "evt_interop_test_id",
+        "actor_key_id": "bp1_interop",
+    }
+    event_json = json.dumps(event, separators=(",", ":"))
+
+    # Python signs canonical_bytes(event) directly (no SHA-256 prehash)
+    py_sig = base64.b64encode(private_key.sign(canonical_bytes(event))).decode()
+
+    # TS verifies Python signature
+    verify_script = (
+        'import { verifyBytes, canonicalBytes } from "./dist/src/index.js";\n'
+        f'const event = JSON.parse({json.dumps(event_json)});\n'
+        f'const sig = {json.dumps(py_sig)};\n'
+        f'const pub = {json.dumps(pub_b64)};\n'
+        "process.stdout.write(verifyBytes(canonicalBytes(event), sig, pub) ? 'ok' : 'fail');\n"
+    )
+    if _node_esm(verify_script).strip() != "ok":
+        raise AssertionError("TS failed to verify Python-signed event")
+
+    # TS signs, Python verifies
+    sign_script = (
+        'import { signBytes, canonicalBytes } from "./dist/src/index.js";\n'
+        f'const event = JSON.parse({json.dumps(event_json)});\n'
+        f'const priv = {json.dumps(priv_b64)};\n'
+        "process.stdout.write(signBytes(canonicalBytes(event), priv));\n"
+    )
+    ts_sig_b64 = _node_esm(sign_script).strip()
+    ts_sig_bytes = base64.b64decode(ts_sig_b64)
+    try:
+        private_key.public_key().verify(ts_sig_bytes, canonical_bytes(event))
+    except Exception as exc:
+        raise AssertionError(f"Python failed to verify TS-signed event: {exc}") from exc
+
+
 def run_all() -> list[Check]:
     checks: list[Check] = []
 
@@ -179,6 +313,13 @@ def run_all() -> list[Check]:
             checks.append(Check("python creates -> rust verifies", True))
         except Exception as exc:
             checks.append(Check("python creates -> rust verifies", False, str(exc)))
+
+        if _ts_available():
+            try:
+                _ts_verify_vault(py_vault)
+                checks.append(Check("python creates -> typescript verifies", True))
+            except Exception as exc:
+                checks.append(Check("python creates -> typescript verifies", False, str(exc)))
 
         rust_vault = tmp / "vault_rust"
         rust_vault.mkdir(parents=True, exist_ok=True)
@@ -202,7 +343,24 @@ def run_all() -> list[Check]:
     except Exception as exc:
         checks.append(Check("same event signed by python+rust -> identical signature", False, str(exc)))
 
-    checks.append(Check("typescript interoperability", True, "stubbed until provara-ts lands"))
+    if _ts_available():
+        try:
+            _ts_canonical_conformance()
+            checks.append(Check("canonical JSON conformance (python/typescript)", True))
+        except Exception as exc:
+            checks.append(Check("canonical JSON conformance (python/typescript)", False, str(exc)))
+
+        try:
+            _ts_signing_interop()
+            checks.append(Check("python/typescript signing interoperability", True))
+        except Exception as exc:
+            checks.append(Check("python/typescript signing interoperability", False, str(exc)))
+    else:
+        checks.append(Check(
+            "typescript interoperability",
+            False,
+            "provara-ts not built — run: cd provara-ts && npm ci && npm run build",
+        ))
 
     return checks
 
