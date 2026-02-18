@@ -43,12 +43,15 @@ def vault(tmp_path: Path) -> Path:
 
 @pytest.fixture()
 def tampered_vault(vault: Path) -> Path:
-    """A vault with a truncated Merkle root (breaks validate_vault_structure)."""
-    mr_file = vault / "merkle_root.txt"
-    if mr_file.exists():
-        mr_file.write_text("0000000000000000000000000000000000000000000000000000000000000000")
-    else:
-        mr_file.write_text("0000000000000000000000000000000000000000000000000000000000000000")
+    """A vault with a tampered event payload (breaks Ed25519 signature verification)."""
+    events_file = vault / "events" / "events.ndjson"
+    lines = events_file.read_text(encoding="utf-8").splitlines()
+    assert lines
+    first = json.loads(lines[0])
+    # Inject a field without re-signing — Ed25519 sig will no longer match payload
+    first.setdefault("data", {})["__tampered__"] = True
+    lines[0] = json.dumps(first, separators=(",", ":"), sort_keys=True)
+    events_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return vault
 
 
