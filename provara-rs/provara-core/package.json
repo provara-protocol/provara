@@ -1,0 +1,20 @@
+{
+  "name": "provara-core-wasm",
+  "version": "0.1.0",
+  "description": "Provara Protocol v1.0 WASM bindings",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/provara-protocol/provara"
+  },
+  "files": [
+    "provara_core_bg.wasm",
+    "provara_core.js",
+    "provara_core.d.ts"
+  ],
+  "module": "provara_core.js",
+  "types": "provara_core.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

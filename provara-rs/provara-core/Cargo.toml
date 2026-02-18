@@ -1,0 +1,53 @@
+[package]
+name = "provara-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+description = "Provara Protocol v1.0 core implementation - Ed25519 signing, SHA-256 hashing, event creation, chain validation"
+keywords = ["provara", "cryptographic", "event-log", "ed25519", "verifiable"]
+categories = ["cryptography", "data-structures"]
+
+[dependencies]
+jcs-rs = { path = "../jcs-rs", version = "0.1.0" }
+
+# Crypto dependencies (RustCrypto)
+ed25519-dalek = { workspace = true }
+sha2 = { workspace = true }
+signature = { workspace = true }
+
+# JSON handling
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Error handling
+thiserror = { workspace = true }
+
+# Base64 encoding
+base64 = { workspace = true }
+
+# Hex encoding
+hex = { workspace = true }
+
+# Random number generation
+rand_core = "0.6"
+
+# Optional WASM support
+wasm-bindgen = { workspace = true, optional = true }
+js-sys = { workspace = true, optional = true }
+getrandom = { workspace = true, optional = true }
+
+[dev-dependencies]
+rand = "0.8"
+serde_json = { workspace = true }
+hex = { workspace = true }
+
+[features]
+default = []
+wasm = ["wasm-bindgen", "js-sys", "getrandom", "jcs-rs/wasm"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]

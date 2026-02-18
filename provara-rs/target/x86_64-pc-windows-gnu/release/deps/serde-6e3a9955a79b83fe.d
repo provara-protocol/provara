@@ -1,0 +1,14 @@
+C:\provara\provara-rs\target\x86_64-pc-windows-gnu\release\deps\serde-6e3a9955a79b83fe.d: C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\provara\provara-rs\target\x86_64-pc-windows-gnu\release\build\serde-7045c947479a211b\out/private.rs
+
+C:\provara\provara-rs\target\x86_64-pc-windows-gnu\release\deps\libserde-6e3a9955a79b83fe.rlib: C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\provara\provara-rs\target\x86_64-pc-windows-gnu\release\build\serde-7045c947479a211b\out/private.rs
+
+C:\provara\provara-rs\target\x86_64-pc-windows-gnu\release\deps\libserde-6e3a9955a79b83fe.rmeta: C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\provara\provara-rs\target\x86_64-pc-windows-gnu\release\build\serde-7045c947479a211b\out/private.rs
+
+C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs:
+C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs:
+C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs:
+C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs:
+C:\Users\c8324\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs:
+C:\provara\provara-rs\target\x86_64-pc-windows-gnu\release\build\serde-7045c947479a211b\out/private.rs:
+
+# env-dep:OUT_DIR=C:\\provara\\provara-rs\\target\\x86_64-pc-windows-gnu\\release\\build\\serde-7045c947479a211b\\out
