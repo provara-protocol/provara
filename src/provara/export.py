@@ -17,12 +17,12 @@ import json
 import base64
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from .canonical_json import canonical_dumps, canonical_hash
-from .sync_v0 import load_events, load_keys_registry
+from .sync_v0 import load_events
 from .backpack_integrity import merkle_root_hex
-from .backpack_signing import verify_event_signature
+from .backpack_signing import load_keys_registry, verify_event_signature
 from .scitt import SIGNED_STATEMENT_TYPE, RECEIPT_TYPE
 
 
@@ -57,11 +57,11 @@ def export_vault_scitt_compat(
     receipts = [e for e in all_events if e.get("type") == RECEIPT_TYPE]
     
     # Build receipt lookup by statement_event_id
-    receipt_by_statement = {}
-    for receipt in receipts:
-        stmt_id = receipt.get("payload", {}).get("statement_event_id")
+    receipt_by_statement: Dict[str, Dict[str, Any]] = {}
+    for receipt_event in receipts:
+        stmt_id = receipt_event.get("payload", {}).get("statement_event_id")
         if stmt_id:
-            receipt_by_statement[stmt_id] = receipt
+            receipt_by_statement[str(stmt_id)] = receipt_event
     
     # Export each statement with its proof
     exported_count = 0
@@ -78,7 +78,9 @@ def export_vault_scitt_compat(
         merkle_proof = _build_merkle_proof(vault_path, stmt)
         
         # Get receipt if exists
-        receipt = receipt_by_statement.get(event_id)
+        receipt: Dict[str, Any] | None = (
+            receipt_by_statement.get(event_id) if isinstance(event_id, str) else None
+        )
         
         # Create export file
         export_data = {
@@ -228,31 +230,20 @@ def _build_merkle_proof(vault_path: Path, target_event: Dict[str, Any]) -> Dict[
 
 def _export_keys(keys_registry: Dict[str, Any]) -> Dict[str, Any]:
     """Export public keys from registry for verification."""
-    exported = {
+    exported: Dict[str, Any] = {
         "keys": [],
         "export_timestamp": datetime.now(timezone.utc).isoformat(),
     }
-
-    # load_keys_registry returns {key_id: {...}}; support both that form and a
-    # raw {"keys": [...]} shape for compatibility.
-    if "keys" in keys_registry and isinstance(keys_registry.get("keys"), list):
-        keys_iter = keys_registry.get("keys", [])
-    else:
-        keys_iter = []
-        for key_id, entry in keys_registry.items():
-            if isinstance(entry, dict):
-                normalized = dict(entry)
-                normalized.setdefault("key_id", key_id)
-                keys_iter.append(normalized)
-
-    for key_entry in keys_iter:
-        exported["keys"].append(
-            {
-                "key_id": key_entry.get("key_id"),
-                "public_key_b64": key_entry.get("public_key_b64"),
-                "algorithm": key_entry.get("algorithm", "Ed25519"),
-            }
-        )
+    
+    # load_keys_registry returns {key_id: {...}}
+    # Convert back to list format for export
+    for key_id, entry in keys_registry.items():
+        if isinstance(entry, dict):
+            exported["keys"].append({
+                "key_id": entry.get("key_id", key_id),
+                "public_key_b64": entry.get("public_key_b64"),
+                "algorithm": entry.get("algorithm", "Ed25519"),
+            })
     
     return exported
 
@@ -263,7 +254,7 @@ def _verify_export_bundle(output_dir: Path, original_statements: List[Dict[str, 
     
     Returns a verification report.
     """
-    report = {
+    report: Dict[str, Any] = {
         "verification_timestamp": datetime.now(timezone.utc).isoformat(),
         "checks": [],
         "overall_status": "PASS",
