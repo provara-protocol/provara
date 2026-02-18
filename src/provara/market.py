@@ -73,11 +73,16 @@ def _append_market_event(
     value: Dict[str, Any],
     actor: str,
 ) -> Dict[str, Any]:
-    # 1. Load keys
+    # 1. Load keys — handle both {"keys":[...]} and flat {kid: b64} formats
     import json
-    keys_data = json.loads(keyfile.read_text())
-    kid = list(keys_data.keys())[0]
-    priv = load_private_key_b64(keys_data[kid])
+    raw = json.loads(keyfile.read_text())
+    if "keys" in raw and isinstance(raw["keys"], list):
+        entry = raw["keys"][0]
+        kid = str(entry["key_id"])
+        priv = load_private_key_b64(str(entry["private_key_b64"]))
+    else:
+        kid = next(k for k in raw if k != "WARNING")
+        priv = load_private_key_b64(raw[kid])
 
     # 2. Find prev_hash
     events_file = vault_path / "events" / "events.ndjson"
