@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provara — Tamper-Evident Vaults for Memory That Outlives You</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+:root {
+  --pv-bg: #f5f2ea;
+  --pv-surface: #fffdf8;
+  --pv-ink: #1f2329;
+  --pv-ink-muted: #4a535c;
+  --pv-rule: #d2c9bb;
+  --pv-accent: #1d4e63;
+  --pv-success: #1f6b4f;
+  --pv-warning: #8a5b21;
+  --pv-danger: #8a2f2f;
+  --pv-focus: #9a7d3a;
+
+  --pv-font-serif: "Source Serif 4", "Iowan Old Style", serif;
+  --pv-font-sans: "IBM Plex Sans", "Segoe UI", sans-serif;
+  --pv-font-mono: "IBM Plex Mono", "Consolas", monospace;
+
+  --pv-text-xs: 0.75rem;
+  --pv-text-sm: 0.875rem;
+  --pv-text-md: 1rem;
+  --pv-text-lg: 1.125rem;
+  --pv-text-xl: 1.375rem;
+  --pv-text-2xl: 1.875rem;
+
+  --pv-space-1: 4px;
+  --pv-space-2: 8px;
+  --pv-space-3: 12px;
+  --pv-space-4: 16px;
+  --pv-space-6: 24px;
+  --pv-space-8: 32px;
+  --pv-space-12: 48px;
+  --pv-space-16: 64px;
+
+  --pv-max-prose: 72ch;
+  --pv-max-tech: 96ch;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--pv-bg);
+  color: var(--pv-ink);
+  font-family: var(--pv-font-serif);
+  line-height: 1.55;
+}
+
+a {
+  color: var(--pv-accent);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--pv-focus);
+  outline-offset: 2px;
+}
+
+.pv-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--pv-space-12) var(--pv-space-6);
+}
+
+.pv-topbar {
+  border-bottom: 1px solid var(--pv-rule);
+  padding-bottom: var(--pv-space-4);
+  margin-bottom: var(--pv-space-8);
+  font-family: var(--pv-font-sans);
+  font-size: var(--pv-text-sm);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--pv-space-4);
+}
+
+.pv-title {
+  font-family: var(--pv-font-mono);
+  font-size: clamp(1.4rem, 2.2vw, 2rem);
+  line-height: 1.2;
+  margin: 0 0 var(--pv-space-3);
+}
+
+.pv-subtitle {
+  max-width: var(--pv-max-prose);
+  color: var(--pv-ink-muted);
+  margin: 0 0 var(--pv-space-8);
+}
+
+.pv-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr;
+  gap: var(--pv-space-8);
+}
+
+.pv-toc {
+  position: sticky;
+  top: var(--pv-space-6);
+  align-self: start;
+  background: var(--pv-surface);
+  border: 1px solid var(--pv-rule);
+  padding: var(--pv-space-4);
+}
+
+.pv-toc h2 {
+  margin: 0 0 var(--pv-space-3);
+  font-family: var(--pv-font-sans);
+  font-size: var(--pv-text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pv-toc ol {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: var(--pv-text-sm);
+}
+
+.pv-toc li {
+  margin: var(--pv-space-2) 0;
+}
+
+.pv-main section {
+  margin-bottom: var(--pv-space-12);
+}
+
+.pv-main h2 {
+  margin: 0 0 var(--pv-space-3);
+  font-family: var(--pv-font-sans);
+  font-size: var(--pv-text-xl);
+}
+
+.pv-main p {
+  max-width: var(--pv-max-prose);
+}
+
+.pv-badge {
+  display: inline-block;
+  margin-right: var(--pv-space-2);
+  margin-bottom: var(--pv-space-2);
+  padding: 2px 8px;
+  border: 1px solid var(--pv-rule);
+  background: #f0ebe1;
+  font-family: var(--pv-font-mono);
+  font-size: var(--pv-text-xs);
+}
+
+.pv-callout {
+  border-left: 4px solid var(--pv-rule);
+  padding: var(--pv-space-3) var(--pv-space-4);
+  background: var(--pv-surface);
+  margin: var(--pv-space-4) 0;
+}
+
+.pv-callout.must {
+  border-left-color: var(--pv-danger);
+}
+
+.pv-callout.should {
+  border-left-color: var(--pv-warning);
+}
+
+.pv-callout.may {
+  border-left-color: var(--pv-success);
+}
+
+.pv-protocol-block {
+  background: #1f2329;
+  color: #f5f5f5;
+  border: 1px solid #3b4148;
+  padding: var(--pv-space-4);
+  overflow: auto;
+  font-family: var(--pv-font-mono);
+  font-size: var(--pv-text-sm);
+  max-width: var(--pv-max-tech);
+}
+
+.pv-status-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: var(--pv-space-3);
+  max-width: var(--pv-max-tech);
+}
+
+.pv-status {
+  border: 1px solid var(--pv-rule);
+  background: var(--pv-surface);
+  padding: var(--pv-space-3);
+  font-family: var(--pv-font-sans);
+  font-size: var(--pv-text-sm);
+}
+
+.pv-status strong {
+  display: block;
+  font-family: var(--pv-font-mono);
+  margin-bottom: var(--pv-space-1);
+}
+
+@media (max-width: 900px) {
+  .pv-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pv-toc {
+    position: static;
+  }
+}
+/* Provara.dev specific styles */
+
+.pv-hero {
+  margin-bottom: var(--pv-space-16);
+}
+
+.pv-ctas {
+  display: flex;
+  gap: var(--pv-space-4);
+  flex-wrap: wrap;
+  margin-top: var(--pv-space-8);
+}
+
+.pv-btn {
+  display: inline-block;
+  padding: var(--pv-space-3) var(--pv-space-6);
+  font-family: var(--pv-font-sans);
+  font-size: var(--pv-text-sm);
+  border: 1px solid var(--pv-rule);
+  border-radius: 2px;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pv-btn-primary {
+  background: var(--pv-accent);
+  color: white;
+  border-color: var(--pv-accent);
+}
+
+.pv-btn-primary:hover {
+  background: #153546;
+}
+
+.pv-btn-secondary {
+  background: var(--pv-surface);
+  color: var(--pv-accent);
+}
+
+.pv-btn-secondary:hover {
+  background: var(--pv-bg);
+}
+
+.pv-callout {
+  max-width: var(--pv-max-prose);
+  padding: var(--pv-space-6);
+  border-left: 3px solid var(--pv-accent);
+  background: var(--pv-surface);
+  margin-bottom: var(--pv-space-12);
+  line-height: 1.7;
+}
+
+.pv-normative {
+  border-left-color: var(--pv-success);
+}
+
+.pv-normative strong {
+  color: var(--pv-success);
+}
+
+.pv-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--pv-space-8);
+  margin-top: var(--pv-space-6);
+}
+
+.pv-feature {
+  padding: var(--pv-space-6);
+  border: 1px solid var(--pv-rule);
+  background: var(--pv-surface);
+}
+
+.pv-feature h3 {
+  margin: 0 0 var(--pv-space-3) 0;
+  font-size: var(--pv-text-lg);
+  font-family: var(--pv-font-sans);
+}
+
+.pv-feature p {
+  margin: 0;
+  color: var(--pv-ink-muted);
+  font-size: var(--pv-text-sm);
+  line-height: 1.6;
+}
+
+.pv-facts {
+  margin: var(--pv-space-12) 0;
+}
+
+.pv-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--pv-space-4);
+  font-size: var(--pv-text-sm);
+}
+
+.pv-table tr {
+  border-bottom: 1px solid var(--pv-rule);
+}
+
+.pv-table tr:last-child {
+  border-bottom: none;
+}
+
+.pv-table td,
+.pv-table th {
+  padding: var(--pv-space-3) var(--pv-space-4);
+  text-align: left;
+}
+
+.pv-table th {
+  background: var(--pv-bg);
+  font-family: var(--pv-font-sans);
+  font-weight: bold;
+  font-size: var(--pv-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pv-table code {
+  font-family: var(--pv-font-mono);
+  font-size: var(--pv-text-xs);
+  background: var(--pv-bg);
+  padding: 2px 4px;
+  border-radius: 1px;
+}
+
+.pv-use-cases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--pv-space-8);
+  margin-top: var(--pv-space-6);
+}
+
+.pv-use-case {
+  padding: var(--pv-space-6);
+  border: 1px solid var(--pv-rule);
+  background: var(--pv-surface);
+}
+
+.pv-use-case h3 {
+  margin: 0 0 var(--pv-space-3) 0;
+  font-size: var(--pv-text-md);
+  font-family: var(--pv-font-sans);
+}
+
+.pv-use-case p {
+  margin: 0;
+  color: var(--pv-ink-muted);
+  font-size: var(--pv-text-sm);
+  line-height: 1.6;
+}
+
+.pv-definition-list {
+  margin: var(--pv-space-6) 0;
+}
+
+.pv-definition-list dt {
+  margin-top: var(--pv-space-6);
+  font-family: var(--pv-font-sans);
+  font-weight: bold;
+  font-size: var(--pv-text-sm);
+}
+
+.pv-definition-list dd {
+  margin: var(--pv-space-2) 0 0 var(--pv-space-4);
+  color: var(--pv-ink-muted);
+  font-size: var(--pv-text-sm);
+  line-height: 1.6;
+}
+
+.pv-cta-section {
+  margin: var(--pv-space-16) 0 var(--pv-space-12) 0;
+  padding: var(--pv-space-8);
+  background: var(--pv-surface);
+  border: 1px solid var(--pv-rule);
+  max-width: var(--pv-max-prose);
+}
+
+.pv-cta-section h2 {
+  margin-top: 0;
+}
+
+.pv-footer {
+  margin-top: var(--pv-space-16);
+  padding: var(--pv-space-8) 0;
+  border-top: 1px solid var(--pv-rule);
+  background: var(--pv-bg);
+  font-size: var(--pv-text-sm);
+  color: var(--pv-ink-muted);
+}
+
+.pv-footer p {
+  margin: var(--pv-space-2) 0;
+}
+
+.pv-footer a {
+  color: var(--pv-accent);
+}
+
+.pv-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pv-ctas {
+    flex-direction: column;
+  }
+  
+  .pv-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .pv-feature-grid,
+  .pv-use-cases {
+    grid-template-columns: 1fr;
+  }
+
+  .pv-table {
+    font-size: var(--pv-text-xs);
+  }
+
+  .pv-table td,
+  .pv-table th {
+    padding: var(--pv-space-2) var(--pv-space-3);
+  }
+}
+    </style>
+</head>
+<body>
+
+<div class="pv-shell">
+
+    <header class="pv-topbar">
+        <nav style="display: flex; gap: var(--pv-space-6); align-items: center;">
+            <a href="/" style="font-family: var(--pv-font-mono); font-weight: 600; color: var(--pv-ink); text-decoration: none;">Provara</a>
+            <a href="/spec/" style="color: var(--pv-ink-muted); text-decoration: none;">Spec</a>
+            <a href="/docs/" style="color: var(--pv-ink-muted); text-decoration: none;">Docs</a>
+            <a href="/playground/" style="color: var(--pv-ink-muted); text-decoration: none;">Playground</a>
+            <a href="/articles/" style="color: var(--pv-ink-muted); text-decoration: none;">Articles</a>
+        </nav>
+        <div style="display: flex; gap: var(--pv-space-4); align-items: center;">
+            <a href="https://github.com/provara-protocol/provara" style="color: var(--pv-ink-muted); text-decoration: none; font-family: var(--pv-font-mono); font-size: var(--pv-text-xs);">GitHub</a>
+            <a href="https://pypi.org/project/provara-protocol/" style="color: var(--pv-ink-muted); text-decoration: none; font-family: var(--pv-font-mono); font-size: var(--pv-text-xs);">PyPI</a>
+        </div>
+    </header>
+
+    <section class="pv-hero">
+        <h1 class="pv-title" style="font-size: clamp(1.6rem, 3vw, 2.4rem);">Tamper-evident vaults for memory that outlives you.</h1>
+        <p class="pv-subtitle" style="font-size: var(--pv-text-lg); line-height: 1.7;">
+            Provara is a self-sovereign cryptographic event log. Ed25519 signatures. SHA-256 chains.
+            Canonical JSON. No server. No blockchain. No infrastructure beyond files on a disk.
+        </p>
+        <div class="pv-ctas">
+            <a href="/docs/getting-started/" class="pv-btn pv-btn-primary">Get Started</a>
+            <a href="/spec/" class="pv-btn pv-btn-secondary">Read the Spec</a>
+            <a href="/playground/" class="pv-btn pv-btn-secondary">Try the Playground</a>
+        </div>
+    </section>
+
+    <div class="pv-callout pv-normative" style="font-family: var(--pv-font-mono); font-size: var(--pv-text-sm);">
+        <strong>$ pip install provara-protocol</strong>
+        <br>
+        <span style="color: var(--pv-ink-muted);"># One dependency. Python 3.10+. Apache 2.0.</span>
+    </div>
+
+    <section style="margin-bottom: var(--pv-space-16);">
+        <h2 style="font-family: var(--pv-font-sans); font-size: var(--pv-text-xl); margin-bottom: var(--pv-space-4);">The Problem</h2>
+        <p style="max-width: var(--pv-max-prose); line-height: 1.8;">
+            Digital records are mutable by default. Databases can be silently edited. Cloud logs can be deleted. 
+            AI agents operate with memory they don't own and can't verify. When what happened matters — 
+            for compliance, for safety, for truth — you need a record that is harder to corrupt than the events themselves.
+        </p>
+        <div class="pv-callout" style="margin-top: var(--pv-space-6); max-width: var(--pv-max-prose);">
+            <p style="margin: 0; font-style: italic; line-height: 1.7;">
+                "Truth is not merged. Evidence is merged. Truth is recomputed."
+            </p>
+        </div>
+    </section>
+
+    <section style="margin-bottom: var(--pv-space-16);">
+        <h2 style="font-family: var(--pv-font-sans); font-size: var(--pv-text-xl); margin-bottom: var(--pv-space-3);">What Provara Does</h2>
+        <p style="max-width: var(--pv-max-prose); color: var(--pv-ink-muted); margin-bottom: var(--pv-space-6);">
+            A cryptographic evidence substrate. Not a database. Not a blockchain. Infrastructure for proof.
+        </p>
+        <div class="pv-feature-grid">
+            <div class="pv-feature">
+                <h3>Append-Only Event Chain</h3>
+                <p>Every event is SHA-256 chained to the previous one. Break any link and the math catches it. Deletion is an event, not an erasure — the full history is always available for re-evaluation.</p>
+            </div>
+            <div class="pv-feature">
+                <h3>Ed25519 Signatures</h3>
+                <p>Every event is cryptographically signed. Authorship is provable. Accountability is structural, not social. You sign your observations the way you'd sign a legal document.</p>
+            </div>
+            <div class="pv-feature">
+                <h3>Zero Infrastructure</h3>
+                <p>Vaults are directories of JSON files. No server, no daemon, no Docker, no cloud account. Works air-gapped. Works on a USB drive. Works in 2076 with nothing but a text editor.</p>
+            </div>
+            <div class="pv-feature">
+                <h3>Deterministic Reducer</h3>
+                <p>Same events in, same state hash out. Any compliant implementation processing the same log produces byte-identical results. Verification is math, not trust.</p>
+            </div>
+            <div class="pv-feature">
+                <h3>Merkle-Sealed Backpacks</h3>
+                <p>File attachments are integrity-sealed with a Merkle tree. Every file path, hash, and size is committed. Phantom files and path traversal are structurally impossible.</p>
+            </div>
+            <div class="pv-feature">
+                <h3>MCP Server</h3>
+                <p>First-class integration with AI agents via Model Context Protocol. Every tool call logged. Every decision traceable. Accountable memory for systems that think.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="pv-facts">
+        <h2 style="font-family: var(--pv-font-sans); font-size: var(--pv-text-xl); margin-bottom: var(--pv-space-4);">Protocol Profile</h2>
+        <table class="pv-table">
+            <tr>
+                <th style="width: 35%;">Parameter</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>Profile ID</td>
+                <td><code>PROVARA-1.0_PROFILE_A</code></td>
+            </tr>
+            <tr>
+                <td>Hash</td>
+                <td>SHA-256 (FIPS 180-4)</td>
+            </tr>
+            <tr>
+                <td>Signature</td>
+                <td>Ed25519 (RFC 8032)</td>
+            </tr>
+            <tr>
+                <td>Serialization</td>
+                <td>RFC 8785 Canonical JSON</td>
+            </tr>
+            <tr>
+                <td>Event IDs</td>
+                <td>Content-addressed <code>evt_</code> + SHA-256[:24]</td>
+            </tr>
+            <tr>
+                <td>Dependencies</td>
+                <td><code>cryptography>=41.0</code> (single dependency)</td>
+            </tr>
+            <tr>
+                <td>License</td>
+                <td>Apache 2.0</td>
+            </tr>
+            <tr>
+                <td>Compliance Tests</td>
+                <td>17 normative tests + 7 test vectors</td>
+            </tr>
+            <tr>
+                <td>Readability Horizon</td>
+                <td>50 years (UTF-8 JSON, no proprietary formats)</td>
+            </tr>
+        </table>
+    </section>
+
+    <section style="margin-bottom: var(--pv-space-16);">
+        <h2 style="font-family: var(--pv-font-sans); font-size: var(--pv-text-xl); margin-bottom: var(--pv-space-3);">Who Uses This</h2>
+        <div class="pv-use-cases">
+            <div class="pv-use-case">
+                <h3>AI Agent Memory</h3>
+                <p>Give autonomous agents an external, tamper-evident memory they can't silently edit. Every decision logged, every tool call traceable, every reasoning step accountable.</p>
+            </div>
+            <div class="pv-use-case">
+                <h3>Compliance &amp; Audit</h3>
+                <p>Immutable event logs for regulated environments. Prove what happened, when, and by whom — with cryptographic evidence that survives organizational turnover.</p>
+            </div>
+            <div class="pv-use-case">
+                <h3>Personal Sovereignty</h3>
+                <p>Your observations, signed with your keys, in files you control. No cloud required. No platform dependency. Records that outlast every service you use today.</p>
+            </div>
+            <div class="pv-use-case">
+                <h3>Whistleblower Evidence</h3>
+                <p>Establish proof before the cover-up. A signed, timestamped, chained record that can't be retroactively altered — even by the person who created it.</p>
+            </div>
+        </div>
+    </section>
+
+    <section style="margin-bottom: var(--pv-space-16);">
+        <h2 style="font-family: var(--pv-font-sans); font-size: var(--pv-text-xl); margin-bottom: var(--pv-space-4);">Design Principles</h2>
+        <dl class="pv-definition-list" style="max-width: var(--pv-max-prose);">
+            <dt>Evidence, not truth</dt>
+            <dd>Provara contains observations, not conclusions. Evidence can be wrong, but it must be tamper-evident. Integrity, not accuracy, is the protocol's job.</dd>
+
+            <dt>Deletion is an event, not an erasure</dt>
+            <dd>Append-only by default. You can mark something as retracted, but the original record persists. The full chain is always available for re-evaluation.</dd>
+
+            <dt>Trust math, not institutions</dt>
+            <dd>Ed25519 and SHA-256 don't have policy teams, acquisitions, or terms of service changes. The protocol is ownerless. Anyone can reimplement from the spec.</dd>
+
+            <dt>Sovereignty means nothing if you can't leave</dt>
+            <dd>Vaults are portable directories. No phone-home. No required network. Optional integrations are fine — the word "optional" is load-bearing.</dd>
+
+            <dt>The spec outlives the code</dt>
+            <dd>The protocol is the product. Implementations come and go. UTF-8 JSON is readable with <code>cat</code> and <code>jq</code>. That's the 50-year bet.</dd>
+        </dl>
+    </section>
+
+    <section id="quickstart" style="margin-bottom: var(--pv-space-16);">
+        <h2 style="font-family: var(--pv-font-sans); font-size: var(--pv-text-xl); margin-bottom: var(--pv-space-4);">Quickstart</h2>
+        <div class="pv-protocol-block" style="max-width: var(--pv-max-tech);">
+<pre style="margin: 0; font-family: var(--pv-font-mono); font-size: var(--pv-text-sm); line-height: 1.6;">
+<span style="color: #8b949e;"># Install</span>
+pip install provara-protocol
+
+<span style="color: #8b949e;"># Create a vault</span>
+provara init my-vault --name "Observation Log"
+
+<span style="color: #8b949e;"># Append an event</span>
+provara observe my-vault \
+  --subject "sensor-7" \
+  --predicate "temperature_reading" \
+  --value "23.4" \
+  --confidence 0.95
+
+<span style="color: #8b949e;"># Verify the chain</span>
+provara verify my-vault
+
+<span style="color: #8b949e;"># Check state</span>
+provara status my-vault
+</pre>
+        </div>
+    </section>
+
+    <div class="pv-cta-section">
+        <h2 style="font-family: var(--pv-font-sans); font-size: var(--pv-text-xl); margin-bottom: var(--pv-space-3);">Start Building</h2>
+        <p style="color: var(--pv-ink-muted); margin-bottom: var(--pv-space-6); line-height: 1.7;">
+            Read the protocol spec, walk through the getting started guide, or try the interactive playground to see cryptographic chaining in your browser.
+        </p>
+        <div class="pv-ctas">
+            <a href="/spec/" class="pv-btn pv-btn-primary">Protocol Spec</a>
+            <a href="/docs/getting-started/" class="pv-btn pv-btn-secondary">Getting Started</a>
+            <a href="https://github.com/provara-protocol/provara" class="pv-btn pv-btn-secondary">View Source</a>
+        </div>
+    </div>
+
+    <footer class="pv-footer">
+        <p>
+            <a href="https://github.com/provara-protocol/provara">GitHub</a> · 
+            <a href="https://pypi.org/project/provara-protocol/">PyPI</a> · 
+            <a href="/docs/">API Docs</a> · 
+            <a href="/spec/">Spec</a> ·
+            <a href="/playground/">Playground</a>
+        </p>
+        <p>© 2026 <a href="https://huntinformationsystems.com">Hunt Information Systems LLC</a> · Apache 2.0 License</p>
+        <p style="margin-top: var(--pv-space-3); font-family: var(--pv-font-mono); font-size: var(--pv-text-xs); color: var(--pv-rule);">
+            From Latin <em>probare</em> (to prove) + <em>vera</em> (true things).
+        </p>
+    </footer>
+
+</div>
+
+</body>
+</html>
