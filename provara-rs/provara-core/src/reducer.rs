@@ -1,7 +1,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, Map, json};
-use jcs_rs::{canonical_hash_hex, canonical_to_string};
+use jcs_rs::canonical_to_string;
+
+use crate::compute_state_hash;
 
 const REDUCER_NAME: &str = "SovereignReducerV0";
 const REDUCER_VERSION: &str = "0.2.0";
@@ -341,7 +343,7 @@ impl SovereignReducerV0 {
             },
         });
         
-        self.state.metadata.state_hash = Some(canonical_hash_hex(&hashable).unwrap_or_default());
+        self.state.metadata.state_hash = Some(compute_state_hash(&hashable).unwrap_or_default());
     }
 }
 

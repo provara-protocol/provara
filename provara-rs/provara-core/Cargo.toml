@@ -12,7 +12,7 @@ keywords = ["provara", "cryptographic", "event-log", "ed25519", "verifiable"]
 categories = ["cryptography", "data-structures"]
 
 [dependencies]
-jcs-rs = { path = "../jcs-rs", version = "0.1.0" }
+jcs-rs = { workspace = true }
 
 # Crypto dependencies (RustCrypto)
 ed25519-dalek = { workspace = true }
@@ -47,7 +47,7 @@ hex = { workspace = true }
 
 [features]
 default = []
-wasm = ["wasm-bindgen", "js-sys", "getrandom", "jcs-rs/wasm"]
+wasm = ["wasm-bindgen", "js-sys", "getrandom"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
