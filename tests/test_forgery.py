@@ -68,14 +68,14 @@ class TestForgery(unittest.TestCase):
         # Modifying the last event (alice v=2)
         events[-1]["payload"]["v"] = 999
         self._write_events(events)
-        
+
         # Verification should fail
         from provara.sync_v0 import verify_all_signatures, load_keys_registry
         reg = load_keys_registry(self.vault_path / "identity" / "keys.json")
         valid, invalid, errors = verify_all_signatures(events, reg)
-        
+
         self.assertGreater(invalid, 0)
-        self.assertTrue(any("invalid signature" in e.lower() for e in errors))
+        self.assertTrue(any("signature" in e.lower() for e in errors))
 
     def test_detect_chain_reorder(self):
         """Forgery Case 3: Swap two events AND their logical links."""

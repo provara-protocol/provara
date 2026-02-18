@@ -30,7 +30,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from provara.backpack_signing import BackpackKeypair, sign_event, verify_event_signature
 from provara.canonical_json import canonical_hash, canonical_dumps, canonical_bytes
-from provara.sync_v0 import verify_causal_chain, detect_forks, verify_all_signatures, load_keys_registry
+from provara.sync_v0 import verify_causal_chain, detect_forks, verify_all_signatures, load_keys_registry, BrokenCausalChainError
 from provara.checkpoint_v0 import create_checkpoint, verify_checkpoint
 from provara.backpack_integrity import merkle_root_hex
 
@@ -265,7 +265,7 @@ class TestAdversarial(unittest.TestCase):
         proper_chain = [self.genesis, e1, e2]
         self.assertTrue(verify_causal_chain(proper_chain, self.actor))
         
-        # Reordered chain (e2 before e1)
+        # Reordered chain (e.g. e2 before e1)
         reordered_chain = [self.genesis, e2, e1]
         self.assertFalse(verify_causal_chain(reordered_chain, self.actor))
 
@@ -355,7 +355,7 @@ class TestAdversarial(unittest.TestCase):
         
         # Chain with e1 duplicated
         chain_with_dup = [self.genesis, e1, e1]  # Same event appended twice
-        
+
         # The chain should either fail verification (due to prev_hash mismatch)
         # or be flagged by deduplication logic
         self.assertFalse(verify_causal_chain(chain_with_dup, self.actor))
@@ -378,7 +378,7 @@ class TestAdversarial(unittest.TestCase):
         }
         e_malicious["event_id"] = "evt_" + canonical_hash(e_malicious)[:24]
         e_malicious_signed = sign_event(e_malicious, self.kp_auth.private_key, self.kp_auth.key_id)
-        
+
         chain = [self.genesis, e_malicious_signed]
         self.assertFalse(verify_causal_chain(chain, self.actor))
 

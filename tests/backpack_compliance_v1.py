@@ -110,6 +110,7 @@ MANIFEST_META_FILES = frozenset({
     "manifest.json",
     "manifest.sig",
     "merkle_root.txt",
+    "identity/private_keys.json",
 })
 
 

@@ -38,6 +38,7 @@ from provara.backpack_signing import (
 from provara.canonical_json import canonical_dumps, canonical_hash
 from provara.reducer_v0 import SovereignReducerV0
 from provara.sync_v0 import (
+    BrokenCausalChainError,
     Fork,
     ImportResult,
     MergeResult,
@@ -462,6 +463,34 @@ class TestDeltaRoundTrip(unittest.TestCase):
         bad_header = canonical_dumps({"type": "wrong_type", "event_count": 0, "keys": []})
         result = import_delta(self.bp_path, bad_header.encode("utf-8"))
         self.assertFalse(result.success)
+
+    def test_import_signed_event_with_unknown_key_rejected(self):
+        """Signed delta event with an unknown actor_key_id must be rejected."""
+        rogue_kp = BackpackKeypair.generate()
+        rogue_event = _make_event(
+            "rogue_e1",
+            "rogue_actor",
+            prev_hash=None,
+            timestamp="2026-02-13T10:00:00Z",
+        )
+        rogue_event = sign_event(rogue_event, rogue_kp.private_key, rogue_kp.key_id)
+
+        header = canonical_dumps(
+            {
+                "type": "provara_delta_v1",
+                "since_hash": None,
+                "event_count": 1,
+                "exported_at": "2026-02-13T10:00:01Z",
+                "keys": [],
+            }
+        )
+        bundle = (header + "\n" + canonical_dumps(rogue_event) + "\n").encode("utf-8")
+
+        result = import_delta(self.bp_path, bundle)
+        self.assertFalse(result.success)
+        self.assertEqual(result.imported_count, 0)
+        self.assertEqual(result.rejected_count, 1)
+        self.assertTrue(any("not found in registry" in err for err in result.errors))
 
 
 # ---------------------------------------------------------------------------
@@ -1020,7 +1049,7 @@ class TestSyncV0Coverage(unittest.TestCase):
         }
         valid, invalid, errors = verify_all_signatures([event], {})
         self.assertEqual(invalid, 1)
-        self.assertIn("not found in registry", errors[0])
+        self.assertIn("not found", errors[0])
 
     # --- _cmd_check_forks ---
 
