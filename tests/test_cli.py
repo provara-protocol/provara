@@ -265,7 +265,13 @@ class TestCLIDirectCoverage(unittest.TestCase):
             ))
         self.assertTrue(saved_keys.exists())
         keys_data = json.loads(saved_keys.read_text())
-        self.assertGreater(len(keys_data), 0)
+        # Verify new structured format
+        self.assertIn("keys", keys_data)
+        self.assertIsInstance(keys_data["keys"], list)
+        self.assertEqual(len(keys_data["keys"]), 1)
+        self.assertIn("key_id", keys_data["keys"][0])
+        self.assertIn("private_key_b64", keys_data["keys"][0])
+        self.assertEqual(keys_data["keys"][0]["algorithm"], "Ed25519")
 
     # --- cmd_backup ---
 
