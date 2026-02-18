@@ -69,7 +69,8 @@ bp1_<first-16-hex-chars-of-SHA-256(raw-32-byte-pubkey)>
 
 ## Test results
 
-52 tests pass, including:
+80 tests pass, including:
 - 12 RFC 8785 conformance vectors (including `minus_zero` via custom tokenizer)
-- 6 of 7 Provara test vectors (one has a pre-existing signature defect)
+- 7 Provara protocol test vectors
+- Merkle tree, causal chain, and reducer state machine coverage
 - Cross-implementation verification of the Python-created reference backpack
