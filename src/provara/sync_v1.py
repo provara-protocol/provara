@@ -46,7 +46,7 @@ def merge_v1(
     3. Detect forks and optionally sign CONFLICT events
     4. Recompute reducer state
     """
-    pass
+    raise NotImplementedError
 
 def get_causal_delta(
     vault_path: Path,
@@ -56,24 +56,24 @@ def get_causal_delta(
     Identify and bundle all events in the vault that are causal successors 
     to the event IDs provided in the remote state vector.
     """
-    pass
+    raise NotImplementedError
 
 def compute_state_vector(vault_path: Path) -> Dict[str, str]:
     """
     Scan the event log and return a map of each actor to their latest 
     known event_id.
     """
-    pass
+    raise NotImplementedError
 
 def detect_forks_v1(events: List[Dict[str, Any]]) -> List[CausalFork]:
     """
     Exhaustively scan events for causal forks (Type 2 conflicts).
     """
-    pass
+    raise NotImplementedError
 
 def get_total_order_key(event: Dict[str, Any]) -> Tuple[int, str, str]:
     """
     Compute the deterministic sorting key for total ordering.
     (ts_logical, timestamp_utc, event_id)
     """
-    pass
+    raise NotImplementedError
