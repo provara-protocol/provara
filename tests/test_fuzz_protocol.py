@@ -8,7 +8,12 @@ import json
 import tempfile
 from pathlib import Path
 
-from hypothesis import assume, given, settings, strategies as st
+import pytest
+
+try:
+    from hypothesis import assume, given, settings, strategies as st
+except ImportError:
+    pytest.skip("hypothesis not installed", allow_module_level=True)
 
 from provara import Vault
 from provara.backpack_integrity import MANIFEST_EXCLUDE, canonical_json_bytes, merkle_root_hex

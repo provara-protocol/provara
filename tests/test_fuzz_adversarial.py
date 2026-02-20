@@ -9,8 +9,13 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from hypothesis import settings, strategies as st
-from hypothesis.stateful import RuleBasedStateMachine, invariant, rule
+import pytest
+
+try:
+    from hypothesis import settings, strategies as st
+    from hypothesis.stateful import RuleBasedStateMachine, invariant, rule
+except ImportError:
+    pytest.skip("hypothesis not installed", allow_module_level=True)
 
 from provara.backpack_integrity import MANIFEST_EXCLUDE, merkle_root_hex
 from provara.backpack_signing import load_private_key_b64, sign_event

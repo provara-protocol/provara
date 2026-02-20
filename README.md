@@ -49,7 +49,7 @@ provara verify my-vault
 
 | Language | Status | Tests |
 |----------|--------|-------|
-| Python | v1.0.0 (reference) | 232 |
+| Python | v1.0.1 (reference) | 528+ |
 | Rust | Complete | 20 |
 | TypeScript | Complete | — |
 
@@ -60,11 +60,11 @@ provara verify my-vault
 | Resource | Description |
 |----------|-------------|
 | [Quickstart](docs/QUICKSTART.md) | Install, init, verify in 5 minutes |
-| [Tutorials](docs/TUTORIALS.md) | Step-by-step guides for common workflows |
-| [API Reference](docs/API.md) | Module and CLI documentation |
-| [Cookbook](docs/COOKBOOK.md) | Recipes for AI governance, key rotation, sync |
+| [Tutorials](docs/tutorials/) | Step-by-step guides for common workflows |
+| [API Reference](docs/api/) | Module and CLI documentation |
+| [Cookbook](docs/cookbook/) | Recipes for AI governance, key rotation, sync |
 | [Protocol Spec](docs/BACKPACK_PROTOCOL_v1.0.md) | Normative specification |
-| [SOUL.md](docs/SOUL.md) | Design philosophy and principles |
+| [SOUL.md](SOUL.md) | Design philosophy and principles |
 
 ---
 
@@ -73,7 +73,7 @@ provara verify my-vault
 ![PyPI](https://img.shields.io/pypi/v/provara-protocol)
 ![Python](https://img.shields.io/pypi/pyversions/provara-protocol)
 ![License](https://img.shields.io/pypi/l/provara-protocol)
-![Tests](https://img.shields.io/badge/tests-232%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-528%2B%20passing-brightgreen)
 
 ---
 
@@ -161,12 +161,13 @@ python tests/backpack_compliance_v1.py tests/fixtures/reference_backpack -v
 
 | Suite | Tests | Coverage |
 |-------|------:|----------|
-| Core unit tests | 125 | Reducer, sync, crypto, bootstrap |
+| Core + adversarial | 400+ | Reducer, sync, crypto, bootstrap, forgery, byzantine |
 | Compliance | 17 | Full protocol conformance |
 | PSMC | 60 | Application layer |
 | MCP Server | 22 | All tools, both transports |
 | Test vectors | 8 | Cross-language validation |
-| **Total** | **232** | |
+| Property-based fuzz | 20+ | Hypothesis-driven invariant testing |
+| **Total** | **528+** | |
 
 ---
 
@@ -232,9 +233,9 @@ You merge raw observations, then rerun the deterministic reducer to derive fresh
 
 ```
 Protocol            Provara v1.0
-Implementation      1.0.0
-PyPI                provara-protocol 1.0.0
-Tests Passing       232
+Implementation      1.0.1
+PyPI                provara-protocol 1.0.1
+Tests Passing       528+
 ```
 
 ---

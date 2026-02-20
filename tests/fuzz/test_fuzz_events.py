@@ -10,8 +10,11 @@ Run: python -m pytest tests/fuzz/test_fuzz_events.py -v
 from __future__ import annotations
 import json
 import pytest
-from hypothesis import given, settings, assume
-from hypothesis import strategies as st
+try:
+    from hypothesis import given, settings, assume
+    from hypothesis import strategies as st
+except ImportError:
+    pytest.skip("hypothesis not installed", allow_module_level=True)
 import sys
 import os
 import hashlib

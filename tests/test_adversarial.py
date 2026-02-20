@@ -22,7 +22,7 @@ import shutil
 import tempfile
 import sys
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # Add src to path
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -36,7 +36,7 @@ from provara.backpack_integrity import merkle_root_hex
 
 def _make_event(kp, actor, prev_event_hash, payload, event_type="OBSERVATION", ts=None):
     if ts is None:
-        ts = datetime.utcnow().isoformat()
+        ts = datetime.now(timezone.utc).isoformat()
     e = {
         "type": event_type,
         "namespace": "local",
@@ -92,7 +92,7 @@ class TestAdversarial(unittest.TestCase):
             "actor_key_id": kp_new.key_id, # Should be kp_auth.key_id
             "new_key_id": kp_new.key_id,
             "prev_event_hash": self.genesis["event_id"],
-            "timestamp_utc": datetime.utcnow().isoformat(),
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "payload": {"public_key": kp_new.public_key_b64}
         }
         malicious_promotion["event_id"] = "evt_" + canonical_hash(malicious_promotion)[:24]
@@ -107,7 +107,7 @@ class TestAdversarial(unittest.TestCase):
         Attack: An actor appends an event with a timestamp earlier than its predecessor.
         Detection: Causal chain verifies prev_event_hash, but high-level logic should flag retro-active events.
         """
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         past = now - timedelta(days=1)
         
         e1 = _make_event(self.kp_auth, self.actor, self.genesis["event_id"], {"v": 1}, ts=now.isoformat())
@@ -283,7 +283,7 @@ class TestAdversarial(unittest.TestCase):
             "namespace": "local",
             "actor": self.actor,
             "actor_key_id": self.kp_auth.key_id,
-            "timestamp_utc": datetime.utcnow().isoformat(),
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "prev_event_hash": e1["event_id"],  # Should be e2["event_id"]
             "payload": {"v": 3},
         }
@@ -311,7 +311,7 @@ class TestAdversarial(unittest.TestCase):
             "namespace": "local",
             "actor": self.actor,
             "actor_key_id": self.kp_auth.key_id,
-            "timestamp_utc": datetime.utcnow().isoformat(),
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "prev_event_hash": e_actor2["event_id"],  # Cross-actor reference!
             "payload": {"data": "injected"},
         }
@@ -334,7 +334,7 @@ class TestAdversarial(unittest.TestCase):
             "namespace": "local",
             "actor": self.actor,
             "actor_key_id": self.kp_auth.key_id,
-            "timestamp_utc": datetime.utcnow().isoformat(),
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "prev_event_hash": None,  # Invalid for OBSERVATION
             "payload": {"data": "forged_genesis"},
         }
@@ -372,7 +372,7 @@ class TestAdversarial(unittest.TestCase):
             "namespace": "local",
             "actor": self.actor,
             "actor_key_id": self.kp_auth.key_id,
-            "timestamp_utc": datetime.utcnow().isoformat(),
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "prev_event_hash": fake_id,  # Non-existent event
             "payload": {"data": "orphaned"},
         }
@@ -406,7 +406,7 @@ class TestAdversarial(unittest.TestCase):
         ATTACK: Retroactive event (timestamp earlier than predecessor).
         Detection: While cryptographically valid, timestamp monotonicity check catches this.
         """
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         past = now - timedelta(days=1)
         
         e1 = _make_event(self.kp_auth, self.actor, self.genesis["event_id"], {"v": 1}, ts=now.isoformat())

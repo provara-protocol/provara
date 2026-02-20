@@ -12,7 +12,7 @@ Tests the spec's resilience against:
 import unittest
 import sys
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # Add src to path
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -33,7 +33,7 @@ class ByzantineSimulator:
     def create_event(self, actor_name, prev_hash, payload, ts=None, event_type="OBSERVATION"):
         kp = self.actors[actor_name]
         if ts is None:
-            ts = datetime.utcnow().isoformat()
+            ts = datetime.now(timezone.utc).isoformat()
         e = {
             "type": event_type,
             "actor": actor_name,
