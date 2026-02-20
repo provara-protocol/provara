@@ -1,12 +1,12 @@
 {
-  "timestamp_utc": "2026-02-18T16:07:46.696898+00:00",
-  "python_version": "3.12.10",
+  "timestamp_utc": "2026-02-20T13:54:37.955954+00:00",
+  "python_version": "3.12.3",
   "platform": {
-    "system": "Windows",
-    "release": "11",
-    "version": "10.0.26200",
-    "machine": "AMD64",
-    "processor": "AMD64 Family 25 Model 117 Stepping 2, AuthenticAMD",
+    "system": "Linux",
+    "release": "6.17.0-14-generic",
+    "version": "#14~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Thu Jan 15 15:52:10 UTC 2",
+    "machine": "x86_64",
+    "processor": "x86_64",
     "cpu_count": 16
   },
   "seed": 1337,
@@ -14,184 +14,184 @@
     {
       "benchmark": "vault_creation",
       "size": 100,
-      "total_seconds": 0.018232899994472973,
-      "throughput": 5484.591043131563,
+      "total_seconds": 0.018365264986641705,
+      "throughput": 5445.061646142146,
       "peak_memory_mb": null,
       "speedup": null
     },
     {
       "benchmark": "vault_creation",
       "size": 1000,
-      "total_seconds": 0.016377199994167313,
-      "throughput": 61060.49876390023,
+      "total_seconds": 0.006679076992440969,
+      "throughput": 149721.2865088616,
       "peak_memory_mb": null,
       "speedup": null
     },
     {
       "benchmark": "vault_creation",
       "size": 10000,
-      "total_seconds": 0.0647910999978194,
-      "throughput": 154342.18589183636,
+      "total_seconds": 0.05136942397803068,
+      "throughput": 194668.33041142783,
       "peak_memory_mb": null,
       "speedup": null
     },
     {
       "benchmark": "vault_creation",
       "size": 100000,
-      "total_seconds": 0.5841166000027442,
-      "throughput": 171198.69560209414,
+      "total_seconds": 0.5049346090236213,
+      "throughput": 198045.44630713144,
       "peak_memory_mb": null,
       "speedup": null
     },
     {
       "benchmark": "chain_verification",
       "size": 100,
-      "total_seconds": 0.0007069999992381781,
-      "throughput": 141442.71585255183,
+      "total_seconds": 0.000433398992754519,
+      "throughput": 230734.2695109605,
       "peak_memory_mb": null,
       "speedup": null
     },
     {
       "benchmark": "chain_verification",
       "size": 1000,
-      "total_seconds": 0.004415900009917095,
-      "throughput": 226454.40289730974,
+      "total_seconds": 0.003590687003452331,
+      "throughput": 278498.2369776402,
       "peak_memory_mb": null,
       "speedup": null
     },
     {
       "benchmark": "chain_verification",
       "size": 10000,
-      "total_seconds": 0.040063499996904284,
-      "throughput": 249603.7540597477,
+      "total_seconds": 0.03324082199833356,
+      "throughput": 300834.9191996914,
       "peak_memory_mb": null,
       "speedup": null
     },
     {
       "benchmark": "chain_verification",
       "size": 100000,
-      "total_seconds": 0.5316218999942066,
-      "throughput": 188103.61273884645,
+      "total_seconds": 0.4689569140027743,
+      "throughput": 213239.20602097875,
       "peak_memory_mb": null,
       "speedup": null
     },
     {
       "benchmark": "streaming_reduce_v1",
       "size": 100,
-      "total_seconds": 0.0016177000070456415,
-      "throughput": 61816.15847466496,
-      "peak_memory_mb": 38.6484375,
+      "total_seconds": 0.0011427300050854683,
+      "throughput": 87509.7350686269,
+      "peak_memory_mb": 34.49609375,
       "speedup": null
     },
     {
       "benchmark": "full_reduce_v0",
       "size": 100,
-      "total_seconds": 0.0011125999881187454,
-      "throughput": 89879.56234754805,
-      "peak_memory_mb": 38.69921875,
+      "total_seconds": 0.000737971015041694,
+      "throughput": 135506.67703981596,
+      "peak_memory_mb": 34.49609375,
       "speedup": null
     },
     {
       "benchmark": "streaming_reduce_v1",
       "size": 1000,
-      "total_seconds": 0.013428300007944927,
-      "throughput": 74469.59029872318,
-      "peak_memory_mb": 38.69921875,
+      "total_seconds": 0.011337967007420957,
+      "throughput": 88199.23354385114,
+      "peak_memory_mb": 34.49609375,
       "speedup": null
     },
     {
       "benchmark": "full_reduce_v0",
       "size": 1000,
-      "total_seconds": 0.015236899998853914,
-      "throughput": 65630.14786965969,
-      "peak_memory_mb": 39.3203125,
+      "total_seconds": 0.01393716997699812,
+      "throughput": 71750.57788994453,
+      "peak_memory_mb": 34.51953125,
       "speedup": null
     },
     {
       "benchmark": "streaming_reduce_v1",
       "size": 10000,
-      "total_seconds": 0.1466495000058785,
-      "throughput": 68189.79948516119,
-      "peak_memory_mb": 39.34375,
+      "total_seconds": 0.11930320601095445,
+      "throughput": 83820.04419128348,
+      "peak_memory_mb": 34.51953125,
       "speedup": null
     },
     {
       "benchmark": "full_reduce_v0",
       "size": 10000,
-      "total_seconds": 0.8580712000111816,
-      "throughput": 11654.044559320588,
-      "peak_memory_mb": 55.70703125,
+      "total_seconds": 0.7876286929822527,
+      "throughput": 12696.337867195152,
+      "peak_memory_mb": 53.05859375,
       "speedup": null
     },
     {
       "benchmark": "streaming_reduce_v1",
       "size": 100000,
-      "total_seconds": 1.9580696999910288,
-      "throughput": 51070.70499097053,
-      "peak_memory_mb": 56.1640625,
+      "total_seconds": 1.3041216580022592,
+      "throughput": 76679.96262954998,
+      "peak_memory_mb": 53.06640625,
       "speedup": null
     },
     {
       "benchmark": "full_reduce_v0",
       "size": 100000,
-      "total_seconds": 157.37400860000344,
-      "throughput": 635.4289433788866,
-      "peak_memory_mb": 279.1796875,
+      "total_seconds": 121.51968878900516,
+      "throughput": 822.9119165506601,
+      "peak_memory_mb": 274.77734375,
       "speedup": null
     },
     {
       "benchmark": "checkpoint_resume",
       "size": 100,
-      "total_seconds": 0.001148700001067482,
-      "throughput": 87054.93158097887,
+      "total_seconds": 0.0005916139925830066,
+      "throughput": 169029.13259944483,
       "peak_memory_mb": null,
-      "speedup": 1.592060588058767
+      "speedup": 1.728733626653913
     },
     {
       "benchmark": "checkpoint_resume",
       "size": 1000,
-      "total_seconds": 0.013579699996626005,
-      "throughput": 73639.32931128514,
+      "total_seconds": 0.005631089006783441,
+      "throughput": 177585.54318629293,
       "peak_memory_mb": null,
-      "speedup": 1.8772726936928907
+      "speedup": 1.9108582680073098
     },
     {
       "benchmark": "checkpoint_resume",
       "size": 10000,
-      "total_seconds": 0.14327319999574684,
-      "throughput": 69796.72402303331,
+      "total_seconds": 0.06061864900402725,
+      "throughput": 164965.73520362756,
       "peak_memory_mb": null,
-      "speedup": 1.9906947007922953
+      "speedup": 1.9354923759611944
     },
     {
       "benchmark": "checkpoint_resume",
       "size": 100000,
-      "total_seconds": 1.501038200003677,
-      "throughput": 66620.55635876225,
+      "total_seconds": 0.6464489510108251,
+      "throughput": 154691.2557343224,
       "peak_memory_mb": null,
-      "speedup": 1.757122370364601
+      "speedup": 1.924612040960319
     },
     {
       "benchmark": "canonical_json",
       "size": 1000,
-      "total_seconds": 0.004358599995612167,
-      "throughput": 229431.46905123367,
-      "peak_memory_mb": null,
-      "speedup": null
-    },
-    {
-      "benchmark": "canonical_json",
-      "size": 10000,
-      "total_seconds": 0.044586800009710714,
-      "throughput": 224281.6259032284,
+      "total_seconds": 0.00237798600574024,
+      "throughput": 420523.9213292642,
       "peak_memory_mb": null,
       "speedup": null
     },
     {
       "benchmark": "canonical_json",
+      "size": 10000,
+      "total_seconds": 0.02453360299114138,
+      "throughput": 407604.2154758439,
+      "peak_memory_mb": null,
+      "speedup": null
+    },
+    {
+      "benchmark": "canonical_json",
       "size": 100000,
-      "total_seconds": 0.43076160000055097,
-      "throughput": 232146.96946030494,
+      "total_seconds": 0.23863718399661593,
+      "throughput": 419046.1784925273,
       "peak_memory_mb": null,
       "speedup": null
     }
