@@ -10,8 +10,11 @@ Run: python -m pytest tests/fuzz/test_fuzz_canonical_json.py -v
 from __future__ import annotations
 import json
 import pytest
-from hypothesis import given, settings, assume, HealthCheck
-from hypothesis import strategies as st
+try:
+    from hypothesis import given, settings, assume, HealthCheck
+    from hypothesis import strategies as st
+except ImportError:
+    pytest.skip("hypothesis not installed", allow_module_level=True)
 import sys
 import os
 

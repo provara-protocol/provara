@@ -3,7 +3,12 @@
 import sys
 import unittest.mock as mock
 
-from provara import mcp
+import pytest
+
+try:
+    from provara import mcp
+except ImportError:
+    pytest.skip("mcp package not installed", allow_module_level=True)
 
 
 def test_mcp_server_instance() -> None:

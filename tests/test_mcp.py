@@ -13,6 +13,11 @@ from pathlib import Path
 
 import pytest
 
+try:
+    from provara.mcp import _PSMC_AVAILABLE  # noqa: F401 — test import gate
+except ImportError:
+    pytest.skip("mcp package not installed", allow_module_level=True)
+
 from provara.mcp import (
     _PSMC_AVAILABLE,
     _vault_path,

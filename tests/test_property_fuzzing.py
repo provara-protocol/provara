@@ -40,9 +40,14 @@ import json
 import math
 import unittest
 
-from hypothesis import given, settings, assume, HealthCheck
-from hypothesis import strategies as st
-from hypothesis.strategies import composite
+import pytest
+
+try:
+    from hypothesis import given, settings, assume, HealthCheck
+    from hypothesis import strategies as st
+    from hypothesis.strategies import composite
+except ImportError:
+    pytest.skip("hypothesis not installed", allow_module_level=True)
 
 from provara.backpack_signing import BackpackKeypair, sign_event, verify_event_signature
 from provara.canonical_json import canonical_bytes, canonical_hash

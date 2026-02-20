@@ -4,7 +4,12 @@ from __future__ import annotations
 
 import json
 
-from hypothesis import given, settings, strategies as st
+import pytest
+
+try:
+    from hypothesis import given, settings, strategies as st
+except ImportError:
+    pytest.skip("hypothesis not installed", allow_module_level=True)
 
 from provara.canonical_json import canonical_dumps
 

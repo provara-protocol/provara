@@ -6,9 +6,17 @@ import json
 import tempfile
 from pathlib import Path
 
-from hypothesis import given, settings, strategies as st
+import pytest
 
-from provara.mcp import init_vault, query_events
+try:
+    from hypothesis import given, settings, strategies as st
+except ImportError:
+    pytest.skip("hypothesis not installed", allow_module_level=True)
+
+try:
+    from provara.mcp import init_vault, query_events
+except ImportError:
+    pytest.skip("mcp package not installed", allow_module_level=True)
 
 
 def _safe_segment(raw: str) -> str:

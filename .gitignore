@@ -87,19 +87,12 @@ docs/site/
 
 # Sensitive/local
 keys_3.json
+genesis_keys.json
 trade_order.json
 atlas_pub.txt
 
-# Playground build artifacts
-playground/src/**/*.js
-playground/src/**/*.js.map
-playground/src/**/*.d.ts
-playground/src/**/*.d.ts.map
-
-# WASM build tools
-wasm-pack*.tar.gz
-wasm-pack-*/
-rust-lld.exe
+# Build artifacts (generated reports)
+coverage.json
 
 # Playground build artifacts
 playground/src/**/*.js
