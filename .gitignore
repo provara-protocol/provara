@@ -55,6 +55,13 @@ hunt-logo.html
 BOOTLOADER.md
 TODO.md
 OWNER_CHECKLIST.md
+ARCHITECT_SPRINT_REPORT.md
+ARCHITECT_SPRINT_SUMMARY.md
+CLOUDFLARE_SETUP.md
+PROVARA_MULTI_AGENT_SPRINT.md
+SPRINT_DISPATCH_2026-02-17.md
+SPRINT_SYNC_CHECK_2026-02-17.md
+WEBSITE_SPRINT.md
 
 # MCP server (separate repo: github.com/provara-protocol/provara-mcp)
 hunt-mcp/
