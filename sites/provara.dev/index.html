@@ -1,52 +1,472 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Provara Protocol</title>
-  <meta name="description" content="Self-sovereign cryptographic event logs.">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Provara Protocol — Self-Sovereign Cryptographic Event Logs</title>
+  <meta name="description" content="Provara Protocol makes memory tamper-evident, replayable, and readable on a 50-year horizon. Ed25519 signed, SHA-256 hash-chained, append-only NDJSON.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Provara Protocol">
-  <meta property="og:description" content="Self-sovereign cryptographic event logs.">
   <meta property="og:url" content="https://provara.dev/">
+  <meta property="og:title" content="Provara Protocol — Self-Sovereign Cryptographic Event Logs">
+  <meta property="og:description" content="Provara Protocol makes memory tamper-evident, replayable, and readable on a 50-year horizon. Ed25519 signed, SHA-256 hash-chained, append-only NDJSON.">
+  <meta property="og:site_name" content="Provara Protocol">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="canonical" href="https://provara.dev/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "name": "Provara Protocol",
+        "url": "https://provara.dev",
+        "sameAs": ["https://github.com/provara-protocol/provara"]
+      },
+      {
+        "@type": "WebSite",
+        "name": "Provara Protocol",
+        "url": "https://provara.dev"
+      }
+    ]
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="alternate" type="application/rss+xml" title="Provara Blog" href="https://provara.dev/rss.xml">
-  <link rel="stylesheet" href="/assets/site.css">
-  
+  <meta name="theme-color" content="#060a10">
+  <link rel="stylesheet" href="assets/site.css">
 </head>
-<body class="">
-<header class="site-header">
-  <div class="wrap">
-    <a href="/" class="brand">Provara</a>
-    <nav>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <div class="bg-field" aria-hidden="true"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       NAVIGATION
+       ═══════════════════════════════════════════════════════════ -->
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="container nav-inner">
+      <a href="/" class="nav-logo" aria-label="Provara Protocol home">
+        <span class="nav-logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+            <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7L12 2z"/>
+            <polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </span>
+        Provara
+      </a>
+      <div class="nav-links">
+        <a href="/spec/v1.0/">Spec v1.0</a>
+        <a href="/docs/">Docs</a>
+        <a href="/blog/">Blog</a>
+        <a href="https://github.com/provara-protocol/provara">GitHub</a>
+        <a href="/playground/" class="nav-cta nav-cta-desktop">Try Playground</a>
+      </div>
+      <button class="nav-hamburger" aria-label="Open menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile drawer -->
+  <div class="nav-drawer" aria-hidden="true">
+    <div class="nav-drawer-backdrop"></div>
+    <div class="nav-drawer-panel">
       <a href="/spec/v1.0/">Spec v1.0</a>
       <a href="/docs/">Docs</a>
       <a href="/blog/">Blog</a>
       <a href="https://github.com/provara-protocol/provara">GitHub</a>
-    </nav>
+      <a href="/playground/" class="nav-drawer-cta">Try Playground</a>
+    </div>
   </div>
-</header>
-<main class="wrap">
-<section class="hero">
-  <p class="eyebrow">Provara Protocol</p>
-  <h1>Self-sovereign cryptographic event logs</h1>
-  <p class="subtitle">Provara Protocol makes memory tamper-evident, replayable, and readable on a 50-year horizon.</p>
-  <div class="cta">
-    <a class="btn primary" href="/playground/">Try Playground</a>
-    <a class="btn" href="/spec/v1.0/">Read Spec</a>
-    <a class="btn" href="/docs/quickstart/">Install (pip/npm)</a>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       HERO
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="hero" id="main">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <div class="hero-badge fade-up">
+            <span class="hero-badge-dot" aria-hidden="true"></span>
+            Self-sovereign cryptographic event logs
+          </div>
+          <h1 class="fade-up delay-1">Tamper-Evident Event Logs for a 50-Year Horizon</h1>
+          <p class="hero-sub fade-up delay-2">
+            Provara Protocol makes memory verifiable. Ed25519 signed, SHA-256 hash-chained, append-only NDJSON. No hosted dependency. No trust required — just math.
+          </p>
+          <div class="hero-actions fade-up delay-3">
+            <a href="/playground/" class="btn btn-primary">Try Playground</a>
+            <a href="/spec/v1.0/" class="btn btn-ghost">Read Spec</a>
+          </div>
+        </div>
+
+        <!-- Terminal Mockup -->
+        <div class="hero-visual fade-up delay-4" aria-label="Provara vault terminal showing a signed event">
+          <div class="hv-scanline" aria-hidden="true"></div>
+          <div class="hv-bar">
+            <span class="hv-bar-left">
+              <span class="hv-bar-dot hv-bar-dot--r" aria-hidden="true"></span>
+              <span class="hv-bar-dot hv-bar-dot--y" aria-hidden="true"></span>
+              <span class="hv-bar-dot hv-bar-dot--g" aria-hidden="true"></span>
+              provara://vault
+            </span>
+            <span class="hv-bar-right" style="color:var(--k-accent)">VERIFIED</span>
+          </div>
+          <div class="hv-body">
+            <div class="hv-event"><span class="t-punct">{</span>
+  <span class="t-key">"type"</span><span class="t-punct">:</span>       <span class="t-str">"event"</span><span class="t-punct">,</span>
+  <span class="t-key">"action"</span><span class="t-punct">:</span>     <span class="t-str">"user.login"</span><span class="t-punct">,</span>
+  <span class="t-key">"actor"</span><span class="t-punct">:</span>      <span class="t-str">"alice"</span><span class="t-punct">,</span>
+  <span class="t-key">"ts"</span><span class="t-punct">:</span>         <span class="t-str">"2026-02-22T14:30:00Z"</span><span class="t-punct">,</span>
+  <span class="t-key">"sig"</span><span class="t-punct">:</span>        <span class="t-str">"ed25519:a3f8c9...d721"</span><span class="t-punct">,</span>
+  <span class="t-key">"prev"</span><span class="t-punct">:</span>       <span class="t-str">"sha256:7b2cf1...e490"</span><span class="t-punct">,</span>
+  <span class="t-key">"hash"</span><span class="t-punct">:</span>       <span class="t-str">"sha256:9c4a21...f832"</span>
+<span class="t-punct">}</span></div>
+          </div>
+          <div class="hv-status">
+            <div class="hv-status-line">
+              <span class="hv-status-check">
+                <svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg>
+              </span>
+              Ed25519 signature valid
+            </div>
+            <div class="hv-status-line">
+              <span class="hv-status-check">
+                <svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg>
+              </span>
+              Hash chain integrity confirmed
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TRUST BAR
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="trust-bar" role="presentation">
+    <div class="trust-bar-inner">
+      <div class="trust-item">
+        <span class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
+            <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7L12 2z"/>
+          </svg>
+        </span>
+        Ed25519 Signed
+      </div>
+      <span class="trust-sep" aria-hidden="true"></span>
+      <div class="trust-item">
+        <span class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <path d="M17.5 14v7m-3.5-3.5h7"/>
+          </svg>
+        </span>
+        SHA-256 Hash-Chained
+      </div>
+      <span class="trust-sep" aria-hidden="true"></span>
+      <div class="trust-item">
+        <span class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
+            <path d="M9 12l2 2 4-4"/>
+            <circle cx="12" cy="12" r="9"/>
+          </svg>
+        </span>
+        Append-Only NDJSON
+      </div>
+      <span class="trust-sep" aria-hidden="true"></span>
+      <div class="trust-item">
+        <span class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
+            <path d="M2 12h4m12 0h4M12 2v4m0 12v4"/>
+            <circle cx="12" cy="12" r="4"/>
+          </svg>
+        </span>
+        Self-Sovereign Keys
+      </div>
+    </div>
   </div>
-</section>
-<section class="cards">
-  <article class="card"><h2>Tamper-Evident</h2><p>Every event is signed and hash-chained. Evidence can be verified independently.</p></article>
-  <article class="card"><h2>Self-Sovereign</h2><p>Vault operators own keys and logs. No hosted dependency is required for verification.</p></article>
-  <article class="card"><h2>50-Year Horizon</h2><p>Append-only NDJSON, deterministic replay, and non-normative indexes for scale.</p></article>
-</section>
-</main>
-<footer class="site-footer">
-  <div class="wrap">
-    <p>Apache 2.0. <a href="https://github.com/provara-protocol/provara">GitHub</a>. Anthropic-free zone.</p>
-  </div>
-</footer>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       HOW IT WORKS
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="methodology" id="how-it-works">
+    <div class="container">
+      <div class="section-tag fade-up">How It Works</div>
+      <h2 class="section-title fade-up delay-1">How Provara Makes Events Tamper-Evident</h2>
+      <p class="section-sub fade-up delay-2">
+        Most systems ask you to trust the operator. Provara makes trust unnecessary — every event carries its own proof.
+      </p>
+
+      <div class="method-grid">
+        <div class="method-card fade-up delay-2">
+          <div class="method-num">Phase 01</div>
+          <h3 class="method-title">Sign</h3>
+          <p class="method-desc">
+            Every event is Ed25519 signed the moment it enters the vault. The private key stays with the vault operator — no third party touches your data.
+          </p>
+        </div>
+        <div class="method-card fade-up delay-3">
+          <div class="method-num">Phase 02</div>
+          <h3 class="method-title">Chain</h3>
+          <p class="method-desc">
+            Each event's SHA-256 hash includes the previous event's hash. A single modification anywhere in the log breaks every hash that follows.
+          </p>
+        </div>
+        <div class="method-card fade-up delay-4">
+          <div class="method-num">Phase 03</div>
+          <h3 class="method-title">Verify</h3>
+          <p class="method-desc">
+            Anyone with the public key can independently verify any event, any time. No hosted service, no API, no account. Verification is a pure computation.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       PROTOCOL FEATURES
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="platform-section" id="protocol">
+    <div class="container">
+      <div class="section-tag fade-up">Protocol</div>
+      <h2 class="section-title fade-up delay-1">Beyond signing. A complete provenance framework.</h2>
+
+      <div class="platform-grid">
+        <div class="platform-card fade-up delay-2">
+          <div class="platform-card-icon platform-card-icon--green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+            </svg>
+          </div>
+          <h3 class="platform-card-title">Vault Init</h3>
+          <p class="platform-card-desc">
+            Create sealed, versioned vaults with a single command. Ed25519 key generation built in. NDJSON format, human-readable by design.
+          </p>
+        </div>
+
+        <div class="platform-card fade-up delay-3">
+          <div class="platform-card-icon platform-card-icon--blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+          </div>
+          <h3 class="platform-card-title">Event Append</h3>
+          <p class="platform-card-desc">
+            Append events with automatic signing and hash-chaining. Deterministic canonical JSON (RFC 8785). One function call, zero configuration.
+          </p>
+        </div>
+
+        <div class="platform-card fade-up delay-4">
+          <div class="platform-card-icon platform-card-icon--purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7L12 2z"/><polyline points="9 12 11 14 15 10"/>
+            </svg>
+          </div>
+          <h3 class="platform-card-title">Verification</h3>
+          <p class="platform-card-desc">
+            Verify any single event or walk the entire chain. Works offline, works in CI, works in any language with Ed25519 support.
+          </p>
+        </div>
+
+        <div class="platform-card fade-up delay-5">
+          <div class="platform-card-icon platform-card-icon--orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+            </svg>
+          </div>
+          <h3 class="platform-card-title">Deterministic Replay</h3>
+          <p class="platform-card-desc">
+            Rebuild vault state from the event log alone. No database, no snapshots — the log is the source of truth. NDJSON readable for 50 years.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       STATS ROW
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="metrics">
+    <div class="container">
+      <div class="metrics-row">
+        <div class="metric">
+          <div class="metric-val">v1.0</div>
+          <div class="metric-label">Spec Version</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">2</div>
+          <div class="metric-label">Languages</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">Apache 2.0</div>
+          <div class="metric-label">License</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val" style="color:var(--k-accent)">STABLE</div>
+          <div class="metric-label">Status</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       DEVELOPER EXPERIENCE
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="api-section" id="developer-experience">
+    <div class="container">
+      <div class="api-layout">
+        <div class="api-text">
+          <div class="section-tag fade-up">Developer Experience</div>
+          <h2 class="section-title fade-up delay-1">Three lines to tamper-evident</h2>
+          <p class="fade-up delay-2">
+            pip install, init, append. That's it. Every event is signed and chained automatically.
+          </p>
+          <a href="/docs/" class="btn btn-ghost fade-up delay-3">View Docs &rarr;</a>
+        </div>
+        <div class="api-panel fade-up delay-3">
+          <div class="api-tabs">
+            <button class="api-tab active" data-tab="python">Python</button>
+            <button class="api-tab" data-tab="cli">CLI</button>
+            <button class="api-tab" data-tab="npm">npm</button>
+          </div>
+          <div class="api-code">
+            <div class="api-code-block active" id="code-python">
+<pre><span class="ck">from</span> provara <span class="ck">import</span> Vault
+
+vault = Vault.init(<span class="cs">"./my-vault"</span>)
+vault.append({<span class="cs">"action"</span>: <span class="cs">"user.login"</span>, <span class="cs">"actor"</span>: <span class="cs">"alice"</span>})
+<span class="cc"># Ed25519 signed + SHA-256 chained automatically</span></pre>
+            </div>
+            <div class="api-code-block" id="code-cli">
+<pre><span class="cc"># Initialize a new vault</span>
+provara init ./my-vault
+
+<span class="cc"># Append an event (signed + chained automatically)</span>
+provara append ./my-vault <span class="cs">'{"action": "user.login"}'</span>
+
+<span class="cc"># Verify the entire chain</span>
+provara verify ./my-vault
+<span class="cc"># Exit 0 = chain intact</span></pre>
+            </div>
+            <div class="api-code-block" id="code-npm">
+<pre><span class="ck">import</span> { Vault } <span class="ck">from</span> <span class="cs">'@provara/sdk'</span>;
+
+<span class="ck">const</span> vault = <span class="ck">await</span> Vault.init(<span class="cs">'./my-vault'</span>);
+<span class="ck">await</span> vault.append({ action: <span class="cs">'user.login'</span>, actor: <span class="cs">'alice'</span> });
+<span class="cc">// Every event is signed and chained</span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       FAQ
+       ═══════════════════════════════════════════════════════════ -->
+  <section class="faq-section" id="faq">
+    <div class="container">
+      <div class="section-tag fade-up">FAQ</div>
+      <h2 class="section-title fade-up delay-1">Frequently asked questions</h2>
+      <p class="section-sub fade-up delay-2">Everything you need to know about Provara Protocol, tamper-evident event logs, and getting started.</p>
+
+      <div class="faq-grid fade-up delay-3">
+
+        <details class="faq-item">
+          <summary>What is Provara Protocol?</summary>
+          <div class="faq-answer">
+            Provara is an open-source protocol for tamper-evident event logs. Every event is Ed25519 signed and SHA-256 hash-chained into an append-only NDJSON file. The result is a verifiable, replayable record that works offline and stays readable for decades. Think of it as git for structured events — but cryptographically sealed.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>How does the hash chain work?</summary>
+          <div class="faq-answer">
+            Each event's SHA-256 hash incorporates the previous event's hash. This creates a chain where modifying any single event breaks the hash of every event that follows. Verification is a single pass through the log — no external service, no blockchain, no consensus mechanism. Just math.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>What happens if someone modifies an event?</summary>
+          <div class="faq-answer">
+            The hash chain breaks at the point of modification. Every subsequent event's hash will fail verification. This is detectable by anyone with the public key and the event log. Provara doesn't prevent tampering — it makes tampering provably detectable.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Do I need to run a server?</summary>
+          <div class="faq-answer">
+            No. Provara vaults are local files. The protocol is designed for self-sovereign operation — you hold the keys, you hold the logs. No hosted dependency, no API calls, no account creation. Verification is a pure computation that runs anywhere.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>What key types are supported?</summary>
+          <div class="faq-answer">
+            Ed25519 is the sole supported signing algorithm. This is a deliberate constraint — Ed25519 is fast, deterministic, and widely supported across languages and platforms. Key rotation is supported through the checkpoint mechanism, which seals one key and activates the next without breaking the chain.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Is Provara Protocol open source?</summary>
+          <div class="faq-answer">
+            Yes. Apache 2.0 licensed. The specification, Python reference implementation, and all tooling are available on GitHub at github.com/provara-protocol/provara. Contributions welcome.
+          </div>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="/" class="nav-logo">
+            <span class="nav-logo-mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+                <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7L12 2z"/>
+                <polyline points="9 12 11 14 15 10"/>
+              </svg>
+            </span>
+            Provara
+          </a>
+          <p class="footer-brand-text">
+            Self-sovereign cryptographic event logs. Open-source protocol by Hunt Information Systems LLC.
+          </p>
+        </div>
+        <div class="footer-col">
+          <h4>Protocol</h4>
+          <a href="/spec/v1.0/">Spec v1.0</a>
+          <a href="/docs/">Docs</a>
+          <a href="/playground/">Playground</a>
+          <a href="/blog/">Blog</a>
+        </div>
+        <div class="footer-col">
+          <h4>Community</h4>
+          <a href="https://github.com/provara-protocol/provara">GitHub</a>
+          <a href="#">Discord</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2026 Provara Protocol</span>
+        <span class="mono" style="font-size:0.65rem;color:var(--k-text-darker)">Apache 2.0 &middot; provara.dev</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/app.js" defer></script>
 </body>
 </html>
