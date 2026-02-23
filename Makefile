@@ -20,7 +20,7 @@ test-vectors: ## Run normative vectors
 	cd $(TEST_DIR) && PYTHONPATH=../src:.. $(PYTHON) test_vectors.py
 
 test-comply: ## Run 17 compliance tests against reference backpack
-	$(PYTHON) tests/backpack_compliance_v1.py $(REF_BACKPACK) -v
+	PYTHONPATH=src:. $(PYTHON) tests/backpack_compliance_v1.py $(REF_BACKPACK) -v
 
 test-vault: ## Run compliance tests against My_Backpack (if exists)
 	@if [ -d "My_Backpack" ]; then \
@@ -55,12 +55,18 @@ checksums: ## Regenerate CHECKSUMS.txt
 		! -path './.venv/*' \
 		! -path './My_Backpack/*' \
 		! -path './Backups/*' \
+		! -path './.mypy_cache/*' \
+		! -path './.pytest_cache/*' \
+		! -path './provara-rs/target/*' \
+		! -path './playground/node_modules/*' \
+		! -path './provara-ts/node_modules/*' \
+		! -path '*/.*' \
 		! -name 'CHECKSUMS.txt' \
 		! -name '*.pyc' \
 		! -name '.DS_Store' \
 		! -name 'Thumbs.db' \
 		-exec sha256sum {} \; | sort -k2 > CHECKSUMS.txt
-	@echo "Done. $(shell wc -l < CHECKSUMS.txt) files hashed."
+	@echo "Done. $$(wc -l < CHECKSUMS.txt) files hashed."
 
 docs-api: ## Generate API reference pages from Python docstrings
 	$(PYTHON) tools/docs/generate_api_reference.py

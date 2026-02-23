@@ -122,6 +122,29 @@ ruff format src/ tests/
 ruff check src/ tests/
 ```
 
+### Docker
+
+You can also run the Provara server using Docker or Docker Compose. This is the recommended way to test the MCP server in a isolated environment.
+
+**Using Docker Compose (Recommended):**
+
+```bash
+# Start the server with a read-only vault
+docker-compose up
+```
+
+**Using Docker CLI:**
+
+```bash
+# Build the image
+docker build -t provara-server .
+
+# Run the server with a local vault mounted read-only
+docker run -p 8765:8765 -v $(pwd)/vault:/app/vault:ro provara-server
+```
+
+Note: The vault is mounted as read-only (`:ro`) by default in the Docker configurations to ensure that the server treats the event log as an immutable source of evidence.
+
 ---
 
 ## Code Standards

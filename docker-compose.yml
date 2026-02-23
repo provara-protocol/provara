@@ -4,7 +4,7 @@ services:
     ports:
       - "8765:8765"
     volumes:
-      - ./vault:/app/vault
+      - ./vault:/app/vault:ro
     environment:
       - PROVARA_VAULT_PATH=/app/vault
     restart: unless-stopped
