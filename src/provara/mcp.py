@@ -49,7 +49,33 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from mcp.server.fastmcp import FastMCP
+try:
+    from mcp.server.fastmcp import FastMCP
+    _MCP_AVAILABLE = True
+except ImportError:
+    _MCP_AVAILABLE = False
+    
+    class FastMCP:  # type: ignore[no-redef]
+        """Dummy FastMCP class used when the mcp package is not installed."""
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            self.name: str = args[0] if args else ""
+            self.settings = type("Settings", (), {"host": "", "port": 0})()
+            
+        def tool(self, *args: Any, **kwargs: Any) -> Any:
+            def decorator(func: Any) -> Any:
+                return func
+            return decorator
+            
+        def resource(self, *args: Any, **kwargs: Any) -> Any:
+            def decorator(func: Any) -> Any:
+                return func
+            return decorator
+            
+        def run(self, *args: Any, **kwargs: Any) -> None:
+            raise RuntimeError(
+                "The 'mcp' package is required to run the MCP server. "
+                "Install it with 'pip install provara[mcp]'."
+            )
 
 
 # ---------------------------------------------------------------------------

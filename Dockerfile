@@ -3,18 +3,14 @@ FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
-# Install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
 # Copy source
 COPY src/ ./src/
 COPY tools/ ./tools/
 COPY pyproject.toml .
 COPY README.md .
 
-# Install the package in editable mode for testing
-RUN pip install -e .
+# Install the package in editable mode with mcp dependencies for testing
+RUN pip install --no-cache-dir -e ".[mcp]"
 
 # RUN TESTS (Optional: can be disabled if CI handles it)
 # RUN python -m pytest src/
@@ -37,6 +33,9 @@ COPY pyproject.toml .
 LABEL org.opencontainers.image.title="Provara Server"
 LABEL org.opencontainers.image.description="MCP server and CLI for the Provara Protocol"
 LABEL org.opencontainers.image.vendor="Hunt Information Systems LLC"
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/health')" || exit 1
 
 # Default port for SSE
 EXPOSE 8765

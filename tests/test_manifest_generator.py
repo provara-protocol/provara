@@ -73,13 +73,12 @@ class TestIterBackpackFiles(unittest.TestCase):
                 link.symlink_to(external_file)
             except (OSError, NotImplementedError):
                 self.skipTest("Symlinks not supported on this platform")
-            import io
-            stderr_buf = io.StringIO()
-            with patch("sys.stderr", new=stderr_buf):
+            import logging
+            with self.assertLogs("provara.manifest_generator", level=logging.WARNING) as cm:
                 files = iter_backpack_files(self.root, set())
             paths = [f["path"] for f in files]
             self.assertNotIn("escape.txt", paths)
-            self.assertIn("SKIPPED", stderr_buf.getvalue())
+            self.assertTrue(any("SKIPPED" in msg for msg in cm.output))
 
     def test_directories_not_included(self) -> None:
         subdir = self.root / "subdir"
@@ -154,37 +153,30 @@ class TestManifestGeneratorMain(unittest.TestCase):
         self._tmp.cleanup()
 
     def test_main_prints_merkle_root(self) -> None:
-        import io
-        from contextlib import redirect_stdout
-        buf = io.StringIO()
+        import logging
         with patch("sys.argv", ["manifest_generator", str(self.root)]):
-            with redirect_stdout(buf):
+            with self.assertLogs("provara.manifest_generator", level=logging.INFO) as cm:
                 main()
-        output = buf.getvalue()
+        output = "\n".join(cm.output)
         self.assertIn("merkle_root:", output)
         self.assertIn("manifest_file_count:", output)
 
     def test_main_write_flag_creates_files(self) -> None:
+        import logging
         manifest_file = self.root / "manifest.json"
         if manifest_file.exists():
             manifest_file.unlink()
         with patch("sys.argv", ["manifest_generator", str(self.root), "--write"]):
-            import io
-            from contextlib import redirect_stdout
-            with redirect_stdout(io.StringIO()):
+            with self.assertLogs("provara.manifest_generator", level=logging.INFO):
                 main()
         self.assertTrue(manifest_file.exists())
         self.assertTrue((self.root / "merkle_root.txt").exists())
 
     def test_main_check_required_flag(self) -> None:
-        import io
-        stderr_buf = io.StringIO()
+        import logging
         with patch("sys.argv", ["manifest_generator", str(self.root), "--check-required"]):
-            with patch("sys.stderr", new=stderr_buf):
-                import io as _io
-                from contextlib import redirect_stdout
-                with redirect_stdout(_io.StringIO()):
-                    main()
+            with self.assertLogs("provara.manifest_generator", level=logging.INFO):
+                main()
         # keys.json exists so some required files should be present
         # Just verify it ran without error
 
@@ -194,16 +186,14 @@ class TestManifestGeneratorMain(unittest.TestCase):
                 main()
 
     def test_main_custom_exclude(self) -> None:
+        import logging
         (self.root / "skip_me.txt").write_text("excluded")
-        import io
-        from contextlib import redirect_stdout
-        buf = io.StringIO()
         with patch("sys.argv", [
             "manifest_generator", str(self.root), "--exclude", "skip_me.txt"
         ]):
-            with redirect_stdout(buf):
+            with self.assertLogs("provara.manifest_generator", level=logging.INFO) as cm:
                 main()
-        self.assertIn("merkle_root:", buf.getvalue())
+        self.assertIn("merkle_root:", "\n".join(cm.output))
 
 
 if __name__ == "__main__":

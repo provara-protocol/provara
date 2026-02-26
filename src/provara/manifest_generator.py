@@ -21,8 +21,11 @@ from __future__ import annotations
 import argparse
 import datetime
 import json
+import logging
 import sys
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 from typing import Any, Dict, List, Set
 
 from .backpack_integrity import (
@@ -76,7 +79,7 @@ def iter_backpack_files(
     files.sort(key=lambda x: str(x["path"]))
 
     for w in warnings:
-        print(f"  WARN: {w}", file=sys.stderr)
+        logger.warning(f"  WARN: {w}")
 
     return files
 
@@ -155,16 +158,16 @@ def main() -> None:
         (root / "manifest.json").write_bytes(canonical_json_bytes(manifest))
         (root / "merkle_root.txt").write_text(root_hex + "\n", encoding="utf-8")
 
-    print(f"manifest_file_count: {manifest['file_count']}")
-    print(f"merkle_root: {root_hex}")
+    logger.info(f"manifest_file_count: {manifest['file_count']}")
+    logger.info(f"merkle_root: {root_hex}")
 
     if args.check_required:
         missing = check_required_files(manifest)
         if missing:
             for m in missing:
-                print(f"  MISSING (spec-required): {m}", file=sys.stderr)
+                logger.error(f"  MISSING (spec-required): {m}")
         else:
-            print("  All spec-required files present.")
+            logger.info("  All spec-required files present.")
 
 
 if __name__ == "__main__":

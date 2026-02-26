@@ -294,24 +294,22 @@ provara/
 ├── src/provara/          # Core Python package
 │   ├── bootstrap_v0.py   # Vault initialization
 │   ├── reducer_v0.py     # Deterministic reducer
-│   ├── reducer_v1.py     # Streaming reducer
 │   ├── sync_v0.py        # Sync protocol
-│   ├── plugins.py        # Plugin system
 │   ├── cli.py            # Command-line interface
-│   └── mcp/              # MCP server
-├── tests/                # Test suites
+│   └── mcp.py            # MCP server
+├── tests/                # Core test suites
 │   ├── test_*.py         # Unit tests
-│   ├── fuzz/             # Fuzzing tests
 │   └── fixtures/         # Test fixtures
-├── docs/                 # Documentation
-│   ├── PLUGIN_API.md     # Plugin specification
-│   ├── EXTENSION_REGISTRY.md
-│   └── draft-hunt-provara-protocol-00.xml  # IETF I-D
-├── examples/             # Example code
-│   └── plugins/          # Example plugins
-├── tools/                # Development tools
-│   ├── benchmarks/       # Performance benchmarks
-│   └── ietf/             # I-D build tools
+├── provara-rs/           # Rust implementation
+├── provara-ts/           # TypeScript implementation
+├── formal/               # TLA+ formal specifications
+├── schemas/              # JSON schemas for validation
+├── test_vectors/         # Cross-language compliance vectors
+├── docs/                 # Documentation & architectural specs
+├── tools/                # Development & build tools
+│   ├── psmc/             # Agent memory extensions
+│   ├── ietf/             # I-D build tools
+│   └── benchmarks/       # Performance benchmarks
 ├── playground/           # Browser playground
 └── PROTOCOL_PROFILE.txt  # Frozen specification
 ```
@@ -322,11 +320,9 @@ provara/
 |--------|---------|
 | `bootstrap_v0.py` | Vault initialization with Ed25519 keys |
 | `reducer_v0.py` | Full replay reducer (deterministic) |
-| `reducer_v1.py` | Streaming reducer (performance) |
 | `sync_v0.py` | Multi-device sync with fork detection |
-| `plugins.py` | Plugin registry and discovery |
 | `cli.py` | Unified CLI interface |
-| `mcp/` | Model Context Protocol server |
+| `mcp.py` | Model Context Protocol server |
 
 ### PROTOCOL_PROFILE.txt
 

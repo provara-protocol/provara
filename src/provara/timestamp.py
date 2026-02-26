@@ -8,10 +8,13 @@ for legal admissibility and independent temporal proof.
 import base64
 import hashlib
 import json
+import logging
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+logger = logging.getLogger(__name__)
 
 from .backpack_signing import load_private_key_b64, sign_event
 from .canonical_json import canonical_dumps, canonical_hash
@@ -103,7 +106,7 @@ def record_timestamp_anchor(
     state = reducer.export_state()
     state_hash = state["metadata"]["state_hash"]
     
-    print(f"Anchoring state hash: {state_hash}")
+    logger.info(f"Anchoring state hash: {state_hash}")
     
     # 2. Get RFC 3161 timestamp
     tsr_bytes = get_rfc3161_timestamp(state_hash, tsa_url)

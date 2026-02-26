@@ -24,7 +24,7 @@ jobs:
           pip install -e .
 
       - name: Run benchmarks (informational)
-        run: python tools/benchmarks/benchmark.py
+        run: PYTHONPATH=src python tools/benchmarks/benchmark.py
 
       - name: Upload benchmark artifact
         if: always()

@@ -111,3 +111,6 @@ playground/src/**/*.d.ts.map
 wasm-pack*.tar.gz
 wasm-pack-*/
 rust-lld.exe
+
+# Cloudflare build cache
+.wrangler/

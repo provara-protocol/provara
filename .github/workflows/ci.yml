@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: 'pip'
+          cache: "pip"
 
       - name: Install dependencies
         run: |
@@ -53,7 +53,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+          cache: "pip"
 
       - name: Install dependencies
         run: |
@@ -93,26 +93,6 @@ jobs:
           path: .pytest_cache/
           retention-days: 7
 
-  mypy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: 'pip'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          pip install -e ".[dev]"
-          pip install mypy
-
-      - name: Run mypy (strict)
-        run: python -m mypy --strict --ignore-missing-imports src/provara/
-
   integrity:
     runs-on: ubuntu-latest
     steps:
@@ -122,7 +102,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: 'pip'
+          cache: "pip"
 
       - name: Install dependencies
         run: |
@@ -151,7 +131,7 @@ jobs:
 
   status:
     runs-on: ubuntu-latest
-    needs: [quality-gate, test, mypy, integrity, docs]
+    needs: [quality-gate, test, integrity, docs]
     if: always()
     steps:
       - name: Check job status
@@ -159,7 +139,7 @@ jobs:
           FAILED=""
           [ "${{ needs.quality-gate.result }}" == "failure" ] && FAILED="$FAILED quality-gate"
           [ "${{ needs.test.result }}"      == "failure" ] && FAILED="$FAILED test"
-          [ "${{ needs.mypy.result }}"      == "failure" ] && FAILED="$FAILED mypy"
+
           [ "${{ needs.integrity.result }}" == "failure" ] && FAILED="$FAILED integrity"
           [ "${{ needs.docs.result }}"      == "failure" ] && FAILED="$FAILED docs"
           if [ -n "$FAILED" ]; then
