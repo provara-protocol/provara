@@ -1125,6 +1125,44 @@ def list_conflicts(vault: Path) -> Dict[str, Any]:
     return state.get("contested", {})
 
 
+def index_vault(vault: Path) -> dict:
+    """Build or rebuild vault.sqlite from events.ndjson (backfill for old vaults)."""
+    events = _read_ndjson(vault_path(vault, "events", "events.ndjson"))
+    conn = _init_vault_sqlite(vault)
+    inserted = 0
+    for event in events:
+        data = event.get("data", {})
+        tags = event.get("tags", [])
+        try:
+            conn.execute(
+                """INSERT OR IGNORE INTO events
+                   (event_id, type, timestamp, payload,
+                    actor, actor_key_id, namespace, ts_logical,
+                    prev_event_hash, sig, raw_canonical,
+                    hash, prev_hash, tags, source_format)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    event["id"],
+                    event["type"],
+                    event["timestamp"],
+                    json.dumps(data, sort_keys=True, separators=(",", ":")),
+                    None, None, None,
+                    event.get("seq"),
+                    None, None, None,
+                    event.get("hash", ""),
+                    event.get("prev_hash"),
+                    json.dumps(tags) if tags else None,
+                    "psmc",
+                ),
+            )
+            inserted += 1
+        except sqlite3.IntegrityError:
+            pass
+    conn.commit()
+    conn.close()
+    return {"count": inserted}
+
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -1179,6 +1217,9 @@ def main():
     # seed (convenience: populate example entries)
     sub.add_parser("seed", help="Populate vault with example entries")
 
+    # index
+    sub.add_parser("index", help="Build/rebuild vault.sqlite from existing ndjson")
+
     args = parser.parse_args()
     vault = Path(args.vault).resolve()
 
@@ -1232,6 +1273,10 @@ def main():
 
     elif args.command == "seed":
         seed_examples(vault)
+
+    elif args.command == "index":
+        result = index_vault(vault)
+        print(f"Indexed {result['count']} events into vault.sqlite")
 
     else:
         parser.print_help()

@@ -783,3 +783,37 @@ class TestSqliteTimeline:
         psmc.append_event(vault, "note", {"title": "untagged"})
         results = psmc.query_timeline(vault, tags="important")
         assert len(results) == 1
+
+
+# ---------------------------------------------------------------------------
+# SQLite Index (backfill from ndjson)
+# ---------------------------------------------------------------------------
+class TestSqliteIndex:
+    def test_index_creates_sqlite_from_ndjson(self, tmp_path):
+        """index command backfills vault.sqlite from existing ndjson-only vault."""
+        # Create vault without sqlite (simulate old vault)
+        v = tmp_path / "old_vault"
+        psmc.init_vault(v)
+        # Remove the sqlite that init now creates
+        (v / "vault.sqlite").unlink()
+        assert not (v / "vault.sqlite").exists()
+
+        # Add some events (ndjson only, since sqlite is gone)
+        for i in range(3):
+            psmc.append_event(v, "note", {"n": i})
+
+        # Run index
+        result = psmc.index_vault(v)
+        assert (v / "vault.sqlite").exists()
+        assert result["count"] == 3
+
+    def test_index_idempotent(self, vault):
+        """Running index twice doesn't duplicate events."""
+        import sqlite3
+        psmc.append_event(vault, "note", {"title": "test"})
+        psmc.index_vault(vault)
+        psmc.index_vault(vault)
+        conn = sqlite3.connect(str(vault / "vault.sqlite"))
+        count = conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+        assert count == 1
+        conn.close()
