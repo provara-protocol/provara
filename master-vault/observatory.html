@@ -147,6 +147,145 @@
     #app > *:not(:last-child) {
       margin-bottom: 24px;
     }
+
+    /* ---- Zone 1: Status Bar ---- */
+    #zone-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--k-border);
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .status-brand {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--k-text-bright);
+      letter-spacing: -0.02em;
+    }
+    .status-brand span { color: var(--k-accent); }
+    .status-stats {
+      display: flex;
+      gap: 20px;
+    }
+    .stat {
+      font-family: var(--k-mono);
+      font-size: 0.75rem;
+      color: var(--k-text-muted);
+    }
+    .stat strong {
+      color: var(--k-text);
+      font-weight: 500;
+    }
+    .status-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .risk-badge {
+      font-family: var(--k-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .risk-low { background: rgba(0,229,160,0.15); color: var(--k-accent); border: 1px solid rgba(0,229,160,0.3); }
+    .risk-medium { background: rgba(255,136,0,0.15); color: var(--k-orange); border: 1px solid rgba(255,136,0,0.3); }
+    .risk-high { background: rgba(255,68,102,0.15); color: var(--k-red); border: 1px solid rgba(255,68,102,0.3); }
+
+    /* ---- Zone 2: Macro Regime + Risk Signals ---- */
+    .macro-risk-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 768px) {
+      .macro-risk-grid { grid-template-columns: 1fr; }
+    }
+    .regime-value {
+      font-family: var(--k-mono);
+      font-size: 2.5rem;
+      font-weight: 700;
+      line-height: 1;
+      margin: 12px 0 8px;
+    }
+    .regime-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .regime-expansion { background: rgba(0,229,160,0.15); color: var(--k-accent); }
+    .regime-caution { background: rgba(255,136,0,0.15); color: var(--k-orange); }
+    .regime-recession { background: rgba(255,68,102,0.15); color: var(--k-red); }
+    .regime-detail {
+      font-family: var(--k-mono);
+      font-size: 0.75rem;
+      color: var(--k-text-muted);
+      margin-top: 4px;
+    }
+    .risk-signals {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .signal-card {
+      background: var(--k-bg-card-alt);
+      border: 1px solid var(--k-border-light);
+      border-radius: 6px;
+      padding: 16px;
+    }
+    .signal-name {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--k-text-muted);
+      margin-bottom: 8px;
+    }
+    .signal-status {
+      font-family: var(--k-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .signal-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .signal-green .signal-dot { background: var(--k-accent); box-shadow: 0 0 6px rgba(0,229,160,0.5); }
+    .signal-yellow .signal-dot { background: var(--k-orange); box-shadow: 0 0 6px rgba(255,136,0,0.5); }
+    .signal-red .signal-dot { background: var(--k-red); box-shadow: 0 0 6px rgba(255,68,102,0.5); }
+    .signal-green .signal-label { color: var(--k-accent); }
+    .signal-yellow .signal-label { color: var(--k-orange); }
+    .signal-red .signal-label { color: var(--k-red); }
+    .combined-score {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--k-border-light);
+      font-family: var(--k-mono);
+      font-size: 0.8rem;
+      color: var(--k-text-muted);
+      text-align: center;
+    }
+    .combined-score strong { font-size: 1.25rem; }
   </style>
 </head>
 <body>
@@ -224,11 +363,197 @@
        ==================================================================== */
 
     function renderStatusBar() {
-      console.log('Zone 1: Status Bar — stub');
+      const count = scalar('SELECT COUNT(*) FROM events') || 0;
+      const sources = scalar('SELECT COUNT(DISTINCT source_format) FROM events') || 0;
+      const minTs = scalar('SELECT MIN(timestamp) FROM events') || '';
+      const maxTs = scalar('SELECT MAX(timestamp) FROM events') || '';
+
+      const minYear = minTs ? new Date(minTs).getFullYear() : '—';
+      const maxYear = maxTs ? new Date(maxTs).getFullYear() : '—';
+      const latestDate = maxTs ? new Date(maxTs).toISOString().slice(0, 10) : '—';
+
+      const el = document.getElementById('zone-status');
+      el.innerHTML = `
+        <div class="status-left">
+          <div class="status-brand">Provara <span>Observatory</span></div>
+          <div class="status-stats">
+            <div class="stat"><strong>${count.toLocaleString()}</strong> events</div>
+            <div class="stat"><strong>${sources}</strong> sources</div>
+            <div class="stat"><strong>${minYear}–${maxYear}</strong> span</div>
+          </div>
+        </div>
+        <div class="status-right">
+          <div class="stat">Updated ${latestDate}</div>
+          <div id="combined-risk-badge" class="risk-badge risk-low">RISK: —</div>
+        </div>
+      `;
     }
 
     function renderMacroRisk() {
-      console.log('Zone 2: Macro Risk — stub');
+      /* ── Macro Regime (left card) ── */
+      const spread_row = query(
+        `SELECT json_extract(payload, '$.spread_2_10') as spread,
+                json_extract(payload, '$.yields."2 Yr"') as y2,
+                json_extract(payload, '$.yields."10 Yr"') as y10,
+                timestamp
+         FROM events
+         WHERE source_format='treasury'
+           AND json_extract(payload, '$.spread_2_10') IS NOT NULL
+         ORDER BY timestamp DESC LIMIT 1`
+      );
+
+      const sr = spread_row.length ? spread_row[0] : { spread: 0, y2: 0, y10: 0, timestamp: '' };
+      const spread = typeof sr.spread === 'number' ? sr.spread : parseFloat(sr.spread) || 0;
+      const y2 = typeof sr.y2 === 'number' ? sr.y2 : parseFloat(sr.y2) || 0;
+      const y10 = typeof sr.y10 === 'number' ? sr.y10 : parseFloat(sr.y10) || 0;
+      const asOf = sr.timestamp ? new Date(sr.timestamp).toISOString().slice(0, 10) : '—';
+
+      let regimeLabel, regimeClass, regimeColor;
+      if (spread < 0) {
+        regimeLabel = 'INVERTED'; regimeClass = 'regime-recession'; regimeColor = 'var(--k-red)';
+      } else if (spread < 0.5) {
+        regimeLabel = 'CAUTION'; regimeClass = 'regime-caution'; regimeColor = 'var(--k-orange)';
+      } else {
+        regimeLabel = 'EXPANSION'; regimeClass = 'regime-expansion'; regimeColor = 'var(--k-accent)';
+      }
+
+      const inversionDays = scalar(
+        `SELECT COUNT(*) FROM events WHERE type='yield.inverted' AND json_extract(payload, '$.spread_2_10') < 0`
+      ) || 0;
+
+      /* ── Risk Signal: Yield Curve ── */
+      let yieldSignalColor, yieldSignalLabel, yieldScore;
+      if (spread < 0) {
+        yieldSignalColor = 'signal-red'; yieldSignalLabel = 'INVERTED'; yieldScore = 4;
+      } else if (spread < 0.5) {
+        yieldSignalColor = 'signal-yellow'; yieldSignalLabel = 'FLATTENING'; yieldScore = 2;
+      } else {
+        yieldSignalColor = 'signal-green'; yieldSignalLabel = 'NORMAL'; yieldScore = 0;
+      }
+
+      /* ── Risk Signal: Cyber Threat ── */
+      const kevRecent = scalar(
+        `SELECT COUNT(*) FROM events WHERE source_format='cisa_kev' AND timestamp >= '2024-01-01'`
+      ) || 0;
+      const kevTotal = scalar(
+        `SELECT COUNT(*) FROM events WHERE source_format='cisa_kev'`
+      ) || 1;
+      const kevRate = kevRecent / kevTotal;
+
+      let cyberSignalColor, cyberSignalLabel, cyberScore;
+      if (kevRate > 0.3) {
+        cyberSignalColor = 'signal-red'; cyberSignalLabel = 'CRITICAL'; cyberScore = 3;
+      } else if (kevRate > 0.15) {
+        cyberSignalColor = 'signal-yellow'; cyberSignalLabel = 'ELEVATED'; cyberScore = 1.5;
+      } else {
+        cyberSignalColor = 'signal-green'; cyberSignalLabel = 'BASELINE'; cyberScore = 0;
+      }
+
+      /* ── Risk Signal: Geopolitical ── */
+      const geoAvg = scalar(
+        `SELECT AVG(json_extract(payload, '$.goldstein_scale')) FROM events WHERE source_format='gdelt' AND json_extract(payload, '$.goldstein_scale') IS NOT NULL`
+      );
+      const geoVal = typeof geoAvg === 'number' ? geoAvg : parseFloat(geoAvg) || 0;
+
+      let geoSignalColor, geoSignalLabel, geoScore;
+      if (geoVal < -3) {
+        geoSignalColor = 'signal-red'; geoSignalLabel = 'HIGH'; geoScore = 2;
+      } else if (geoVal < 0) {
+        geoSignalColor = 'signal-yellow'; geoSignalLabel = 'ELEVATED'; geoScore = 1;
+      } else {
+        geoSignalColor = 'signal-green'; geoSignalLabel = 'STABLE'; geoScore = 0;
+      }
+
+      /* ── Risk Signal: Seismic ── */
+      const seismicMajor = scalar(
+        `SELECT COUNT(*) FROM events WHERE source_format='usgs' AND json_extract(payload, '$.magnitude') >= 6.0`
+      ) || 0;
+
+      let seismicSignalColor, seismicSignalLabel, seismicScore;
+      if (seismicMajor > 0) {
+        seismicSignalColor = 'signal-red'; seismicSignalLabel = 'MAJOR'; seismicScore = 1;
+      } else {
+        seismicSignalColor = 'signal-green'; seismicSignalLabel = 'BASELINE'; seismicScore = 0;
+      }
+
+      /* ── Combined Risk Score ── */
+      const combinedRaw = yieldScore + cyberScore + geoScore + seismicScore;
+      const combined = Math.min(combinedRaw, 10);
+      const combinedFixed = combined.toFixed(1);
+
+      // Update the status bar badge
+      const badge = document.getElementById('combined-risk-badge');
+      if (badge) {
+        badge.classList.remove('risk-low', 'risk-medium', 'risk-high');
+        if (combined >= 6) {
+          badge.classList.add('risk-high');
+          badge.textContent = `RISK: ${combinedFixed}`;
+        } else if (combined >= 3) {
+          badge.classList.add('risk-medium');
+          badge.textContent = `RISK: ${combinedFixed}`;
+        } else {
+          badge.classList.add('risk-low');
+          badge.textContent = `RISK: ${combinedFixed}`;
+        }
+      }
+
+      /* ── Combined score color ── */
+      let combinedColor;
+      if (combined >= 6) combinedColor = 'var(--k-red)';
+      else if (combined >= 3) combinedColor = 'var(--k-orange)';
+      else combinedColor = 'var(--k-accent)';
+
+      /* ── Render ── */
+      const el = document.getElementById('zone-macro-risk');
+      el.innerHTML = `
+        <div class="macro-risk-grid">
+          <div class="card">
+            <div class="card-title">Macro Regime</div>
+            <span class="regime-label ${regimeClass}">${regimeLabel}</span>
+            <div class="regime-value" style="color:${regimeColor}">${spread >= 0 ? '+' : ''}${spread.toFixed(2)}%</div>
+            <div class="regime-detail">2Yr ${y2.toFixed(2)}% · 10Yr ${y10.toFixed(2)}%</div>
+            <div class="regime-detail">${inversionDays} inversion day${inversionDays !== 1 ? 's' : ''} recorded</div>
+            <div class="regime-detail">As of ${asOf}</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Risk Signal Dashboard</div>
+            <div class="risk-signals">
+              <div class="signal-card">
+                <div class="signal-name">Yield Curve</div>
+                <div class="signal-status ${yieldSignalColor}">
+                  <span class="signal-dot"></span>
+                  <span class="signal-label">${yieldSignalLabel}</span>
+                </div>
+              </div>
+              <div class="signal-card">
+                <div class="signal-name">Cyber Threat</div>
+                <div class="signal-status ${cyberSignalColor}">
+                  <span class="signal-dot"></span>
+                  <span class="signal-label">${cyberSignalLabel}</span>
+                </div>
+              </div>
+              <div class="signal-card">
+                <div class="signal-name">Geopolitical</div>
+                <div class="signal-status ${geoSignalColor}">
+                  <span class="signal-dot"></span>
+                  <span class="signal-label">${geoSignalLabel}</span>
+                </div>
+              </div>
+              <div class="signal-card">
+                <div class="signal-name">Seismic</div>
+                <div class="signal-status ${seismicSignalColor}">
+                  <span class="signal-dot"></span>
+                  <span class="signal-label">${seismicSignalLabel}</span>
+                </div>
+              </div>
+            </div>
+            <div class="combined-score">
+              Combined Risk &nbsp;<strong style="color:${combinedColor}">${combinedFixed}</strong> / 10
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     function renderYieldCurve() {
