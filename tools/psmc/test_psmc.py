@@ -718,3 +718,34 @@ class TestProvaraReducerIntegration:
         assert provara_event["type"] in ["OBSERVATION", "ASSERTION"]
         assert "actor" in provara_event
         assert "sig" in provara_event
+
+
+# ---------------------------------------------------------------------------
+# SQLite Queries (show/count via sqlite)
+# ---------------------------------------------------------------------------
+class TestSqliteQueries:
+    def test_count_uses_sqlite(self, vault):
+        """count_events returns correct count via sqlite."""
+        for i in range(3):
+            psmc.append_event(vault, "note", {"n": i})
+        assert psmc.count_events(vault) == 3
+
+    def test_show_filters_by_type(self, vault, capsys):
+        """show_events --type filters correctly."""
+        psmc.append_event(vault, "note", {"title": "a note"})
+        psmc.append_event(vault, "decision", {"title": "a decision"})
+        psmc.append_event(vault, "note", {"title": "another note"})
+        psmc.show_events(vault, event_type="note")
+        output = capsys.readouterr().out
+        lines = [l for l in output.strip().split("\n") if l.strip()]
+        assert len(lines) == 2
+        assert "decision" not in output
+
+    def test_show_last_n(self, vault, capsys):
+        """show_events --last N shows only last N events."""
+        for i in range(10):
+            psmc.append_event(vault, "note", {"n": i})
+        psmc.show_events(vault, last_n=3)
+        output = capsys.readouterr().out
+        lines = [l for l in output.strip().split("\n") if l.strip()]
+        assert len(lines) == 3

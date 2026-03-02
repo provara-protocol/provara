@@ -491,6 +491,13 @@ def get_last_hash(vault: Path) -> str:
 
 
 def count_events(vault: Path) -> int:
+    conn = _open_vault_sqlite(vault)
+    if conn is not None:
+        try:
+            return conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+        finally:
+            conn.close()
+    # Fallback to ndjson scanning
     events_file = vault_path(vault, "events", "events.ndjson")
     count = 0
     with open(events_file, "r", encoding="utf-8") as f:
@@ -665,14 +672,52 @@ def _read_ndjson(filepath: Path) -> list[dict]:
 
 
 def show_events(vault: Path, last_n: int | None = None, event_type: str | None = None) -> None:
-    events = _read_ndjson(vault_path(vault, "events", "events.ndjson"))
+    conn = _open_vault_sqlite(vault)
+    if conn is not None:
+        try:
+            clauses = []
+            params: list = []
+            if event_type:
+                clauses.append("type = ?")
+                params.append(event_type)
+            where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
 
+            if last_n:
+                # Get total matching count, then offset
+                count = conn.execute(
+                    f"SELECT COUNT(*) FROM events {where}", params
+                ).fetchone()[0]
+                offset = max(0, count - last_n)
+                rows = conn.execute(
+                    f"SELECT ts_logical, timestamp, type, payload FROM events {where} "
+                    f"ORDER BY seq ASC LIMIT ? OFFSET ?",
+                    params + [last_n, offset],
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    f"SELECT ts_logical, timestamp, type, payload FROM events {where} "
+                    f"ORDER BY seq ASC",
+                    params,
+                ).fetchall()
+
+            for row in rows:
+                ts = (row[1] or "?")[:19]
+                etype = row[2] or "?"
+                seq = row[0] if row[0] is not None else "?"
+                data_preview = row[3] or "{}"
+                if len(data_preview) > 80:
+                    data_preview = data_preview[:77] + "..."
+                print(f"[{seq:>4}] {ts}  {etype:<12}  {data_preview}")
+            return
+        finally:
+            conn.close()
+
+    # Fallback to ndjson
+    events = _read_ndjson(vault_path(vault, "events", "events.ndjson"))
     if event_type:
         events = [e for e in events if e.get("type") == event_type]
-
     if last_n:
         events = events[-last_n:]
-
     for e in events:
         ts = e.get("timestamp", "?")[:19]
         etype = e.get("type", "?")
