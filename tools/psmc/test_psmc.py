@@ -60,7 +60,7 @@ class TestInit:
 
     def test_metadata_contents(self, vault):
         meta = json.loads((vault / "psmc.json").read_text(encoding="utf-8"))
-        assert meta["version"] == "1.0.0"
+        assert meta["version"] == "1.1.0"
         assert meta["hash_algo"] == "sha256"
         assert meta["sig_algo"] == "ed25519"
         assert meta["provara_compatible"] is True
@@ -817,3 +817,16 @@ class TestSqliteIndex:
         count = conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
         assert count == 1
         conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Query CLI
+# ---------------------------------------------------------------------------
+class TestQueryCli:
+    def test_query_cli_type_filter(self, vault):
+        """CLI query --type filters events."""
+        psmc.append_event(vault, "note", {"title": "n1"})
+        psmc.append_event(vault, "decision", {"title": "d1"})
+        results = psmc.query_timeline(vault, event_type="decision")
+        assert len(results) == 1
+        assert results[0]["type"] == "decision"

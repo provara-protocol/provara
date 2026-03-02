@@ -1,23 +1,25 @@
 #!/usr/bin/env python3
 """
-Personal Sovereign Memory Container (PSMC) v1.0
+Personal Sovereign Memory Container (PSMC) v1.1
 ================================================
 A minimal, file-first, append-only event log with cryptographic integrity.
 Built on Provara Protocol primitives. Designed for 20+ year durability.
 
-No database. No blockchain. No cloud.
+Dual-format storage: NDJSON (source of truth) + SQLite (fast queries).
 
 Cryptographic foundation: Provara SNP_Core (Ed25519 + SHA-256 + RFC 8785 canonical JSON)
 Single external dependency: cryptography >= 41.0
-Formats: UTF-8 NDJSON, PEM keys, plain text digests
+Formats: UTF-8 NDJSON, SQLite (WAL mode), PEM keys, plain text digests
 License: Apache 2.0
 
 Usage:
     python psmc.py init
     python psmc.py append --type identity --data '{"name":"Alice"}'
     python psmc.py verify
-    python psmc.py digest --weeks 1
     python psmc.py show [--last N] [--type TYPE]
+    python psmc.py query --type note --since 2026-01-01
+    python psmc.py index
+    python psmc.py digest --weeks 1
     python psmc.py export --format markdown
     python psmc.py rotate-key
 """
@@ -65,7 +67,7 @@ from cryptography.exceptions import InvalidSignature  # noqa: E402
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 HASH_ALGO = "sha256"
 SIG_ALGO = "ed25519"
 GENESIS_PREV = "0" * 64  # null hash for first event
@@ -1044,6 +1046,9 @@ def sync_vaults(local_vault: Path, remote_vault: Path) -> dict:
     _write_ndjson(local_events_file, all_events)
     _write_ndjson(local_chain_file, all_chain)
 
+    # Rebuild sqlite index after sync
+    index_vault(local_vault)
+
     return {"success": True, "merged": len(new_events)}
 
 
@@ -1220,6 +1225,14 @@ def main():
     # index
     sub.add_parser("index", help="Build/rebuild vault.sqlite from existing ndjson")
 
+    # query
+    p_query = sub.add_parser("query", help="Query events with filters")
+    p_query.add_argument("--type", dest="query_type", help="Filter by event type")
+    p_query.add_argument("--since", help="Events after this ISO timestamp")
+    p_query.add_argument("--until", help="Events before this ISO timestamp")
+    p_query.add_argument("--tags", help="Filter by tag substring")
+    p_query.add_argument("--limit", type=int, help="Max events to return")
+
     args = parser.parse_args()
     vault = Path(args.vault).resolve()
 
@@ -1277,6 +1290,29 @@ def main():
     elif args.command == "index":
         result = index_vault(vault)
         print(f"Indexed {result['count']} events into vault.sqlite")
+
+    elif args.command == "query":
+        results = query_timeline(
+            vault,
+            event_type=args.query_type,
+            start_time=args.since,
+            end_time=args.until,
+            tags=args.tags,
+            limit=args.limit,
+        )
+        for e in results:
+            ts = (e.get("timestamp", "?") or "?")[:19]
+            etype = e.get("type", "?")
+            seq = e.get("seq") or e.get("ts_logical") or "?"
+            data = e.get("data") or e.get("payload", {})
+            if isinstance(data, str):
+                data_preview = data
+            else:
+                data_preview = json.dumps(data, ensure_ascii=False)
+            if len(data_preview) > 80:
+                data_preview = data_preview[:77] + "..."
+            print(f"[{seq:>4}] {ts}  {etype:<12}  {data_preview}")
+        print(f"\n{len(results)} events found.")
 
     else:
         parser.print_help()
