@@ -1060,24 +1060,62 @@ def query_timeline(
     start_time: Optional[str] = None,
     end_time: Optional[str] = None,
     limit: Optional[int] = None,
+    tags: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
-    """Query vault events with filters."""
-    events = _read_ndjson(vault_path(vault, "events", "events.ndjson"))
+    """Query vault events with filters. Uses sqlite if available."""
+    conn = _open_vault_sqlite(vault)
+    if conn is not None:
+        try:
+            clauses: list[str] = []
+            params: list = []
+            if event_type:
+                clauses.append("type = ?")
+                params.append(event_type)
+            if start_time:
+                clauses.append("timestamp >= ?")
+                params.append(start_time)
+            if end_time:
+                clauses.append("timestamp <= ?")
+                params.append(end_time)
+            if tags:
+                clauses.append("tags LIKE ?")
+                params.append(f"%{tags}%")
+            where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
+            limit_clause = f"LIMIT {limit}" if limit else ""
+            rows = conn.execute(
+                f"SELECT * FROM events {where} ORDER BY seq ASC {limit_clause}",
+                params,
+            ).fetchall()
+            results = []
+            for row in rows:
+                d = dict(row)
+                try:
+                    d["data"] = json.loads(d.get("payload", "{}"))
+                except (json.JSONDecodeError, TypeError):
+                    d["data"] = {}
+                if d.get("tags"):
+                    try:
+                        d["tags"] = json.loads(d["tags"])
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+                d["id"] = d.pop("event_id", None)
+                results.append(d)
+            return results
+        finally:
+            conn.close()
 
+    # Fallback to ndjson scanning
+    events = _read_ndjson(vault_path(vault, "events", "events.ndjson"))
     if event_type:
         events = [e for e in events if e.get("type") == event_type]
-
     if start_time:
         start_dt = datetime.fromisoformat(start_time)
         events = [e for e in events if datetime.fromisoformat(e["timestamp"]) >= start_dt]
-
     if end_time:
         end_dt = datetime.fromisoformat(end_time)
         events = [e for e in events if datetime.fromisoformat(e["timestamp"]) <= end_dt]
-
     if limit:
         events = events[-limit:]
-
     return events
 
 

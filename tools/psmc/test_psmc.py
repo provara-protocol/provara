@@ -749,3 +749,37 @@ class TestSqliteQueries:
         output = capsys.readouterr().out
         lines = [l for l in output.strip().split("\n") if l.strip()]
         assert len(lines) == 3
+
+
+# ---------------------------------------------------------------------------
+# SQLite Timeline Queries
+# ---------------------------------------------------------------------------
+class TestSqliteTimeline:
+    def test_query_by_type(self, vault):
+        psmc.append_event(vault, "note", {"title": "n1"})
+        psmc.append_event(vault, "decision", {"title": "d1"})
+        results = psmc.query_timeline(vault, event_type="note")
+        assert len(results) == 1
+        assert results[0]["type"] == "note"
+
+    def test_query_by_time_range(self, vault):
+        from datetime import datetime, timezone, timedelta
+        psmc.append_event(vault, "note", {"title": "old"})
+        results = psmc.query_timeline(
+            vault,
+            start_time=(datetime.now(timezone.utc) - timedelta(hours=1)).isoformat(),
+            end_time=(datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
+        )
+        assert len(results) == 1
+
+    def test_query_with_limit(self, vault):
+        for i in range(10):
+            psmc.append_event(vault, "note", {"n": i})
+        results = psmc.query_timeline(vault, limit=3)
+        assert len(results) == 3
+
+    def test_query_by_tags(self, vault):
+        psmc.append_event(vault, "note", {"title": "tagged"}, tags=["important", "test"])
+        psmc.append_event(vault, "note", {"title": "untagged"})
+        results = psmc.query_timeline(vault, tags="important")
+        assert len(results) == 1
