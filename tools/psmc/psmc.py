@@ -25,6 +25,7 @@ Usage:
 import argparse
 import json
 import os
+import sqlite3
 import sys
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -205,6 +206,66 @@ def vault_path(base: Path, *parts) -> Path:
 
 
 # ---------------------------------------------------------------------------
+# SQLite helpers (unified schema from migrate_ndjson)
+# ---------------------------------------------------------------------------
+_SQLITE_SCHEMA = """
+CREATE TABLE IF NOT EXISTS vault_meta (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS events (
+    seq             INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id        TEXT    NOT NULL UNIQUE,
+    type            TEXT    NOT NULL,
+    timestamp       TEXT    NOT NULL,
+    payload         TEXT    NOT NULL,
+    actor           TEXT,
+    actor_key_id    TEXT,
+    namespace       TEXT,
+    ts_logical      INTEGER,
+    prev_event_hash TEXT,
+    sig             TEXT,
+    raw_canonical   TEXT,
+    hash            TEXT,
+    prev_hash       TEXT,
+    tags            TEXT,
+    source_format   TEXT    NOT NULL DEFAULT 'psmc'
+);
+
+CREATE INDEX IF NOT EXISTS idx_events_type ON events(type);
+CREATE INDEX IF NOT EXISTS idx_events_timestamp ON events(timestamp);
+CREATE INDEX IF NOT EXISTS idx_events_actor ON events(actor);
+CREATE INDEX IF NOT EXISTS idx_events_tags ON events(tags);
+CREATE INDEX IF NOT EXISTS idx_events_format ON events(source_format);
+"""
+
+
+def _init_vault_sqlite(vault: Path) -> sqlite3.Connection:
+    """Create and initialize vault.sqlite with unified schema."""
+    db_path = vault_path(vault, "vault.sqlite")
+    conn = sqlite3.connect(str(db_path))
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA synchronous=NORMAL;")
+    conn.execute("PRAGMA busy_timeout=5000;")
+    conn.executescript(_SQLITE_SCHEMA)
+    conn.commit()
+    return conn
+
+
+def _open_vault_sqlite(vault: Path) -> sqlite3.Connection | None:
+    """Open vault.sqlite if it exists. Returns None if missing."""
+    db_path = vault_path(vault, "vault.sqlite")
+    if not db_path.exists():
+        return None
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA busy_timeout=5000;")
+    return conn
+
+
+# ---------------------------------------------------------------------------
 # Hashing (delegates to Provara canonical_json module)
 # ---------------------------------------------------------------------------
 def compute_event_hash(event: dict) -> str:
@@ -342,6 +403,10 @@ def init_vault(vault: Path) -> None:
     # Create empty event log and chain
     vault_path(vault, "events", "events.ndjson").touch()
     vault_path(vault, "chain", "chain.ndjson").touch()
+
+    # Create SQLite database with unified schema
+    conn = _init_vault_sqlite(vault)
+    conn.close()
 
     # Write README for future readers
     readme = vault_path(vault, "README.txt")

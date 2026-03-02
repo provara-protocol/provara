@@ -88,6 +88,39 @@ class TestInit:
 
 
 # ---------------------------------------------------------------------------
+# SQLite Initialization
+# ---------------------------------------------------------------------------
+class TestSqliteInit:
+    def test_vault_sqlite_created_on_init(self, vault):
+        """init_vault creates vault.sqlite with unified schema."""
+        assert (vault / "vault.sqlite").exists()
+
+    def test_vault_sqlite_has_tables(self, vault):
+        import sqlite3
+        conn = sqlite3.connect(str(vault / "vault.sqlite"))
+        tables = [r[0] for r in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        ).fetchall()]
+        assert "events" in tables
+        assert "vault_meta" in tables
+        conn.close()
+
+    def test_vault_sqlite_wal_mode(self, vault):
+        import sqlite3
+        conn = sqlite3.connect(str(vault / "vault.sqlite"))
+        mode = conn.execute("PRAGMA journal_mode").fetchone()[0]
+        assert mode == "wal"
+        conn.close()
+
+    def test_vault_sqlite_empty_on_init(self, vault):
+        import sqlite3
+        conn = sqlite3.connect(str(vault / "vault.sqlite"))
+        count = conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+        assert count == 0
+        conn.close()
+
+
+# ---------------------------------------------------------------------------
 # Event Appending
 # ---------------------------------------------------------------------------
 class TestAppend:
