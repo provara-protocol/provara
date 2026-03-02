@@ -3,6 +3,7 @@ import sqlite3
 import json
 import pytest
 from pathlib import Path
+from unittest.mock import patch, MagicMock
 
 # Allow importing from tools/
 import sys
@@ -44,4 +45,52 @@ def test_insert_dedup(tmp_path):
     assert r2 is False
     count = conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
     assert count == 1
+    conn.close()
+
+
+MOCK_COINGECKO_OHLC = [
+    [1704067200000, 42000.0, 42500.0, 41800.0, 42200.0],  # 2024-01-01
+    [1704153600000, 42200.0, 43000.0, 42100.0, 42800.0],  # 2024-01-02
+]
+
+def test_import_coingecko_ohlc(tmp_path):
+    from import_market_data import init_db, import_coingecko_ohlc
+    db = tmp_path / "test.sqlite"
+    conn = init_db(db)
+
+    mock_resp = MagicMock()
+    mock_resp.ok = True
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = MOCK_COINGECKO_OHLC
+
+    with patch("import_market_data.requests.get", return_value=mock_resp):
+        count = import_coingecko_ohlc(conn, coins=["bitcoin"], days=7)
+
+    assert count == 2
+    rows = conn.execute(
+        "SELECT * FROM events WHERE source_format='coingecko' ORDER BY timestamp"
+    ).fetchall()
+    assert len(rows) == 2
+    assert rows[0]["type"] == "price.ohlcv"
+    payload = json.loads(rows[0]["payload"])
+    assert payload["coin"] == "bitcoin"
+    assert payload["close"] == 42200.0
+    conn.close()
+
+def test_coingecko_dedup(tmp_path):
+    from import_market_data import init_db, import_coingecko_ohlc
+    db = tmp_path / "test.sqlite"
+    conn = init_db(db)
+
+    mock_resp = MagicMock()
+    mock_resp.ok = True
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = MOCK_COINGECKO_OHLC
+
+    with patch("import_market_data.requests.get", return_value=mock_resp):
+        c1 = import_coingecko_ohlc(conn, coins=["bitcoin"], days=7)
+        c2 = import_coingecko_ohlc(conn, coins=["bitcoin"], days=7)
+
+    assert c1 == 2
+    assert c2 == 0  # all dupes skipped
     conn.close()

@@ -20,6 +20,8 @@ import time
 import os
 from pathlib import Path
 
+import requests
+
 SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS vault_meta (
     key   TEXT PRIMARY KEY,
@@ -74,7 +76,7 @@ def _insert(conn, event_id, etype, ts, payload, tags=None, source="imported", ac
             etype,
             ts,
             json.dumps(payload, sort_keys=True, separators=(",", ":"))
-            if isinstance(payload, dict) else payload,
+            if not isinstance(payload, str) else payload,
             json.dumps(tags) if tags else None,
             source,
             actor,
@@ -90,3 +92,47 @@ def _get_last_timestamp(conn, event_type, source):
         (event_type, source),
     ).fetchone()
     return row[0] if row and row[0] else None
+
+
+COINGECKO_BASE = "https://api.coingecko.com/api/v3"
+DEFAULT_COINS = ["bitcoin", "ethereum", "solana"]
+
+
+def import_coingecko_ohlc(conn, coins=None, days=90):
+    """Import crypto OHLC from CoinGecko. Returns count of new events."""
+    coins = coins or DEFAULT_COINS
+    total = 0
+
+    for coin in coins:
+        time.sleep(2.1)  # respect 30 req/min rate limit
+        resp = requests.get(
+            f"{COINGECKO_BASE}/coins/{coin}/ohlc",
+            params={"vs_currency": "usd", "days": days},
+            timeout=30,
+        )
+        if not resp.ok:
+            print(f"  WARN  CoinGecko {coin}: HTTP {resp.status_code}")
+            continue
+
+        candles = resp.json()
+        for candle in candles:
+            ts_ms, o, h, l, c = candle
+            ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(ts_ms / 1000))
+            event_id = f"cg-{coin}-{ts_ms}"
+
+            payload = {
+                "coin": coin,
+                "open": o,
+                "high": h,
+                "low": l,
+                "close": c,
+                "vs_currency": "usd",
+            }
+
+            if _insert(conn, event_id, "price.ohlcv", ts, payload,
+                       tags=["crypto", coin, "ohlc"], source="coingecko"):
+                total += 1
+
+        conn.commit()
+
+    return total
