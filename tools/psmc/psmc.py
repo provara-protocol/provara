@@ -265,6 +265,44 @@ def _open_vault_sqlite(vault: Path) -> sqlite3.Connection | None:
     return conn
 
 
+def _sqlite_insert_event(vault: Path, event: dict) -> None:
+    """Insert a PSMC event into vault.sqlite."""
+    conn = _open_vault_sqlite(vault)
+    if conn is None:
+        return  # sqlite not available, ndjson-only vault
+    try:
+        data = event.get("data", {})
+        tags = event.get("tags", [])
+        conn.execute(
+            """INSERT OR IGNORE INTO events
+               (event_id, type, timestamp, payload,
+                actor, actor_key_id, namespace, ts_logical,
+                prev_event_hash, sig, raw_canonical,
+                hash, prev_hash, tags, source_format)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                event["id"],
+                event["type"],
+                event["timestamp"],
+                json.dumps(data, sort_keys=True, separators=(",", ":")),
+                None,  # actor (PSMC doesn't track per-event actors)
+                None,  # actor_key_id
+                None,  # namespace
+                event.get("seq"),  # ts_logical
+                None,  # prev_event_hash (Backpack field)
+                None,  # sig (Backpack field)
+                None,  # raw_canonical (Backpack field)
+                event.get("hash", ""),
+                event.get("prev_hash"),
+                json.dumps(tags) if tags else None,
+                "psmc",
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
 # ---------------------------------------------------------------------------
 # Hashing (delegates to Provara canonical_json module)
 # ---------------------------------------------------------------------------
@@ -512,6 +550,9 @@ def append_event(vault: Path, event_type: str, data: dict, tags: list[str] | Non
         emit_provara_event(vault, event)
         # Run reducer to update state
         run_provara_reducer(vault)
+
+    # Dual-write to SQLite
+    _sqlite_insert_event(vault, event)
 
     return event
 

@@ -121,6 +121,56 @@ class TestSqliteInit:
 
 
 # ---------------------------------------------------------------------------
+# SQLite Dual-Write
+# ---------------------------------------------------------------------------
+class TestSqliteDualWrite:
+    def test_append_writes_to_sqlite(self, vault):
+        """append_event inserts into vault.sqlite."""
+        import sqlite3
+        event = psmc.append_event(vault, "note", {"title": "test note"})
+        conn = sqlite3.connect(str(vault / "vault.sqlite"))
+        row = conn.execute("SELECT * FROM events WHERE event_id = ?", (event["id"],)).fetchone()
+        assert row is not None
+        conn.close()
+
+    def test_sqlite_event_fields(self, vault):
+        """SQLite row has correct type, timestamp, payload, hash, source_format."""
+        import sqlite3
+        event = psmc.append_event(vault, "decision", {"title": "test"}, tags=["tag1", "tag2"])
+        conn = sqlite3.connect(str(vault / "vault.sqlite"))
+        conn.row_factory = sqlite3.Row
+        row = dict(conn.execute("SELECT * FROM events WHERE event_id = ?", (event["id"],)).fetchone())
+        assert row["type"] == "decision"
+        assert row["hash"] == event["hash"]
+        assert row["prev_hash"] == event["prev_hash"]
+        assert row["source_format"] == "psmc"
+        assert row["ts_logical"] == event["seq"]
+        assert "tag1" in row["tags"]
+        conn.close()
+
+    def test_sqlite_count_matches_ndjson(self, vault):
+        """After multiple appends, sqlite count matches ndjson count."""
+        import sqlite3
+        for i in range(5):
+            psmc.append_event(vault, "note", {"n": i})
+        ndjson_count = psmc.count_events(vault)
+        conn = sqlite3.connect(str(vault / "vault.sqlite"))
+        sqlite_count = conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+        assert sqlite_count == ndjson_count == 5
+        conn.close()
+
+    def test_sqlite_payload_is_json(self, vault):
+        """Payload column stores JSON-serialized data."""
+        import sqlite3, json
+        psmc.append_event(vault, "belief", {"confidence": 0.9, "statement": "test"})
+        conn = sqlite3.connect(str(vault / "vault.sqlite"))
+        row = conn.execute("SELECT payload FROM events").fetchone()
+        payload = json.loads(row[0])
+        assert payload["confidence"] == 0.9
+        conn.close()
+
+
+# ---------------------------------------------------------------------------
 # Event Appending
 # ---------------------------------------------------------------------------
 class TestAppend:
