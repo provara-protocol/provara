@@ -1135,7 +1135,12 @@ def index_vault(vault: Path) -> dict:
     events = _read_ndjson(vault_path(vault, "events", "events.ndjson"))
     conn = _init_vault_sqlite(vault)
     inserted = 0
+    skipped = 0
     for event in events:
+        # Skip malformed events missing required fields
+        if not event.get("id") or not event.get("type") or not event.get("timestamp"):
+            skipped += 1
+            continue
         data = event.get("data", {})
         tags = event.get("tags", [])
         try:
@@ -1165,7 +1170,7 @@ def index_vault(vault: Path) -> dict:
             pass
     conn.commit()
     conn.close()
-    return {"count": inserted}
+    return {"count": inserted, "skipped": skipped}
 
 
 # ---------------------------------------------------------------------------
