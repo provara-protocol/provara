@@ -257,6 +257,35 @@ def test_import_blockchain_onchain(tmp_path):
 # Task 6: CLI tests
 # ---------------------------------------------------------------------------
 
+def test_merkle_checkpoint(tmp_path):
+    from import_market_data import init_db, _insert, _merkle_checkpoint
+    db = tmp_path / "test.sqlite"
+    conn = init_db(db)
+
+    # Insert some events
+    for i in range(5):
+        _insert(conn, f"evt-{i}", "test", f"2026-01-0{i+1}T00:00:00Z",
+                {"n": i}, source="test")
+    conn.commit()
+
+    # Create checkpoint over all events (from seq 0)
+    merkle = _merkle_checkpoint(conn, 0, "test_run")
+    assert merkle is not None
+    assert len(merkle) == 64  # SHA-256 hex
+
+    # Verify checkpoint event was inserted
+    cp = conn.execute(
+        "SELECT * FROM events WHERE type='integrity.checkpoint'"
+    ).fetchone()
+    assert cp is not None
+    payload = json.loads(cp["payload"])
+    assert payload["merkle_root"] == merkle
+    assert payload["event_count"] == 5
+    assert payload["algorithm"] == "sha256-merkle"
+    assert cp["source_format"] == "checkpoint"
+    conn.close()
+
+
 def test_cli_help():
     result = subprocess.run(
         ["python3", "tools/import_market_data.py", "--help"],

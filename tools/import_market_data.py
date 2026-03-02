@@ -14,10 +14,12 @@ Usage:
     python tools/import_market_data.py --output ~/master-vault/vault.sqlite --backfill
 """
 
+import hashlib
 import json
 import sqlite3
 import time
 import os
+import uuid
 from pathlib import Path
 
 import pandas as pd
@@ -316,6 +318,54 @@ def import_blockchain_onchain(conn, metrics=None, timespan="1year"):
 
 
 # ---------------------------------------------------------------------------
+# Merkle Checkpoint
+# ---------------------------------------------------------------------------
+
+
+def _merkle_checkpoint(conn, before_seq, source_label):
+    """Compute SHA-256 Merkle root over events added since before_seq and insert checkpoint event."""
+    rows = conn.execute(
+        "SELECT event_id FROM events WHERE seq > ? ORDER BY seq",
+        (before_seq,),
+    ).fetchall()
+
+    if not rows:
+        return None
+
+    # Leaf hashes
+    leaves = [hashlib.sha256(r[0].encode()).digest() for r in rows]
+
+    # Build Merkle tree
+    while len(leaves) > 1:
+        if len(leaves) % 2 == 1:
+            leaves.append(leaves[-1])  # duplicate last if odd
+        leaves = [
+            hashlib.sha256(leaves[i] + leaves[i + 1]).digest()
+            for i in range(0, len(leaves), 2)
+        ]
+
+    merkle_root = leaves[0].hex()
+    event_count = len(rows)
+    ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    event_id = f"checkpoint-{uuid.uuid4().hex[:12]}"
+
+    payload = {
+        "merkle_root": merkle_root,
+        "event_count": event_count,
+        "from_seq": before_seq + 1,
+        "to_seq": before_seq + event_count,
+        "source": source_label,
+        "algorithm": "sha256-merkle",
+    }
+
+    _insert(conn, event_id, "integrity.checkpoint", ts, payload,
+            tags=["checkpoint", "merkle", source_label], source="checkpoint",
+            actor="import_market_data")
+    conn.commit()
+    return merkle_root
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
@@ -340,6 +390,7 @@ def main():
 
     conn = init_db(args.output)
     before = conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+    before_seq = conn.execute("SELECT COALESCE(MAX(seq), 0) FROM events").fetchone()[0]
 
     print(f"Importing market data into {args.output}\n")
 
@@ -355,6 +406,12 @@ def main():
             grand_total += count
         except Exception as e:
             print(f"  FAIL  {name}: {e}")
+
+    # Merkle checkpoint over all new events
+    if grand_total > 0:
+        merkle = _merkle_checkpoint(conn, before_seq, args.source)
+        if merkle:
+            print(f"  SEAL  Merkle root: {merkle[:16]}...")
 
     after = conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
     print(f"\n{'='*50}")
