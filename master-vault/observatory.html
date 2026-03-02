@@ -346,6 +346,133 @@
       width: 100% !important;
       height: 100% !important;
     }
+
+    /* ---- Zone 5: SQL Console ---- */
+    .console-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .console-header:hover .card-title { color: var(--k-text); }
+    .console-toggle {
+      font-family: var(--k-mono);
+      font-size: 0.75rem;
+      color: var(--k-text-muted);
+      transition: transform 0.2s;
+    }
+    .console-body { display: none; margin-top: 16px; }
+    .console-body.open { display: block; }
+    .console-toggle.open { transform: rotate(180deg); }
+    .sql-input {
+      width: 100%;
+      min-height: 80px;
+      background: var(--k-bg);
+      border: 1px solid var(--k-border);
+      border-radius: 4px;
+      color: var(--k-accent);
+      font-family: var(--k-mono);
+      font-size: 0.8rem;
+      padding: 12px;
+      resize: vertical;
+      outline: none;
+    }
+    .sql-input:focus {
+      border-color: var(--k-accent);
+      box-shadow: 0 0 0 2px rgba(0,229,160,0.15);
+    }
+    .console-toolbar {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      align-items: center;
+    }
+    .btn-run {
+      font-family: var(--k-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 6px 16px;
+      background: rgba(0,229,160,0.15);
+      color: var(--k-accent);
+      border: 1px solid rgba(0,229,160,0.3);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-run:hover { background: rgba(0,229,160,0.25); }
+    .preset-select {
+      font-family: var(--k-mono);
+      font-size: 0.75rem;
+      padding: 6px 10px;
+      background: var(--k-bg);
+      color: var(--k-text-muted);
+      border: 1px solid var(--k-border);
+      border-radius: 4px;
+      outline: none;
+    }
+    .console-results {
+      margin-top: 12px;
+      max-height: 300px;
+      overflow: auto;
+      font-family: var(--k-mono);
+      font-size: 0.75rem;
+    }
+    .console-results table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .console-results th {
+      text-align: left;
+      padding: 6px 10px;
+      background: var(--k-bg-elevated);
+      color: var(--k-accent);
+      font-weight: 600;
+      border-bottom: 1px solid var(--k-border);
+      position: sticky;
+      top: 0;
+    }
+    .console-results td {
+      padding: 4px 10px;
+      border-bottom: 1px solid var(--k-border-light);
+      color: var(--k-text);
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .console-results tr:hover td { background: var(--k-bg-hover); }
+    .console-error {
+      color: var(--k-red);
+      font-family: var(--k-mono);
+      font-size: 0.8rem;
+      padding: 8px;
+      margin-top: 8px;
+    }
+    .console-info {
+      color: var(--k-text-muted);
+      font-family: var(--k-mono);
+      font-size: 0.75rem;
+      margin-top: 4px;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 600px) {
+      .status-left { flex-direction: column; gap: 8px; }
+      .status-stats { flex-wrap: wrap; }
+      .risk-signals { grid-template-columns: 1fr; }
+    }
+
+    /* ---- Footer ---- */
+    .footer {
+      text-align: center;
+      padding: 32px 0;
+      font-family: var(--k-mono);
+      font-size: 0.7rem;
+      color: var(--k-text-dark);
+      border-top: 1px solid var(--k-border);
+      margin-top: 32px;
+    }
   </style>
 </head>
 <body>
@@ -363,6 +490,9 @@
     <section id="zone-yield"></section>
     <section id="zone-sectors"></section>
     <section id="zone-console"></section>
+    <footer class="footer">
+      Provara Intelligence Terminal &middot; Data from vault.sqlite &middot; Rendered locally, no server
+    </footer>
   </div>
 
   <!-- CDN Dependencies -->
@@ -1005,8 +1135,151 @@
       });
     }
 
+    /* ====================================================================
+       ZONE 5: SQL CONSOLE
+       ==================================================================== */
+
+    const PRESET_QUERIES = {
+      '': 'SELECT * FROM events ORDER BY seq DESC LIMIT 20',
+      'Yield curve inversions': `SELECT timestamp, json_extract(payload, '$.spread_2_10') as spread,
+    json_extract(payload, '$.yields."2 Yr"') as y2,
+    json_extract(payload, '$.yields."10 Yr"') as y10
+FROM events WHERE type='yield.inverted'
+ORDER BY timestamp DESC LIMIT 50`,
+      'Monthly CVE acceleration': `SELECT substr(timestamp, 1, 7) as month,
+    COUNT(*) as cves_added,
+    SUM(CASE WHEN type='cve.ransomware' THEN 1 ELSE 0 END) as ransomware
+FROM events WHERE source_format='cisa_kev'
+GROUP BY month ORDER BY month DESC LIMIT 24`,
+      'GDELT conflict spikes': `SELECT substr(timestamp, 1, 7) as month,
+    AVG(json_extract(payload, '$.goldstein_scale')) as avg_goldstein,
+    COUNT(*) as events,
+    SUM(CASE WHEN type='geopolitical.conflict' THEN 1 ELSE 0 END) as conflicts
+FROM events WHERE source_format='gdelt'
+GROUP BY month ORDER BY month DESC`,
+      'Cross-source event density': `SELECT source_format,
+    COUNT(*) as total,
+    MIN(timestamp) as earliest,
+    MAX(timestamp) as latest
+FROM events GROUP BY source_format
+ORDER BY total DESC`,
+      'Top targeted vendors (KEV)': `SELECT json_extract(payload, '$.vendor') as vendor,
+    COUNT(*) as vulns,
+    SUM(CASE WHEN type='cve.ransomware' THEN 1 ELSE 0 END) as ransomware
+FROM events WHERE source_format='cisa_kev'
+GROUP BY vendor ORDER BY vulns DESC LIMIT 20`,
+      'Major earthquakes': `SELECT timestamp,
+    json_extract(payload, '$.magnitude') as mag,
+    json_extract(payload, '$.place') as place,
+    json_extract(payload, '$.depth_km') as depth_km
+FROM events WHERE source_format='usgs'
+  AND json_extract(payload, '$.magnitude') >= 4.5
+ORDER BY json_extract(payload, '$.magnitude') DESC`,
+      'GDP leaders by year': `SELECT json_extract(payload, '$.year') as year,
+    json_extract(payload, '$.country_code') as code,
+    json_extract(payload, '$.value_trillion') as gdp_trillion
+FROM events WHERE source_format='worldbank'
+  AND json_extract(payload, '$.country_code') IN ('USA','CHN','JPN','DEU','IND')
+ORDER BY year DESC, gdp_trillion DESC LIMIT 50`,
+    };
+
     function renderConsole() {
-      console.log('Zone 5: Console — stub');
+      const el = document.getElementById('zone-console');
+      const presetOptions = Object.keys(PRESET_QUERIES)
+        .map(k => k === '' ? '<option value="">— Presets —</option>' : `<option value="${k}">${k}</option>`)
+        .join('');
+
+      el.innerHTML = `
+        <div class="card">
+          <div class="console-header" onclick="toggleConsole()">
+            <div class="card-title" style="margin-bottom:0">SQL Console</div>
+            <span class="console-toggle" id="console-chevron">&#9660;</span>
+          </div>
+          <div class="console-body" id="console-body">
+            <textarea class="sql-input" id="sql-input">SELECT source_format, COUNT(*) as total, MIN(timestamp) as earliest, MAX(timestamp) as latest FROM events GROUP BY source_format ORDER BY total DESC</textarea>
+            <div class="console-toolbar">
+              <button class="btn-run" onclick="runQuery()">Run (Ctrl+Enter)</button>
+              <select class="preset-select" id="preset-select" onchange="loadPreset(this.value)">${presetOptions}</select>
+            </div>
+            <div id="console-output"></div>
+          </div>
+        </div>
+      `;
+
+      // Keyboard shortcut: Ctrl+Enter or Cmd+Enter to run
+      document.getElementById('sql-input').addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          runQuery();
+        }
+      });
+    }
+
+    function toggleConsole() {
+      const body = document.getElementById('console-body');
+      const chevron = document.getElementById('console-chevron');
+      body.classList.toggle('open');
+      chevron.classList.toggle('open');
+    }
+
+    function loadPreset(name) {
+      const sql = PRESET_QUERIES[name];
+      if (sql) {
+        document.getElementById('sql-input').value = sql;
+        runQuery();
+      }
+    }
+
+    function runQuery() {
+      const sql = document.getElementById('sql-input').value.trim();
+      const output = document.getElementById('console-output');
+      if (!sql) {
+        output.innerHTML = '<div class="console-error">No SQL to execute.</div>';
+        return;
+      }
+
+      const t0 = performance.now();
+      try {
+        const rows = query(sql);
+        const elapsed = (performance.now() - t0).toFixed(1);
+
+        if (rows.length === 0) {
+          output.innerHTML = `<div class="console-info">Query returned 0 rows (${elapsed} ms)</div>`;
+          return;
+        }
+
+        const displayRows = rows.slice(0, 200);
+        const cols = Object.keys(displayRows[0]);
+
+        let html = '<div class="console-results"><table><thead><tr>';
+        for (const col of cols) {
+          html += `<th>${col}</th>`;
+        }
+        html += '</tr></thead><tbody>';
+
+        for (const row of displayRows) {
+          html += '<tr>';
+          for (const col of cols) {
+            const val = row[col];
+            if (val === null || val === undefined) {
+              html += `<td style="color:var(--k-text-dark);font-style:italic">NULL</td>`;
+            } else {
+              const str = String(val);
+              const display = str.length > 80 ? str.substring(0, 80) + '...' : str;
+              html += `<td title="${str.replace(/"/g, '&quot;')}">${display}</td>`;
+            }
+          }
+          html += '</tr>';
+        }
+
+        html += '</tbody></table></div>';
+        html += `<div class="console-info">${rows.length} row${rows.length !== 1 ? 's' : ''}${rows.length > 200 ? ' (showing first 200)' : ''} &middot; ${elapsed} ms</div>`;
+        output.innerHTML = html;
+
+      } catch (err) {
+        const elapsed = (performance.now() - t0).toFixed(1);
+        output.innerHTML = `<div class="console-error">Error: ${err.message}</div><div class="console-info">${elapsed} ms</div>`;
+      }
     }
 
     /* ====================================================================
