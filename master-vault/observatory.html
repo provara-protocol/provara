@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Observatory — Financial Intelligence Terminal</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ======================================================================
+       KESTREL DESIGN TOKENS
+       ====================================================================== */
+    :root {
+      --k-bg: #060a10;
+      --k-bg-card: #0a0e18;
+      --k-bg-card-alt: #080c14;
+      --k-bg-hover: #0d1220;
+      --k-bg-elevated: #0e1424;
+      --k-border: #111822;
+      --k-border-light: #151c28;
+      --k-border-hover: #1a2330;
+      --k-border-accent: #1a2636;
+      --k-text: #c8d4e0;
+      --k-text-bright: #e0e8f0;
+      --k-text-muted: #8899aa;
+      --k-text-dark: #5a7088;
+      --k-accent: #00e5a0;
+      --k-accent-dim: #00c488;
+      --k-accent-blue: #00b8ff;
+      --k-accent-purple: #8866ff;
+      --k-red: #ff4466;
+      --k-orange: #ff8800;
+      --k-yellow: #e6b84a;
+      --k-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --k-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace;
+      --k-max-width: 1140px;
+      --k-gutter: 20px;
+    }
+
+    /* ======================================================================
+       RESET
+       ====================================================================== */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+
+    /* ======================================================================
+       BASE STYLES
+       ====================================================================== */
+    body {
+      font-family: var(--k-sans);
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--k-text);
+      background: var(--k-bg);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ======================================================================
+       LAYOUT
+       ====================================================================== */
+    .container {
+      max-width: var(--k-max-width);
+      margin: 0 auto;
+      padding: 0 var(--k-gutter);
+    }
+
+    /* ======================================================================
+       CARD SYSTEM
+       ====================================================================== */
+    .card {
+      background: var(--k-bg-card);
+      border: 1px solid var(--k-border);
+      border-radius: 8px;
+      padding: 24px;
+    }
+
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--k-text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* ======================================================================
+       LOADING STATE
+       ====================================================================== */
+    #loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 24px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--k-border);
+      border-top: 3px solid var(--k-accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #loading-label {
+      font-family: var(--k-mono);
+      font-size: 0.875rem;
+      color: var(--k-text-muted);
+    }
+
+    #loading-label.error {
+      color: var(--k-red);
+      max-width: 480px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ======================================================================
+       APP ZONES
+       ====================================================================== */
+    #app {
+      display: none;
+      padding: 24px 0 48px;
+    }
+
+    #app > *:not(:last-child) {
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading State -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <div id="loading-label">Loading vault...</div>
+  </div>
+
+  <!-- Application -->
+  <div id="app" class="container">
+    <header id="zone-status"></header>
+    <section id="zone-macro-risk"></section>
+    <section id="zone-yield"></section>
+    <section id="zone-sectors"></section>
+    <section id="zone-console"></section>
+  </div>
+
+  <!-- CDN Dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+  <script>
+    /* ====================================================================
+       GLOBALS
+       ==================================================================== */
+    let DB = null;
+
+    /* ====================================================================
+       QUERY HELPERS
+       ==================================================================== */
+
+    /**
+     * Execute SQL and return an array of row objects.
+     * @param {string} sql - SQL statement (may include ? placeholders)
+     * @param {Array} params - Bind parameters
+     * @returns {Array<Object>} - Array of {column: value} objects
+     */
+    function query(sql, params = []) {
+      const stmt = DB.prepare(sql);
+      stmt.bind(params);
+      const rows = [];
+      while (stmt.step()) {
+        rows.push(stmt.getAsObject());
+      }
+      stmt.free();
+      return rows;
+    }
+
+    /**
+     * Execute SQL and return the first value from the first row.
+     * @param {string} sql - SQL statement
+     * @param {Array} params - Bind parameters
+     * @returns {*} - Single scalar value, or undefined if no rows
+     */
+    function scalar(sql, params = []) {
+      const stmt = DB.prepare(sql);
+      stmt.bind(params);
+      let value;
+      if (stmt.step()) {
+        const row = stmt.getAsObject();
+        const keys = Object.keys(row);
+        if (keys.length > 0) {
+          value = row[keys[0]];
+        }
+      }
+      stmt.free();
+      return value;
+    }
+
+    /* ====================================================================
+       RENDER STUBS (Tasks 3-7 will populate these)
+       ==================================================================== */
+
+    function renderStatusBar() {
+      console.log('Zone 1: Status Bar — stub');
+    }
+
+    function renderMacroRisk() {
+      console.log('Zone 2: Macro Risk — stub');
+    }
+
+    function renderYieldCurve() {
+      console.log('Zone 3: Yield Curve — stub');
+    }
+
+    function renderSectors() {
+      console.log('Zone 4: Sectors — stub');
+    }
+
+    function renderConsole() {
+      console.log('Zone 5: Console — stub');
+    }
+
+    /* ====================================================================
+       VAULT LOADER
+       ==================================================================== */
+
+    async function loadVault() {
+      const label = document.getElementById('loading-label');
+      const loading = document.getElementById('loading');
+      const app = document.getElementById('app');
+
+      try {
+        // Step 1: Initialize SQL.js engine
+        label.textContent = 'Initializing SQL engine...';
+        const SQL = await initSqlJs({
+          locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}`
+        });
+
+        // Step 2: Fetch and load the vault database
+        label.textContent = 'Loading vault.sqlite...';
+        const response = await fetch('vault.sqlite');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch vault.sqlite: ${response.status} ${response.statusText}`);
+        }
+        const buf = await response.arrayBuffer();
+        DB = new SQL.Database(new Uint8Array(buf));
+
+        // Step 3: Log event count
+        const eventCount = scalar('SELECT COUNT(*) FROM events');
+        console.log(`Observatory: vault loaded — ${eventCount} events`);
+
+        // Step 4: Swap loading for app
+        loading.style.display = 'none';
+        app.style.display = 'block';
+
+        // Step 5: Render all zones
+        renderStatusBar();
+        renderMacroRisk();
+        renderYieldCurve();
+        renderSectors();
+        renderConsole();
+
+      } catch (err) {
+        console.error('Observatory load failed:', err);
+        const spinner = loading.querySelector('.spinner');
+        if (spinner) spinner.style.display = 'none';
+        label.classList.add('error');
+        label.textContent = `Failed to load vault: ${err.message}`;
+      }
+    }
+
+    /* ====================================================================
+       BOOT
+       ==================================================================== */
+    loadVault();
+  </script>
+</body>
+</html>
