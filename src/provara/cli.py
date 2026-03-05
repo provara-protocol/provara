@@ -582,6 +582,118 @@ def cmd_migrate(args: argparse.Namespace) -> None:
         indent=2,
     ))
 
+def _append_sovereign(
+    args: argparse.Namespace,
+    vault: Path,
+    kid: str,
+    priv,
+) -> None:
+    """Sovereign schema append path: typed, validated, two-phase signed."""
+    from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+    from .sovereign_schema import (
+        PAYLOAD_TYPE_MAP,
+        EventType,
+        ProvaraEvent,
+    )
+
+    # Validate payload type
+    payload_type = getattr(args, "payload_type", None)
+    if not payload_type or payload_type not in PAYLOAD_TYPE_MAP:
+        valid = ", ".join(PAYLOAD_TYPE_MAP.keys())
+        _cli_error(
+            f"Unknown payload type: {payload_type}",
+            f"sovereign events require --payload-type to be one of: {valid}",
+            "use a valid payload type or omit --schema for backpack events",
+            "docs/plans/2026-03-05-sovereign-schema-integration-design.md",
+        )
+
+    # Validate event type
+    try:
+        event_type = EventType(args.type)
+    except ValueError:
+        valid_types = [e.value for e in EventType]
+        _cli_error(
+            f"Invalid sovereign event type: {args.type}",
+            "sovereign events require --type to be a valid EventType value",
+            f"valid types include: {', '.join(valid_types[:5])}...",
+            "docs/plans/2026-03-05-sovereign-schema-integration-design.md",
+        )
+
+    # Parse payload JSON
+    if args.data.startswith("@"):
+        data_str = Path(args.data[1:]).resolve().read_text(encoding="utf-8")
+    else:
+        data_str = args.data
+
+    try:
+        payload_data = json.loads(data_str)
+    except json.JSONDecodeError as e:
+        _cli_error(
+            f"Invalid JSON payload: {e}",
+            "event payload must be valid JSON",
+            "fix JSON syntax and retry",
+            "PROTOCOL_PROFILE.txt §1",
+        )
+
+    # Validate through Pydantic model
+    payload_cls = PAYLOAD_TYPE_MAP[payload_type]
+    try:
+        payload_model = payload_cls(**payload_data)
+    except Exception as e:
+        _cli_error(
+            f"Payload validation failed for {payload_type}: {e}",
+            f"the provided JSON does not match the {payload_type} schema",
+            "check field names, types, and constraints",
+            "src/provara/sovereign_schema.py",
+        )
+
+    # Determine chain position from existing events
+    events_file = vault / "events" / "events.ndjson"
+    prev_digest = "genesis"
+    sequence = 0
+
+    if events_file.exists() and events_file.stat().st_size > 0:
+        lines = events_file.read_text(encoding="utf-8").strip().split("\n")
+        for line in reversed(lines):
+            if not line.strip():
+                continue
+            evt = json.loads(line)
+            if "schema_version" in evt:
+                prev_event = ProvaraEvent.model_validate(evt, strict=False)
+                prev_digest = prev_event.signable_digest()
+                sequence = prev_event.sequence_number + 1
+                break
+
+    # Agent role
+    agent_role = getattr(args, "agent_role", None) or getattr(args, "actor", None) or "system"
+
+    # Build unsigned event
+    event = ProvaraEvent.from_payload(
+        event_type=event_type,
+        agent_role=agent_role,
+        payload_model=payload_model,
+        previous_digest=prev_digest,
+        sequence=sequence,
+    )
+
+    # Sign
+    digest_bytes = bytes.fromhex(event.signable_digest())
+    sig = priv.sign(digest_bytes)
+    pub_hex = priv.public_key().public_bytes(
+        encoding=Encoding.Raw, format=PublicFormat.Raw
+    ).hex()
+
+    # Seal
+    sealed = event.seal(pub_hex, sig.hex())
+
+    # Append
+    with open(events_file, "a", encoding="utf-8") as f:
+        f.write(sealed.to_ndjson_line())
+
+    etype = sealed.event_type.value if hasattr(sealed.event_type, "value") else sealed.event_type
+    print(f"Appended sovereign event {sealed.event_id} (type={etype}, payload={payload_type})")
+
+
 def cmd_append(args: argparse.Namespace) -> None:
     """Handle ``provara append`` event creation/signing.
 
@@ -611,7 +723,12 @@ def cmd_append(args: argparse.Namespace) -> None:
             "PROTOCOL_PROFILE.txt §2",
         )
     priv = load_private_key_b64(keys_data[kid])
-    
+
+    # Sovereign schema path
+    if getattr(args, "schema", None) == "sovereign":
+        _append_sovereign(args, vault, kid, priv)
+        return
+
     # Load existing events to find prev_hash for this actor
     actor_name = args.actor or "provara_user"
     all_events = load_events(vault / "events" / "events.ndjson")
@@ -1385,6 +1502,9 @@ def main() -> None:
     p_app.add_argument("--confidence", type=float, help="Confidence score (0.0-1.0)")
     p_app.add_argument("--timestamp", action="store_true", help="Request RFC 3161 trusted timestamp")
     p_app.add_argument("--tsa-url", help="Custom TSA URL (defaults to DigiCert)")
+    p_app.add_argument("--schema", choices=["sovereign"], help="Use sovereign event schema")
+    p_app.add_argument("--payload-type", help="Sovereign payload type (e.g. SwapIntent, LendingAction)")
+    p_app.add_argument("--agent-role", help="Agent role for sovereign events (e.g. quant, strategist)")
 
     # market-alpha
     p_ma = sub.add_parser("market-alpha", help="Record a market signal")
