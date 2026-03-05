@@ -156,6 +156,14 @@ class SovereignReducerV0:
         if not isinstance(event, dict):
             return  # malformed — skip silently
 
+        # Sovereign schema dispatch (auto-detect by schema_version field)
+        if "schema_version" in event:
+            self._handle_sovereign_event(event)
+            event_id = event.get("event_id") or "unknown_event"
+            self.state["metadata"]["last_event_id"] = event_id
+            self.state["metadata"]["event_count"] += 1
+            return
+
         e_type = event.get("type")
         event_id = event.get("event_id") or event.get("id") or "unknown_event"
         actor = str(event.get("actor") or "unknown")
@@ -184,14 +192,19 @@ class SovereignReducerV0:
         self.state["metadata"]["event_count"] += 1
 
     def export_state(self) -> Dict[str, Any]:
-        """Deterministic, JSON-serializable snapshot of all four namespaces."""
-        return {
+        """Deterministic, JSON-serializable snapshot of all namespaces."""
+        exported = {
             "canonical": self.state["canonical"],
             "local": self.state["local"],
             "contested": self.state["contested"],
             "archived": self.state["archived"],
             "metadata": self.state["metadata"],
         }
+        for key in ("pending_actions", "executed_actions", "pipeline_log",
+                     "sovereign_events", "constitution", "halted"):
+            if key in self.state:
+                exported[key] = self.state[key]
+        return exported
 
     def export_state_json(self) -> str:
         return canonical_dumps(self.export_state())
@@ -400,6 +413,59 @@ class SovereignReducerV0:
             "effective_from_event_id": payload.get("effective_from_event_id") or event_id,
             "ontology_versions": payload.get("ontology_versions"),
         }
+
+    # ------------------------------------------------------------------
+    # Sovereign event handling
+    # ------------------------------------------------------------------
+
+    def _handle_sovereign_event(self, event: Dict[str, Any]) -> None:
+        """Dispatch a sovereign schema event into state namespaces."""
+        e_type = event.get("event_type", "")
+        payload = event.get("payload", {})
+
+        # Initialize sovereign namespaces on first use
+        for key in ("pending_actions", "executed_actions", "pipeline_log", "sovereign_events"):
+            if key not in self.state:
+                self.state[key] = []
+
+        if e_type == "action.proposed":
+            self.state["pending_actions"].append(event)
+
+        elif e_type == "action.executed":
+            self.state["executed_actions"].append(event)
+            self.state["pending_actions"] = [
+                a for a in self.state["pending_actions"]
+                if a.get("payload", {}).get("id") != payload.get("id")
+                or payload.get("id") is None
+            ]
+
+        elif e_type in ("action.rejected", "action.expired"):
+            self.state["pending_actions"] = [
+                a for a in self.state["pending_actions"]
+                if a.get("payload", {}).get("id") != payload.get("id")
+                or payload.get("id") is None
+            ]
+
+        elif e_type == "system.circuit_breaker.triggered":
+            self.state["halted"] = True
+
+        elif e_type == "system.circuit_breaker.reset":
+            self.state["halted"] = False
+
+        elif e_type == "governance.constitution.created":
+            self.state["constitution"] = payload
+
+        elif e_type == "governance.constitution.amended":
+            if self.state.get("constitution"):
+                self.state["constitution"].update(payload)
+            else:
+                self.state["constitution"] = payload
+
+        elif e_type in ("signal.detected", "simulation.complete", "audit.passed", "audit.failed"):
+            self.state["pipeline_log"].append(event)
+
+        else:
+            self.state["sovereign_events"].append(event)
 
     # ------------------------------------------------------------------
     # Contested belief handling
