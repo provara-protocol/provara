@@ -42,6 +42,7 @@ from .query import VaultIndex
 from .migrate import migrate_vault
 from .checkpoint_v0 import create_checkpoint, save_checkpoint, load_latest_checkpoint, verify_checkpoint
 from .sync_v0 import load_events, write_events
+from .refactor import normalize_identities
 from .export import export_vault_scitt_compat
 from .errors import ProvaraError, VaultStructureInvalidError
 from .plugins import registry as plugin_registry
@@ -1226,6 +1227,39 @@ def cmd_verify_anchor(args: argparse.Namespace) -> None:
         sys.exit(1)
 
 
+def cmd_refactor(args: argparse.Namespace) -> None:
+    """Handle provara refactor."""
+    vault_path = Path(args.path).resolve()
+    
+    if args.normalize:
+        try:
+            mapping = json.loads(args.normalize)
+            # Find the root key to re-sign
+            keys_path = vault_path / "identity" / "keys.json"
+            registry = load_keys_registry(keys_path)
+            # Find an active key to sign with
+            active_key_id = None
+            for kid, entry in registry.items():
+                if entry.get("status") == "active":
+                    active_key_id = kid
+                    break
+            
+            if not active_key_id:
+                print("Error: No active key found in keys.json for re-signing.")
+                return
+
+            # Ask for the private key (simulated here for CLI)
+            # In a real tool, this would be a prompt or env var
+            pk_b64 = os.environ.get("PROVARA_PRIVATE_KEY")
+            if not pk_b64:
+                print("Error: PROVARA_PRIVATE_KEY environment variable required for re-signing.")
+                return
+                
+            count = normalize_identities(vault_path, mapping, pk_b64, active_key_id)
+            print(f"Successfully normalized and re-signed {count} events.")
+        except Exception as e:
+            print(f"Refactor failed: {e}")
+
 def main() -> None:
     """CLI entrypoint.
 
@@ -1235,6 +1269,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(prog="provara", description="Provara Protocol CLI")
     sub = parser.add_subparsers(dest="command", required=True)
     
+    # refactor
+    p_refactor = sub.add_parser("refactor", help="Refactor vault history")
+    p_refactor.add_argument("path", help="Path to vault")
+    p_refactor.add_argument("--normalize", help="JSON actor mapping")
+    p_refactor.set_defaults(func=cmd_refactor)
+
     # init
     p_init = sub.add_parser("init", help="Create a new vault")
     p_init.add_argument("path", help="Path to new vault")
@@ -1593,6 +1633,8 @@ def main() -> None:
         cmd_anchor(args)
     elif args.command == "verify-anchor":
         cmd_verify_anchor(args)
+    elif args.command == "refactor":
+        cmd_refactor(args)
 
 if __name__ == "__main__":
     main()
