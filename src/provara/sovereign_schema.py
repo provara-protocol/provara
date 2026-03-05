@@ -201,6 +201,14 @@ class EmergencyHalt(_Base):
     cooldown_ms: int = Field(default=86400000, ge=0)  # Default: 24h
 
 
+PAYLOAD_TYPE_MAP: dict[str, type] = {
+    "SwapIntent": SwapIntent,
+    "LendingAction": LendingAction,
+    "AllocationRebalance": AllocationRebalance,
+    "EmergencyHalt": EmergencyHalt,
+}
+
+
 # The discriminated union — this is what the VaultGate accepts
 ActionProposal = Annotated[
     Union[SwapIntent, LendingAction, AllocationRebalance, EmergencyHalt],

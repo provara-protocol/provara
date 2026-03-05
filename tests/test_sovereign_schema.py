@@ -22,7 +22,7 @@ import time
 
 import pytest
 
-from sovereign_schema import (
+from provara.sovereign_schema import (
     GENESIS_DIGEST,
     SCHEMA_VERSION,
     ActionProposal,
@@ -808,3 +808,31 @@ class TestFullPipeline:
             assert ok, msg
         finally:
             os.unlink(path)
+
+
+class TestPayloadTypeMap:
+    def test_map_contains_all_payload_types(self):
+        from provara.sovereign_schema import PAYLOAD_TYPE_MAP
+        assert "SwapIntent" in PAYLOAD_TYPE_MAP
+        assert "LendingAction" in PAYLOAD_TYPE_MAP
+        assert "AllocationRebalance" in PAYLOAD_TYPE_MAP
+        assert "EmergencyHalt" in PAYLOAD_TYPE_MAP
+
+    def test_map_values_are_classes(self):
+        from provara.sovereign_schema import PAYLOAD_TYPE_MAP, SwapIntent
+        assert PAYLOAD_TYPE_MAP["SwapIntent"] is SwapIntent
+
+    def test_resolve_payload_from_map(self):
+        from provara.sovereign_schema import PAYLOAD_TYPE_MAP
+        cls = PAYLOAD_TYPE_MAP["SwapIntent"]
+        intent = cls(
+            action_type="swap",
+            asset_in="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            asset_out="0x4200000000000000000000000000000000000006",
+            amount_in_wei=1000000,
+            min_amount_out_wei=380000000000000,
+            max_slippage_bps=50,
+            deadline_epoch_ms=4102444800000,
+            receiver="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        )
+        assert intent.action_type == "swap"
