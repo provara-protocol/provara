@@ -50,7 +50,6 @@ Usage:
 
 from __future__ import annotations
 
-import hashlib
 import json
 import time
 from enum import Enum
@@ -65,34 +64,7 @@ from pydantic import (
     model_validator,
 )
 
-
-# ════════════════════════════════════════════════════════════════
-# CANONICAL SERIALIZATION — RFC 8785
-# ════════════════════════════════════════════════════════════════
-
-def canonical_json(obj: dict[str, Any]) -> bytes:
-    """RFC 8785 (JCS) deterministic JSON serialization.
-
-    Invariants:
-      - Sorted keys (recursive)
-      - No whitespace
-      - No trailing newline
-      - UTF-8 encoded bytes
-
-    Safe for integer-only schemas. Float prohibition is enforced
-    at the Pydantic model level, not here.
-    """
-    return json.dumps(
-        obj,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=False,
-    ).encode("utf-8")
-
-
-def sha256_hex(data: bytes) -> str:
-    """SHA-256 digest as lowercase hex string."""
-    return hashlib.sha256(data).hexdigest()
+from provara.canonical_json import canonical_bytes as canonical_json, sha256_hex
 
 
 # ════════════════════════════════════════════════════════════════
