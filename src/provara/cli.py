@@ -156,6 +156,43 @@ def cmd_init(args: argparse.Namespace) -> None:
             "PROTOCOL_PROFILE.txt §13",
         )
 
+def verify_sovereign_events(events: list) -> list:
+    """Validate sovereign events in a mixed event log.
+
+    Checks payload_digest integrity and sequence_number ordering.
+    Returns a list of error strings (empty = valid).
+    """
+    from .sovereign_schema import canonical_json, sha256_hex
+
+    errors = []
+    sovereign_events = [e for e in events if "schema_version" in e]
+
+    prev_seq = -1
+    for evt in sovereign_events:
+        # Check payload digest
+        payload = evt.get("payload", {})
+        expected_digest = sha256_hex(canonical_json(payload))
+        actual_digest = evt.get("payload_digest", "")
+        if actual_digest != expected_digest:
+            eid = evt.get("event_id", "unknown")
+            errors.append(
+                f"Payload digest mismatch on {eid}: "
+                f"expected {expected_digest[:16]}..., got {actual_digest[:16]}..."
+            )
+
+        # Check sequence
+        seq = evt.get("sequence_number")
+        if seq is not None:
+            if seq != prev_seq + 1:
+                eid = evt.get("event_id", "unknown")
+                errors.append(
+                    f"Sequence gap on {eid}: expected {prev_seq + 1}, got {seq}"
+                )
+            prev_seq = seq
+
+    return errors
+
+
 def cmd_verify(args: argparse.Namespace) -> None:
     """Handle ``provara verify`` integrity/compliance execution.
 
@@ -1409,6 +1446,7 @@ def main() -> None:
     p_verify.add_argument("-v", "--verbose", action="store_true")
     p_verify.add_argument("--show-redacted", action="store_true", help="Show metadata for redacted events")
     p_verify.add_argument("--follow-predecessors", action="store_true", help="Verify entire archival chain")
+    p_verify.add_argument("--pipeline", action="store_true", help="Check sovereign pipeline completeness")
 
     # shred
     p_shred = sub.add_parser("shred", help="Crypto-shred event(s) for GDPR erasure")
