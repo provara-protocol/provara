@@ -42,12 +42,15 @@ class TestCLIEndToEnd(unittest.TestCase):
     def run_provara(self, args):
         # Run via sys.executable -m provara for cross-platform reliability
         cmd = [sys.executable, "-m", "provara"] + args
-            
+        env = {**__import__("os").environ}
+        src_dir = str(Path(__file__).resolve().parents[1] / "src")
+        env["PYTHONPATH"] = src_dir + (":" + env["PYTHONPATH"] if "PYTHONPATH" in env else "")
         result = subprocess.run(
-            cmd, 
-            capture_output=True, 
-            text=True, 
-            encoding="utf-8"
+            cmd,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            env=env,
         )
         return result
 

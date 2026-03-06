@@ -89,11 +89,10 @@ include = ["provara*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-# PYTHONPATH must include src for imports to resolve.
-# Run with: PYTHONPATH=src python -m pytest
 addopts = "-v --tb=short"
 
 [tool.coverage.run]
