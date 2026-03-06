@@ -271,9 +271,35 @@ class TestProvaraIntegration:
         expected = {
             "seq", "event_id", "event_type", "timestamp",
             "payload", "prev_hash", "event_hash", "signature", "signer_pub",
+            "schema_version", "payload_type",
         }
         actual = {f.name for f in fields(Event)}
         assert actual == expected
+
+    def test_sovereign_columns_exist(self, tmp_vault):
+        cursor = tmp_vault.conn.execute("PRAGMA table_info(events)")
+        columns = {row[1] for row in cursor.fetchall()}
+        assert "schema_version" in columns
+        assert "payload_type" in columns
+
+    def test_sovereign_append_and_query(self, tmp_vault, keypair):
+        sk, _ = keypair
+        ev = tmp_vault.append(
+            "action.proposed", {"action_type": "swap"}, sk,
+            schema_version="1.0.0-provara", payload_type="SwapIntent",
+        )
+        assert ev.schema_version == "1.0.0-provara"
+        assert ev.payload_type == "SwapIntent"
+        results = tmp_vault.conn.execute(
+            "SELECT * FROM events WHERE payload_type = ?", ("SwapIntent",)
+        ).fetchall()
+        assert len(results) == 1
+
+    def test_backpack_append_leaves_sovereign_fields_null(self, tmp_vault, keypair):
+        sk, _ = keypair
+        ev = tmp_vault.append("OBSERVATION", {"subject": "test"}, sk)
+        assert ev.schema_version is None
+        assert ev.payload_type is None
 
     def test_generate_keypair_returns_valid_key(self):
         from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey

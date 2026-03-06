@@ -63,11 +63,14 @@ CREATE TABLE IF NOT EXISTS events (
     prev_hash   TEXT    NOT NULL,          -- SHA-256 hex of previous event (or "GENESIS")
     event_hash  TEXT    NOT NULL UNIQUE,   -- SHA-256 hex of this event's canonical form
     signature   TEXT    NOT NULL,          -- Ed25519 signature (hex) over event_hash
-    signer_pub  TEXT    NOT NULL           -- Ed25519 public key (hex)
+    signer_pub      TEXT    NOT NULL,          -- Ed25519 public key (hex)
+    schema_version  TEXT,                      -- sovereign schema version (NULL for backpack)
+    payload_type    TEXT                        -- sovereign payload type (NULL for backpack)
 );
 
 CREATE INDEX IF NOT EXISTS idx_events_type ON events(event_type);
 CREATE INDEX IF NOT EXISTS idx_events_timestamp ON events(timestamp);
+CREATE INDEX IF NOT EXISTS idx_events_payload_type ON events(payload_type);
 """
 
 
@@ -86,6 +89,8 @@ class Event:
     event_hash: str
     signature: str
     signer_pub: str
+    schema_version: Optional[str] = None
+    payload_type: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
@@ -136,6 +141,8 @@ class Vault:
         event_type: str,
         payload: dict,
         private_key: Ed25519PrivateKey,
+        schema_version: Optional[str] = None,
+        payload_type: Optional[str] = None,
     ) -> Event:
         """Append a new event to the chain. Returns the stored Event."""
 
@@ -173,12 +180,14 @@ class Vault:
         self.conn.execute(
             """INSERT INTO events
                (event_id, event_type, timestamp, payload,
-                prev_hash, event_hash, signature, signer_pub)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                prev_hash, event_hash, signature, signer_pub,
+                schema_version, payload_type)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 event_id, event_type, timestamp,
                 canonical.decode("utf-8"),
                 prev_hash, event_hash, sig_hex, pub_hex,
+                schema_version, payload_type,
             ),
         )
         self.conn.commit()
@@ -197,6 +206,8 @@ class Vault:
             event_hash=event_hash,
             signature=sig_hex,
             signer_pub=pub_hex,
+            schema_version=schema_version,
+            payload_type=payload_type,
         )
 
     # -----------------------------------------------------------------------
@@ -315,6 +326,8 @@ class Vault:
             event_hash=row["event_hash"],
             signature=row["signature"],
             signer_pub=row["signer_pub"],
+            schema_version=row["schema_version"],
+            payload_type=row["payload_type"],
         )
 
     def close(self):
