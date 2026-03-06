@@ -21,7 +21,7 @@ import sys
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, NoReturn, Optional
 
 # Core imports
 from .bootstrap_v0 import bootstrap_backpack
@@ -51,15 +51,8 @@ from .rfc3161 import request_timestamp, store_timestamp, verify_all_timestamps, 
 # Repo root: src/provara/../../  (two levels up from this file's directory)
 _repo_root = Path(__file__).resolve().parents[2]
 
-def _fail_with_error(err: ProvaraError) -> None:
-    """Print a structured error message from a ``ProvaraError`` and exit.
-
-    Args:
-        err: Structured protocol/runtime error.
-
-    Returns:
-        None: This function terminates the process.
-    """
+def _fail_with_error(err: ProvaraError) -> NoReturn:
+    """Print a structured error message from a ``ProvaraError`` and exit."""
     context = f" Context: {err.context}." if err.context else ""
     print(
         f"ERROR: {err.code}. {err.message}.{context} "
@@ -69,18 +62,8 @@ def _fail_with_error(err: ProvaraError) -> None:
     sys.exit(1)
 
 
-def _cli_error(what: str, why: str, fix: str, see: str) -> None:
-    """Print a teaching-style CLI error and exit.
-
-    Args:
-        what: What failed.
-        why: Why it failed.
-        fix: Recommended remediation.
-        see: Spec or command reference.
-
-    Returns:
-        None: This function terminates the process.
-    """
+def _cli_error(what: str, why: str, fix: str, see: str) -> NoReturn:
+    """Print a teaching-style CLI error and exit."""
     print(f"ERROR: {what}. {why}. Fix: {fix}. (See: {see})")
     sys.exit(1)
 
