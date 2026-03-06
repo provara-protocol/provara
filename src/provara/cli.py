@@ -245,6 +245,24 @@ def cmd_verify(args: argparse.Namespace) -> None:
     if result.wasSuccessful():
         print("\nPASS: All 17 integrity checks passed.")
 
+        # Sovereign event verification (always runs if sovereign events exist,
+        # --pipeline additionally checks reducer pipeline completeness)
+        from .sync_v0 import iter_events as _iter_sov
+        events_path_sov = target / "events" / "events.ndjson"
+        if events_path_sov.exists():
+            all_events = list(_iter_sov(events_path_sov))
+            sovereign_present = any("schema_version" in e for e in all_events)
+            if sovereign_present or getattr(args, "pipeline", False):
+                sov_errors = verify_sovereign_events(all_events)
+                if sov_errors:
+                    print(f"\nSOVEREIGN: {len(sov_errors)} error(s) detected:")
+                    for err in sov_errors:
+                        print(f"  - {err}")
+                    sys.exit(1)
+                else:
+                    sov_count = sum(1 for e in all_events if "schema_version" in e)
+                    print(f"\nSOVEREIGN: {sov_count} sovereign event(s) verified OK.")
+
         # Show shredded events info
         from .crypto_shred import count_shredded_events
         total, shredded = count_shredded_events(target)
