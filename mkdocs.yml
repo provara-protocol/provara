@@ -5,6 +5,29 @@ repo_name: provara-protocol/provara
 
 theme:
   name: material
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
 
 plugins:
   - search
@@ -16,14 +39,92 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
 
 nav:
-  - Getting Started: getting-started.md
-  - Tutorials: tutorials/README.md
-  - API Reference: api-reference/index.md
-  - Cookbook: cookbook/README.md
-  - Protocol Spec: protocol-spec.md
-  - Contributing: contributing.md
+  - Home: index.md
+  - Getting Started:
+      - Introduction: getting-started.md
+      - Quickstart: QUICKSTART.md
+      - Comparison: COMPARISON.md
+  - Tutorials:
+      - Overview: tutorials/README.md
+      - 01. Your First Vault: tutorials/01_first_vault.md
+      - 02. Multi-Actor Dispute: tutorials/02_multi_actor_dispute.md
+      - 03. Checkpoint & Query: tutorials/03_checkpoint_query.md
+      - 04. MCP Integration: tutorials/04_mcp_integration.md
+      - 05. Anchoring: tutorials/05_anchor.md
+  - Protocol Specification:
+      - Overview: protocol-spec.md
+      - Backpack Protocol v1.0: BACKPACK_PROTOCOL_v1.0.md
+      - Chain Validation: CHAIN_VALIDATION.md
+      - Offline Sync: OFFLINE_SYNC_PROTOCOL.md
+      - Redaction & Shredding:
+          - Redaction Spec: REDACTION_SPEC.md
+          - Crypto Shredding: CRYPTO_SHREDDING.md
+      - Advanced Cryptography:
+          - Threshold Signatures: THRESHOLD_SIGNATURES.md
+          - ZK Proof Hooks: ZK_PROOF_HOOKS.md
+  - Integrations & Standards:
+      - RFC3161 Timestamping: RFC3161_TIMESTAMPING.md
+      - Sigstore Anchoring: SIGSTORE_ANCHORING.md
+      - SCITT Mapping: SCITT_MAPPING.md
+      - Model Context Protocol (MCP):
+          - Docker MCP: DOCKER_MCP.md
+          - Migration Guide: MCP_MIGRATION.md
+  - Cookbook:
+      - Recipes Overview: cookbook/README.md
+      - AI Agent Memory: cookbook/ai_agent_memory.md
+      - Audit Log SaaS: cookbook/audit_log_saas.md
+      - Legal Discovery: cookbook/legal_discovery.md
+      - Supply Chain: cookbook/supply_chain.md
+  - Security & Operations:
+      - Threat Model: THREAT_MODEL.md
+      - Key Management:
+          - Rotation Ceremony: KEY_ROTATION_CEREMONY.md
+          - Compromise Recovery: KEY_COMPROMISE_RECOVERY.md
+      - Infrastructure:
+          - Vault Archival: VAULT_ARCHIVAL.md
+          - Data Residency: DATA_RESIDENCY.md
+  - Compliance:
+      - GDPR Compliance: GDPR_COMPLIANCE.md
+      - Governance Alignment: GOVERNANCE_ALIGNMENT.md
+      - Conformance Kit: CONFORMANCE_KIT.md
+  - Reference:
+      - API Overview: api/index.md
+      - Getting Started (API): api/getting-started.md
+      - API Modules:
+          - Backpack Integrity: api/modules/backpack_integrity.md
+          - Backpack Signing: api/modules/backpack_signing.md
+          - Bootstrap v0: api/modules/bootstrap_v0.md
+          - Canonical JSON: api/modules/canonical_json.md
+          - Checkpoint v0: api/modules/checkpoint_v0.md
+          - CLI reference: api/modules/cli.md
+          - Manifest Generator: api/modules/manifest_generator.md
+          - Perception v0: api/modules/perception_v0.md
+          - Reducer v0: api/modules/reducer_v0.md
+          - Rekey Backpack: api/modules/rekey_backpack.md
+          - Sync v0: api/modules/sync_v0.md
+      - Integrations:
+          - MCP API: api/integration/mcp.md
+          - PSMC CLI API: api/integration/psmc.md
+      - Error Codes: ERROR_CODES.md
+      - Extension Registry: EXTENSION_REGISTRY.md
+      - IANA Considerations: IANA_CONSIDERATIONS.md
+  - Ecosystem Plans:
+      - Design Principles: plans/2026-02-15-design-principles.md
+      - Dev Portal Redesign: plans/2026-02-22-provara-dev-redesign.md
+      - Intelligence Terminal: plans/2026-03-02-intelligence-terminal-design.md
+      - Market Data Importers: plans/2026-03-02-market-data-importers-plan.md
+      - PSMC Dual-Format: plans/2026-03-02-psmc-dual-format-design.md
+      - Sovereign Schema: plans/2026-03-05-sovereign-schema-integration-design.md
+  - Community:
+      - Contributing: contributing.md
+      - Visual Identity: VISUAL_IDENTITY_SYSTEM.md
 
 docs_dir: docs
 site_dir: site
