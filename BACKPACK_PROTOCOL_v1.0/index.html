@@ -1,0 +1,6305 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://provara.dev/docs/BACKPACK_PROTOCOL_v1.0/">
+      
+      
+        <link rel="prev" href="../protocol-spec/">
+      
+      
+        <link rel="next" href="../CHAIN_VALIDATION/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>Backpack Protocol v1.0 - Provara Protocol Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#backpack-protocol-v10" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Provara Protocol Documentation" class="md-header__button md-logo" aria-label="Provara Protocol Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Provara Protocol Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Backpack Protocol v1.0
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/provara-protocol/provara" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    provara-protocol/provara
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../getting-started/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../tutorials/" class="md-tabs__link">
+          
+  
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../protocol-spec/" class="md-tabs__link">
+          
+  
+  
+  Protocol Specification
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../RFC3161_TIMESTAMPING/" class="md-tabs__link">
+          
+  
+  
+  Integrations & Standards
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../cookbook/" class="md-tabs__link">
+          
+  
+  
+  Cookbook
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../THREAT_MODEL/" class="md-tabs__link">
+          
+  
+  
+  Security & Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../GDPR_COMPLIANCE/" class="md-tabs__link">
+          
+  
+  
+  Compliance
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../api/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../plans/2026-02-15-design-principles/" class="md-tabs__link">
+          
+  
+  
+  Ecosystem Plans
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../contributing/" class="md-tabs__link">
+          
+  
+  
+  Community
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Provara Protocol Documentation" class="md-nav__button md-logo" aria-label="Provara Protocol Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Provara Protocol Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/provara-protocol/provara" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    provara-protocol/provara
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../QUICKSTART/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../COMPARISON/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Comparison
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/01_first_vault/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01. Your First Vault
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/02_multi_actor_dispute/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02. Multi-Actor Dispute
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/03_checkpoint_query/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03. Checkpoint & Query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/04_mcp_integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04. MCP Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/05_anchor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05. Anchoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Protocol Specification
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Protocol Specification
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../protocol-spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backpack Protocol v1.0
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backpack Protocol v1.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#normative-precedence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normative Precedence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Purpose
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-concepts-and-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Concepts and Vocabulary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-cryptographic-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Cryptographic Stack
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Cryptographic Stack">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sha-256-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SHA-256 Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ed25519-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ed25519 Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-id-derivation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key ID Derivation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-canonical-json" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Canonical JSON
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Canonical JSON">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rules-all-must-apply" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rules (all MUST apply)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reference-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reference Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-event-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Event Identity
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Event Identity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#derivation-rule-must" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Derivation Rule (MUST)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-causal-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Causal Chain
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Causal Chain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rules-all-must-apply_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rules (all MUST apply)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integrity-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integrity Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fork-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fork Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-event-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Event Types
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Event Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-types-no-prefix-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Types (no prefix required)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Types (no prefix required)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GENESIS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#observation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OBSERVATION
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assertion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ASSERTION
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#attestation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ATTESTATION
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RETRACTION
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key_revocation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KEY_REVOCATION
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key_promotion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KEY_PROMOTION
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reducer_epoch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REDUCER_EPOCH
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-the-reducer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. The Reducer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. The Reducer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#four-namespace-state-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Four-Namespace State Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#belief-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Belief Keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conflict-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conflict Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agreeing-evidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agreeing Evidence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#state-hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        State Hash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reducer-invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reducer Invariants
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-key-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Key Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Key Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-registry-identitykeysjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Registry (identity/keys.json)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-rotation-protocol" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Rotation Protocol
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#revoked-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Revoked Keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-merkle-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Merkle Tree
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Merkle Tree">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Construction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#empty-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Empty Tree
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reference-implementation_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reference Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-manifest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Manifest
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Manifest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#excluded-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Excluded Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manifest-signature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manifest Signature
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-safety-tiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Safety Tiers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Safety Tiers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#merge-ratchet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Merge Ratchet
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-sync-protocol" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Sync Protocol
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. Sync Protocol">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-chain-validation-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 Chain Validation Algorithm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-algorithm-pseudocode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Algorithm Pseudocode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#133-fencing-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.3 Fencing Tokens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delta-export-import" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delta Export / Import
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-event-permanence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Event Permanence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Directory Structure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="15. Directory Structure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#path-safety" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path Safety
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-compliance-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Compliance Requirements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="16. Compliance Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-error-taxonomy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.1 Error Taxonomy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#162-minimum-test-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.2 Minimum Test Coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-reimplementation-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Reimplementation Guide
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="17. Reimplementation Guide">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-cryptographic-primitives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1 — Cryptographic Primitives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-validate-against-test-vectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2 — Validate Against Test Vectors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-implement-the-reducer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3 — Implement the Reducer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-verify-determinism" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4 — Verify Determinism
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-pass-compliance-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5 — Pass Compliance Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-state-hashes-diverge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If State Hashes Diverge
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#18-security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18. Security Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="18. Security Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#181-threat-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.1 Threat Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#182-mandatory-validation-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.2 Mandatory Validation Order
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#183-replay-and-duplication-attacks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.3 Replay and Duplication Attacks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#184-truncation-and-partial-snapshot-risk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.4 Truncation and Partial Snapshot Risk
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#185-time-semantics-and-backdating" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.5 Time Semantics and Backdating
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#186-privacy-and-confidentiality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.6 Privacy and Confidentiality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#187-key-compromise-and-rotation-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.7 Key Compromise and Rotation Boundaries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#188-denial-of-service-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.8 Denial-of-Service Considerations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#189-cryptographic-agility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.9 Cryptographic Agility
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#19-extension-registry-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        19. Extension Registry Process
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#20-iana-style-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        20. IANA-Style Considerations
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CHAIN_VALIDATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chain Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../OFFLINE_SYNC_PROTOCOL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Offline Sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Redaction & Shredding
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Redaction & Shredding
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../REDACTION_SPEC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Redaction Spec
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CRYPTO_SHREDDING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Crypto Shredding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6" id="__nav_4_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Cryptography
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Advanced Cryptography
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../THRESHOLD_SIGNATURES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Threshold Signatures
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ZK_PROOF_HOOKS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ZK Proof Hooks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations & Standards
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integrations & Standards
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RFC3161_TIMESTAMPING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RFC3161 Timestamping
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SIGSTORE_ANCHORING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sigstore Anchoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SCITT_MAPPING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SCITT Mapping
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Context Protocol (MCP)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Model Context Protocol (MCP)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DOCKER_MCP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MCP_MIGRATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cookbook
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cookbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recipes Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cookbook/ai_agent_memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Agent Memory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cookbook/audit_log_saas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Audit Log SaaS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cookbook/legal_discovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Legal Discovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cookbook/supply_chain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Supply Chain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security & Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security & Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../THREAT_MODEL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Threat Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key Management
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Key Management
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../KEY_ROTATION_CEREMONY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rotation Ceremony
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../KEY_COMPROMISE_RECOVERY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compromise Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_3" id="__nav_7_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../VAULT_ARCHIVAL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vault Archival
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DATA_RESIDENCY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Residency
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compliance
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GDPR_COMPLIANCE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GDPR Compliance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GOVERNANCE_ALIGNMENT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance Alignment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONFORMANCE_KIT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conformance Kit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started (API)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_3" id="__nav_9_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Modules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Modules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/modules/backpack_integrity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backpack Integrity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/modules/backpack_signing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backpack Signing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/modules/bootstrap_v0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bootstrap v0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/modules/canonical_json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Canonical JSON
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/modules/checkpoint_v0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Checkpoint v0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/modules/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/modules/manifest_generator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifest Generator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/modules/perception_v0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Perception v0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/modules/reducer_v0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reducer v0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/modules/rekey_backpack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rekey Backpack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/modules/sync_v0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync v0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_4" id="__nav_9_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integrations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/integration/mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/integration/psmc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PSMC CLI API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ERROR_CODES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Error Codes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../EXTENSION_REGISTRY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extension Registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../IANA_CONSIDERATIONS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IANA Considerations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ecosystem Plans
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ecosystem Plans
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plans/2026-02-15-design-principles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Principles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plans/2026-02-22-provara-dev-redesign/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dev Portal Redesign
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plans/2026-03-02-intelligence-terminal-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intelligence Terminal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plans/2026-03-02-market-data-importers-plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Market Data Importers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plans/2026-03-02-psmc-dual-format-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PSMC Dual-Format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plans/2026-03-05-sovereign-schema-integration-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sovereign Schema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Community
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../VISUAL_IDENTITY_SYSTEM/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Visual Identity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#normative-precedence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normative Precedence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Purpose
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-concepts-and-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Concepts and Vocabulary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-cryptographic-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Cryptographic Stack
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Cryptographic Stack">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sha-256-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SHA-256 Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ed25519-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ed25519 Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-id-derivation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key ID Derivation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-canonical-json" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Canonical JSON
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Canonical JSON">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rules-all-must-apply" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rules (all MUST apply)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reference-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reference Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-event-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Event Identity
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Event Identity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#derivation-rule-must" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Derivation Rule (MUST)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-causal-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Causal Chain
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Causal Chain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rules-all-must-apply_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rules (all MUST apply)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integrity-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integrity Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fork-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fork Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-event-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Event Types
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Event Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-types-no-prefix-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Types (no prefix required)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Types (no prefix required)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GENESIS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#observation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OBSERVATION
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assertion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ASSERTION
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#attestation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ATTESTATION
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RETRACTION
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key_revocation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KEY_REVOCATION
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key_promotion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KEY_PROMOTION
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reducer_epoch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REDUCER_EPOCH
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-the-reducer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. The Reducer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. The Reducer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#four-namespace-state-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Four-Namespace State Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#belief-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Belief Keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conflict-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conflict Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agreeing-evidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agreeing Evidence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#state-hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        State Hash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reducer-invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reducer Invariants
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-key-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Key Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Key Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-registry-identitykeysjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Registry (identity/keys.json)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-rotation-protocol" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Rotation Protocol
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#revoked-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Revoked Keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-merkle-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Merkle Tree
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Merkle Tree">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Construction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#empty-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Empty Tree
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reference-implementation_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reference Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-manifest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Manifest
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Manifest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#excluded-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Excluded Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manifest-signature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manifest Signature
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-safety-tiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Safety Tiers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Safety Tiers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#merge-ratchet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Merge Ratchet
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-sync-protocol" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Sync Protocol
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. Sync Protocol">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-chain-validation-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 Chain Validation Algorithm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-algorithm-pseudocode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Algorithm Pseudocode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#133-fencing-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.3 Fencing Tokens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delta-export-import" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delta Export / Import
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-event-permanence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Event Permanence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Directory Structure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="15. Directory Structure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#path-safety" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path Safety
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-compliance-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Compliance Requirements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="16. Compliance Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-error-taxonomy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.1 Error Taxonomy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#162-minimum-test-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.2 Minimum Test Coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-reimplementation-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Reimplementation Guide
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="17. Reimplementation Guide">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-cryptographic-primitives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1 — Cryptographic Primitives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-validate-against-test-vectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2 — Validate Against Test Vectors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-implement-the-reducer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3 — Implement the Reducer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-verify-determinism" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4 — Verify Determinism
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-pass-compliance-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5 — Pass Compliance Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-state-hashes-diverge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If State Hashes Diverge
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#18-security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18. Security Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="18. Security Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#181-threat-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.1 Threat Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#182-mandatory-validation-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.2 Mandatory Validation Order
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#183-replay-and-duplication-attacks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.3 Replay and Duplication Attacks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#184-truncation-and-partial-snapshot-risk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.4 Truncation and Partial Snapshot Risk
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#185-time-semantics-and-backdating" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.5 Time Semantics and Backdating
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#186-privacy-and-confidentiality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.6 Privacy and Confidentiality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#187-key-compromise-and-rotation-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.7 Key Compromise and Rotation Boundaries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#188-denial-of-service-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.8 Denial-of-Service Considerations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#189-cryptographic-agility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.9 Cryptographic Agility
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#19-extension-registry-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        19. Extension Registry Process
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#20-iana-style-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        20. IANA-Style Considerations
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="backpack-protocol-v10">Backpack Protocol v1.0<a class="headerlink" href="#backpack-protocol-v10" title="Permanent link">&para;</a></h1>
+<p><strong>Profile:</strong> <code>PROVARA-1.0_PROFILE_A</code>
+<strong>Status:</strong> Normative reference implementation specification
+<strong>Date:</strong> 2026-02-16
+<strong>Source of truth:</strong> <a href="../PROTOCOL_PROFILE.txt"><code>PROTOCOL_PROFILE.txt</code></a> — immutable after distribution. This document is the human-readable companion.</p>
+<h2 id="normative-precedence">Normative Precedence<a class="headerlink" href="#normative-precedence" title="Permanent link">&para;</a></h2>
+<p>When materials disagree, use this precedence order:</p>
+<ol>
+<li><code>PROTOCOL_PROFILE.txt</code> (frozen normative profile, highest authority)</li>
+<li><code>docs/BACKPACK_PROTOCOL_v1.0.md</code> (human-readable protocol companion)</li>
+<li><code>docs/OPEN_DECISIONS.md</code> (resolved ambiguities and implementation choices)</li>
+<li>Reference implementation code and tests (<code>SNP_Core/bin</code>, <code>SNP_Core/test</code>)</li>
+</ol>
+<p>If a conflict exists between this document and the profile, the profile wins.</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#1-purpose">Purpose</a></li>
+<li><a href="#2-concepts-and-vocabulary">Concepts and Vocabulary</a></li>
+<li><a href="#3-cryptographic-stack">Cryptographic Stack</a></li>
+<li><a href="#4-canonical-json">Canonical JSON</a></li>
+<li><a href="#5-event-identity">Event Identity</a></li>
+<li><a href="#6-causal-chain">Causal Chain</a></li>
+<li><a href="#7-event-types">Event Types</a></li>
+<li><a href="#8-the-reducer">The Reducer</a></li>
+<li><a href="#9-key-management">Key Management</a></li>
+<li><a href="#10-merkle-tree">Merkle Tree</a></li>
+<li><a href="#11-manifest">Manifest</a></li>
+<li><a href="#12-safety-tiers">Safety Tiers</a></li>
+<li><a href="#13-sync-protocol">Sync Protocol</a></li>
+<li><a href="#14-event-permanence">Event Permanence</a></li>
+<li><a href="#15-directory-structure">Directory Structure</a></li>
+<li><a href="#16-compliance-requirements">Compliance Requirements</a></li>
+<li><a href="#17-reimplementation-guide">Reimplementation Guide</a></li>
+<li><a href="#18-security-considerations">Security Considerations</a></li>
+<li><a href="#19-extension-registry-process">Extension Registry Process</a></li>
+<li><a href="#20-iana-style-considerations">IANA-Style Considerations</a></li>
+</ol>
+<hr />
+<h2 id="1-purpose">1. Purpose<a class="headerlink" href="#1-purpose" title="Permanent link">&para;</a></h2>
+<p>The Backpack Protocol defines a tamper-evident, append-only memory substrate for AI systems, sovereign identity, and long-lived digital institutions. A <em>backpack</em> (vault) is a directory of signed events. Given the same event log, any compliant implementation on any machine must produce byte-identical state.</p>
+<p><strong>Design axiom:</strong> <em>Truth is not merged. Evidence is merged. Truth is recomputed.</em></p>
+<p>Events are cryptographic evidence — signed, hashed, and causally chained. Beliefs about the world are derived by replaying evidence through a deterministic reducer. No belief is ever directly merged; only the underlying evidence is combined, and conclusions are recomputed fresh each time.</p>
+<hr />
+<h2 id="2-concepts-and-vocabulary">2. Concepts and Vocabulary<a class="headerlink" href="#2-concepts-and-vocabulary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Vault / Backpack</strong></td>
+<td>A directory containing a compliant event log, identity files, policies, and manifest</td>
+</tr>
+<tr>
+<td><strong>Event</strong></td>
+<td>An immutable, content-addressed JSON record appended to the event log</td>
+</tr>
+<tr>
+<td><strong>Actor</strong></td>
+<td>The identity that authored an event (identified by <code>actor_key_id</code>)</td>
+</tr>
+<tr>
+<td><strong>Belief</strong></td>
+<td>A derived conclusion about the world — never stored directly, always recomputed from events</td>
+</tr>
+<tr>
+<td><strong>Namespace</strong></td>
+<td>One of four epistemic buckets: <code>canonical</code>, <code>local</code>, <code>contested</code>, <code>archived</code></td>
+</tr>
+<tr>
+<td><strong>Reducer</strong></td>
+<td>The pure function <code>f(events) → state</code> that deterministically produces beliefs</td>
+</tr>
+<tr>
+<td><strong>State hash</strong></td>
+<td>A SHA-256 digest of reducer output — byte-identical across all compliant implementations</td>
+</tr>
+<tr>
+<td><strong>Merkle root</strong></td>
+<td>A SHA-256 Merkle tree root over all backpack files — seals vault integrity</td>
+</tr>
+<tr>
+<td><strong>Manifest</strong></td>
+<td>A JSON file enumerating every backpack file with its SHA-256 hash and size</td>
+</tr>
+<tr>
+<td><strong>Fencing token</strong></td>
+<td>A signed, content-addressed token that prevents stale writes during sync</td>
+</tr>
+<tr>
+<td><strong>Key ID</strong></td>
+<td><code>bp1_</code> + first 16 hex chars of <code>SHA-256(raw_ed25519_public_key_bytes)</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-cryptographic-stack">3. Cryptographic Stack<a class="headerlink" href="#3-cryptographic-stack" title="Permanent link">&para;</a></h2>
+<p>All Profile A implementations MUST use exactly this stack. No substitutions are permitted.</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Algorithm</th>
+<th>Specification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hashing</td>
+<td>SHA-256</td>
+<td>FIPS 180-4</td>
+</tr>
+<tr>
+<td>Signing</td>
+<td>Ed25519</td>
+<td>RFC 8032</td>
+</tr>
+<tr>
+<td>Canonical JSON</td>
+<td>JCS subset</td>
+<td>RFC 8785</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sha-256-rules">SHA-256 Rules<a class="headerlink" href="#sha-256-rules" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Output: 64 lowercase hexadecimal characters</li>
+<li>Input: UTF-8 encoded bytes</li>
+<li>Used for: event IDs, file integrity, Merkle nodes, state hash, key ID derivation</li>
+</ul>
+<h3 id="ed25519-rules">Ed25519 Rules<a class="headerlink" href="#ed25519-rules" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Key size: 256-bit (32-byte public, 64-byte private with seed)</li>
+<li>Signatures: 64 bytes, Base64-encoded (standard alphabet with padding)</li>
+<li>Signing payload for events: <code>SHA-256(canonical_bytes(event_without_sig_field))</code></li>
+<li>The <code>sig</code> field MUST be excluded before signing</li>
+<li>The <code>event_id</code> field MUST be included in the signing payload</li>
+</ul>
+<h3 id="key-id-derivation">Key ID Derivation<a class="headerlink" href="#key-id-derivation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>key_id = &quot;bp1_&quot; + SHA-256(raw_public_key_bytes)[:16 hex chars]
+</code></pre></div>
+<p>Example: <code>bp1_27a6549d43046062</code></p>
+<hr />
+<h2 id="4-canonical-json">4. Canonical JSON<a class="headerlink" href="#4-canonical-json" title="Permanent link">&para;</a></h2>
+<p>All hashing and signing MUST use RFC 8785 canonical JSON. Two compliant implementations serializing the same logical object MUST produce byte-identical output.</p>
+<h3 id="rules-all-must-apply">Rules (all MUST apply)<a class="headerlink" href="#rules-all-must-apply" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Object keys MUST be sorted lexicographically by Unicode code point</li>
+<li>No whitespace between tokens</li>
+<li>No trailing commas</li>
+<li>Numbers MUST NOT have leading zeros, positive signs, or trailing decimal zeros</li>
+<li>Strings MUST use minimal escape sequences</li>
+<li>Encoding MUST be UTF-8 without BOM</li>
+<li>Null values MUST be preserved as <code>"null"</code> — MUST NOT be omitted</li>
+</ol>
+<h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h3>
+<p>Input object (logical):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span><span class="nt">&quot;z&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;a&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;m&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;b&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">}}</span>
+</code></pre></div></p>
+<p>Canonical output:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>{&quot;a&quot;:1,&quot;m&quot;:{&quot;b&quot;:null,&quot;y&quot;:2},&quot;z&quot;:3}
+</code></pre></div></p>
+<h3 id="reference-implementation">Reference Implementation<a class="headerlink" href="#reference-implementation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">canonical_bytes</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="n">obj</span><span class="p">,</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>        <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">),</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>        <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>        <span class="n">allow_nan</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Cross-language note: For fractional values (floats), prefer integer encoding or string-wrapped decimals to guarantee byte-exact interoperability across languages.</p>
+<hr />
+<h2 id="5-event-identity">5. Event Identity<a class="headerlink" href="#5-event-identity" title="Permanent link">&para;</a></h2>
+<p>Events are content-addressed. Their ID is derived from their content.</p>
+<h3 id="derivation-rule-must">Derivation Rule (MUST)<a class="headerlink" href="#derivation-rule-must" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Remove <code>event_id</code> and <code>sig</code> fields from the event object</li>
+<li>Compute canonical JSON bytes of the remaining object</li>
+<li><code>event_id = "evt_" + SHA-256(canonical_bytes)[:24 hex chars]</code></li>
+</ol>
+<p>This rule is deterministic: identical event content always produces the same <code>event_id</code>.</p>
+<h3 id="example_1">Example<a class="headerlink" href="#example_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">derive_event_id</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">hashable</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;event_id&quot;</span><span class="p">,</span> <span class="s2">&quot;sig&quot;</span><span class="p">)}</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">digest</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">canonical_bytes</span><span class="p">(</span><span class="n">hashable</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;evt_</span><span class="si">{</span><span class="n">digest</span><span class="p">[:</span><span class="mi">24</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+</code></pre></div>
+<hr />
+<h2 id="6-causal-chain">6. Causal Chain<a class="headerlink" href="#6-causal-chain" title="Permanent link">&para;</a></h2>
+<p>Each actor maintains a per-actor linked list of events via <code>prev_event_hash</code>.</p>
+<h3 id="rules-all-must-apply_1">Rules (all MUST apply)<a class="headerlink" href="#rules-all-must-apply_1" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>First event</strong> by an actor: <code>prev_event_hash</code> MUST be <code>null</code></li>
+<li><strong>Subsequent events</strong>: <code>prev_event_hash</code> MUST equal the <code>event_id</code> of that actor's immediately preceding event</li>
+<li><strong>Cross-actor</strong>: <code>prev_event_hash</code> MUST NOT reference another actor's events</li>
+</ol>
+<h3 id="integrity-rule">Integrity Rule<a class="headerlink" href="#integrity-rule" title="Permanent link">&para;</a></h3>
+<p>For any event E by actor A, if <code>E.prev_event_hash</code> is not null, there MUST exist an event P where:
+- <code>P.event_id == E.prev_event_hash</code>
+- <code>P.actor == A</code></p>
+<p>Any gap or forgery breaks the chain and fails compliance.</p>
+<h3 id="fork-detection">Fork Detection<a class="headerlink" href="#fork-detection" title="Permanent link">&para;</a></h3>
+<p>A <em>fork</em> occurs when two events by the same actor share the same <code>prev_event_hash</code>. This indicates concurrent offline operation. Forks are preserved in the merged log and surface in the <code>contested/</code> namespace after reducer replay.</p>
+<hr />
+<h2 id="7-event-types">7. Event Types<a class="headerlink" href="#7-event-types" title="Permanent link">&para;</a></h2>
+<p>Machine-readable schema: <code>docs/schemas/provara_event_schema_v1.json</code></p>
+<h3 id="core-types-no-prefix-required">Core Types (no prefix required)<a class="headerlink" href="#core-types-no-prefix-required" title="Permanent link">&para;</a></h3>
+<p>All core event types are reserved. Custom extensions MUST use reverse-domain prefixes (<code>com.example.my_type</code>).</p>
+<h4 id="genesis">GENESIS<a class="headerlink" href="#genesis" title="Permanent link">&para;</a></h4>
+<p>The vault birth certificate. Every backpack has exactly one GENESIS event, written by <code>bootstrap_v0.py</code>.</p>
+<p>Required fields:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">&quot;event_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;evt_...&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GENESIS&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="nt">&quot;namespace&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;canonical&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="nt">&quot;actor&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;actor_id&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span><span class="nt">&quot;actor_key_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;bp1_...&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span><span class="nt">&quot;ts_logical&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span><span class="nt">&quot;prev_event_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">  </span><span class="nt">&quot;timestamp_utc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;ISO 8601&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">    </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;vault_uuid&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">    </span><span class="nt">&quot;birth_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;ISO 8601&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">    </span><span class="nt">&quot;root_key_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;bp1_...&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">    </span><span class="nt">&quot;protocol_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">    </span><span class="nt">&quot;profile&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PROVARA-1.0_PROFILE_A&quot;</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">  </span><span class="nt">&quot;sig&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;base64 ed25519&gt;&quot;</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="p">}</span>
+</code></pre></div></p>
+<h4 id="observation">OBSERVATION<a class="headerlink" href="#observation" title="Permanent link">&para;</a></h4>
+<p>A sensor, measurement, or belief claim with associated confidence.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OBSERVATION&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nt">&quot;namespace&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;local&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;entity&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="nt">&quot;predicate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;property&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;any JSON value&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">    </span><span class="nt">&quot;confidence&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.9</span><span class="p">,</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;ISO 8601&gt;&quot;</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="p">}</span>
+</code></pre></div>
+<p>The belief key is <code>subject:predicate</code>. The reducer places observations in <code>local/</code>, moving them to <code>contested/</code> if conflicting high-confidence evidence accumulates.</p>
+<h4 id="assertion">ASSERTION<a class="headerlink" href="#assertion" title="Permanent link">&para;</a></h4>
+<p>Functionally equivalent to OBSERVATION but defaults to lower confidence (0.35). Used for inferred or deduced beliefs rather than direct sensor readings.</p>
+<h4 id="attestation">ATTESTATION<a class="headerlink" href="#attestation" title="Permanent link">&para;</a></h4>
+<p>Promotes a belief to the <code>canonical/</code> namespace. Requires institutional authority.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ATTESTATION&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">&quot;namespace&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;canonical&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;entity&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="nt">&quot;predicate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;property&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;attested value&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="nt">&quot;target_event_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;event_id of source evidence&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="nt">&quot;actor_key_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;bp1_...&gt;&quot;</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="p">}</span>
+</code></pre></div>
+<p>When a canonical belief already exists for a key, it is moved to <code>archived/</code> with <code>superseded_by</code> set to the new attestation event ID.</p>
+<h4 id="retraction">RETRACTION<a class="headerlink" href="#retraction" title="Permanent link">&para;</a></h4>
+<p>Removes a belief from active namespaces. Canonical entries are archived as retracted.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RETRACTION&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;entity&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">    </span><span class="nt">&quot;predicate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;property&gt;&quot;</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="p">}</span>
+</code></pre></div>
+<p>Effect:
+- Removes from <code>local/</code> and <code>contested/</code>
+- If in <code>canonical/</code>: moves to <code>archived/</code> with <code>retracted: true</code> and <code>superseded_by: &lt;retraction_event_id&gt;</code></p>
+<h4 id="key_revocation">KEY_REVOCATION<a class="headerlink" href="#key_revocation" title="Permanent link">&para;</a></h4>
+<p>Part of the two-event key rotation protocol. Marks a key as revoked.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;KEY_REVOCATION&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="nt">&quot;revoked_key_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;bp1_...&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">    </span><span class="nt">&quot;trust_boundary_event_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;last trusted event_id&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;compromised&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="nt">&quot;revoked_by&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;signing_key_id&gt;&quot;</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="p">}</span>
+</code></pre></div>
+<p>MUST be signed by a surviving trusted authority. The revoked key MUST NOT sign its own revocation.</p>
+<h4 id="key_promotion">KEY_PROMOTION<a class="headerlink" href="#key_promotion" title="Permanent link">&para;</a></h4>
+<p>Second half of key rotation. Introduces the replacement key.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;KEY_PROMOTION&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="nt">&quot;new_key_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;bp1_...&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">    </span><span class="nt">&quot;new_public_key_b64&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;base64&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">    </span><span class="nt">&quot;algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ed25519&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">    </span><span class="nt">&quot;roles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;root&quot;</span><span class="p">],</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">    </span><span class="nt">&quot;promoted_by&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;signing_key_id&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">    </span><span class="nt">&quot;replaces_key_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;revoked_key_id&gt;&quot;</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="p">}</span>
+</code></pre></div>
+<p>The new key MUST NOT sign its own promotion. A surviving authority signs both rotation events.</p>
+<h4 id="reducer_epoch">REDUCER_EPOCH<a class="headerlink" href="#reducer_epoch" title="Permanent link">&para;</a></h4>
+<p>Records a reducer version transition for audit purposes.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;REDUCER_EPOCH&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="nt">&quot;epoch_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;epoch_identifier&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">    </span><span class="nt">&quot;reducer_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256:&lt;hash_of_reducer_code&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">    </span><span class="nt">&quot;effective_from_event_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;event_id&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">    </span><span class="nt">&quot;ontology_versions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;perception&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v1&quot;</span><span class="p">}</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="8-the-reducer">8. The Reducer<a class="headerlink" href="#8-the-reducer" title="Permanent link">&para;</a></h2>
+<p>The reducer is a pure function: <code>f(events) → state</code>. Given the same event sequence, any compliant implementation MUST produce a byte-identical <code>state_hash</code>.</p>
+<h3 id="four-namespace-state-model">Four-Namespace State Model<a class="headerlink" href="#four-namespace-state-model" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Namespace</th>
+<th>Meaning</th>
+<th>When Populated</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>canonical/</code></td>
+<td>Institutionally attested truth</td>
+<td>Via ATTESTATION event</td>
+</tr>
+<tr>
+<td><code>local/</code></td>
+<td>Node-local observations</td>
+<td>Via OBSERVATION (no conflict)</td>
+</tr>
+<tr>
+<td><code>contested/</code></td>
+<td>Conflicting high-confidence evidence</td>
+<td>When two conflicting observations both exceed the conflict threshold</td>
+</tr>
+<tr>
+<td><code>archived/</code></td>
+<td>Superseded canonical beliefs</td>
+<td>When a canonical entry is overwritten by new ATTESTATION or RETRACTION</td>
+</tr>
+</tbody>
+</table>
+<h3 id="belief-keys">Belief Keys<a class="headerlink" href="#belief-keys" title="Permanent link">&para;</a></h3>
+<p>Beliefs are indexed by <code>subject:predicate</code>. Example: <code>door_01:status</code>.</p>
+<h3 id="conflict-detection">Conflict Detection<a class="headerlink" href="#conflict-detection" title="Permanent link">&para;</a></h3>
+<p>The default conflict confidence threshold is <code>0.50</code>. An incoming observation triggers conflict if:</p>
+<ol>
+<li><strong>Conflicts with canonical</strong>: existing canonical value differs AND incoming confidence ≥ threshold</li>
+<li><strong>Conflicts with local</strong>: existing local value differs AND <code>max(existing_confidence, incoming_confidence)</code> ≥ threshold</li>
+</ol>
+<p>When conflict is detected, the key moves from <code>local/</code> to <code>contested/</code> with full evidence grouping.</p>
+<h3 id="agreeing-evidence">Agreeing Evidence<a class="headerlink" href="#agreeing-evidence" title="Permanent link">&para;</a></h3>
+<p>If a new observation agrees with the existing local value:
+- If incoming confidence ≤ existing: keep existing, record evidence (no state change)
+- If incoming confidence &gt; existing: update local to show higher confidence source</p>
+<h3 id="state-hash">State Hash<a class="headerlink" href="#state-hash" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>state_hash = SHA-256(canonical_bytes(state_without_metadata.state_hash))
+</code></pre></div>
+<p>The hash covers all four namespaces plus non-hash metadata fields. It excludes <code>metadata.state_hash</code> itself (non-self-referential). An empty reducer (zero events) produces a valid, deterministic state hash.</p>
+<h3 id="reducer-invariants">Reducer Invariants<a class="headerlink" href="#reducer-invariants" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Same event sequence → byte-identical <code>state_hash</code></li>
+<li>Empty log → valid state hash, all namespaces empty, <code>event_count = 0</code></li>
+<li>Unknown event types: counted, ignored for state, logged to <code>_ignored_types</code></li>
+<li>Malformed events (non-dict, missing fields): skipped or handled gracefully — never crash</li>
+</ol>
+<hr />
+<h2 id="9-key-management">9. Key Management<a class="headerlink" href="#9-key-management" title="Permanent link">&para;</a></h2>
+<h3 id="key-registry-identitykeysjson">Key Registry (<code>identity/keys.json</code>)<a class="headerlink" href="#key-registry-identitykeysjson" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="p">{</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="nt">&quot;keys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">      </span><span class="nt">&quot;key_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bp1_27a6549d43046062&quot;</span><span class="p">,</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">      </span><span class="nt">&quot;public_key_b64&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;base64&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">      </span><span class="nt">&quot;algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ed25519&quot;</span><span class="p">,</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">      </span><span class="nt">&quot;roles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;root&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;attestation&quot;</span><span class="p">],</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">      </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span><span class="p">,</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">      </span><span class="nt">&quot;created_at_utc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-02-13T00:00:00Z&quot;</span>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">  </span><span class="p">],</span>
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="w">  </span><span class="nt">&quot;revocations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="key-rotation-protocol">Key Rotation Protocol<a class="headerlink" href="#key-rotation-protocol" title="Permanent link">&para;</a></h3>
+<p>Key rotation is a two-event atomic operation:</p>
+<ol>
+<li><strong>KEY_REVOCATION</strong> — signed by a surviving trusted authority (MUST NOT be the key being revoked)</li>
+<li><strong>KEY_PROMOTION</strong> — signed by the same surviving authority (MUST NOT be the new key)</li>
+</ol>
+<p><strong>Security invariant:</strong> A compromised key cannot authorize its own replacement. If an attacker could self-sign a KEY_PROMOTION, they could escalate from key compromise to permanent identity takeover.</p>
+<p><strong>Trust hierarchy (for signing rotation):</strong>
+1. Non-compromised root key → signs rotation
+2. Root compromised, quorum keys survive → quorum signs
+3. All keys compromised → catastrophic identity death (new genesis required)</p>
+<h3 id="revoked-keys">Revoked Keys<a class="headerlink" href="#revoked-keys" title="Permanent link">&para;</a></h3>
+<p>After revocation, a key's <code>status</code> changes to <code>"revoked"</code>. Revoked keys appear in the <code>revocations</code> list and MUST NOT be used to sign new events.</p>
+<hr />
+<h2 id="10-merkle-tree">10. Merkle Tree<a class="headerlink" href="#10-merkle-tree" title="Permanent link">&para;</a></h2>
+<p>The Merkle tree seals the integrity of all backpack files.</p>
+<h3 id="construction">Construction<a class="headerlink" href="#construction" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Leaves:</strong> For each file entry in the manifest: <code>leaf_hash = SHA-256(canonical_bytes({"path": "...", "sha256": "...", "size": N}))</code></li>
+<li><strong>Ordering:</strong> Leaves MUST be sorted lexicographically by file path</li>
+<li><strong>Padding:</strong> If leaf count is odd, the last leaf is duplicated</li>
+<li><strong>Nodes:</strong> <code>node_hash = SHA-256(left_child_bytes || right_child_bytes)</code> — raw byte concatenation (32 + 32 bytes), NOT hex string concatenation</li>
+<li><strong>Root:</strong> A single 64-character lowercase hex string stored in <code>merkle_root.txt</code></li>
+</ol>
+<h3 id="empty-tree">Empty Tree<a class="headerlink" href="#empty-tree" title="Permanent link">&para;</a></h3>
+<p>An empty tree (no files) produces: <code>SHA-256(b"").hexdigest()</code></p>
+<h3 id="reference-implementation_1">Reference Implementation<a class="headerlink" href="#reference-implementation_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">merkle_root_hex</span><span class="p">(</span><span class="n">leaves</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bytes</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">leaves</span><span class="p">:</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>        <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>    <span class="n">level</span> <span class="o">=</span> <span class="p">[</span><span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span> <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="n">leaves</span><span class="p">]</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>        <span class="n">next_level</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">level</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>            <span class="n">left</span> <span class="o">=</span> <span class="n">level</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>            <span class="n">right</span> <span class="o">=</span> <span class="n">level</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="k">else</span> <span class="n">level</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>            <span class="n">next_level</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">())</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>        <span class="n">level</span> <span class="o">=</span> <span class="n">next_level</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>    <span class="k">return</span> <span class="n">level</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+</code></pre></div>
+<hr />
+<h2 id="11-manifest">11. Manifest<a class="headerlink" href="#11-manifest" title="Permanent link">&para;</a></h2>
+<p><code>manifest.json</code> inventories every file in the backpack with its SHA-256 hash, file size, and relative path.</p>
+<h3 id="format">Format<a class="headerlink" href="#format" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="p">{</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span><span class="nt">&quot;backpack_spec_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span><span class="nt">&quot;manifest_format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;manifest.v0&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">  </span><span class="nt">&quot;generated_at_utc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-02-13T00:00:00Z&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">  </span><span class="nt">&quot;merkle_root&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;64 hex chars&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">  </span><span class="nt">&quot;files&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">      </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;events/events.ndjson&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">      </span><span class="nt">&quot;sha256&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;64 hex chars&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="w">      </span><span class="nt">&quot;size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="w">  </span><span class="p">]</span>
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="excluded-files">Excluded Files<a class="headerlink" href="#excluded-files" title="Permanent link">&para;</a></h3>
+<p><code>manifest.json</code>, <code>manifest.sig</code>, and <code>merkle_root.txt</code> are excluded from the file list (they cannot hash themselves).</p>
+<h3 id="manifest-signature">Manifest Signature<a class="headerlink" href="#manifest-signature" title="Permanent link">&para;</a></h3>
+<p><code>manifest.sig</code> is a detached Ed25519 signature over <code>SHA-256(merkle_root_bytes + canonical_bytes(manifest_header))</code>. It binds the manifest to a specific key and timestamp.</p>
+<hr />
+<h2 id="12-safety-tiers">12. Safety Tiers<a class="headerlink" href="#12-safety-tiers" title="Permanent link">&para;</a></h2>
+<p>The safety tier system governs what actions a vault can authorize offline.</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Risk</th>
+<th>Offline Allowed</th>
+<th>Gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>L0</strong></td>
+<td>Data-only, reversible</td>
+<td>Yes</td>
+<td>Local reducer</td>
+</tr>
+<tr>
+<td><strong>L1</strong></td>
+<td>Low-kinetic</td>
+<td>Yes (logged for review)</td>
+<td>Reducer + policy</td>
+</tr>
+<tr>
+<td><strong>L2</strong></td>
+<td>High-kinetic</td>
+<td>Lease window only</td>
+<td>Multi-sensor + signed policy</td>
+</tr>
+<tr>
+<td><strong>L3</strong></td>
+<td>Critical / irreversible</td>
+<td>No</td>
+<td>Human MFA or remote signature</td>
+</tr>
+</tbody>
+</table>
+<h3 id="merge-ratchet">Merge Ratchet<a class="headerlink" href="#merge-ratchet" title="Permanent link">&para;</a></h3>
+<p>Safety constraints only tighten automatically on merge (<code>most_restrictive_wins</code>). Loosening requires a signed <code>POLICY_UPDATE</code> by a key with L3 clearance. This is a one-way ratchet — you can always become more cautious, never less cautious without explicit authority.</p>
+<hr />
+<h2 id="13-sync-protocol">13. Sync Protocol<a class="headerlink" href="#13-sync-protocol" title="Permanent link">&para;</a></h2>
+<p>The sync protocol is a union merge with causal chain verification.</p>
+<h3 id="131-chain-validation-algorithm">13.1 Chain Validation Algorithm<a class="headerlink" href="#131-chain-validation-algorithm" title="Permanent link">&para;</a></h3>
+<p>To validate causal and cryptographic integrity, a conformant implementation MUST execute the following deterministic procedure:</p>
+<ol>
+<li>Parse all NDJSON lines as UTF-8 JSON objects.</li>
+<li>Build <code>event_by_id[event_id]</code> and fail on duplicate IDs.</li>
+<li>For each event:</li>
+<li>Recompute content-derived ID from the event with <code>event_id</code> and <code>sig</code> removed.</li>
+<li>Verify recomputed ID equals <code>event_id</code>.</li>
+<li>Build <code>actor_events[actor]</code> and sort each actor list by:</li>
+<li><code>timestamp_utc</code> (primary, ascending)</li>
+<li><code>event_id</code> (secondary, ascending)</li>
+<li>For each actor chain:</li>
+<li>First event MUST have <code>prev_event_hash = null</code>.</li>
+<li>Each subsequent event MUST set <code>prev_event_hash</code> to the immediately preceding event ID in that actor-sorted list.</li>
+<li><code>prev_event_hash</code> MUST reference an event by the same actor (cross-actor references are invalid).</li>
+<li>For each signed event:</li>
+<li>Resolve public key by <code>actor_key_id</code>.</li>
+<li>Reject missing, unknown, or revoked key IDs.</li>
+<li>Verify Ed25519 signature over canonical JSON bytes of event-without-<code>sig</code>.</li>
+<li>If all checks pass, the chain is valid; otherwise invalid with a specific error code (see §16.1).</li>
+</ol>
+<h3 id="132-algorithm-pseudocode">13.2 Algorithm Pseudocode<a class="headerlink" href="#132-algorithm-pseudocode" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>function verify_vault(events):
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    event_by_id = {}
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>    actor_events = {}
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>    for e in events:
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>        require_utf8_json(e)                                   # PROVARA_E007
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>        require_required_fields(e)                             # PROVARA_E004
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>        if e.event_id in event_by_id:
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>            fail(PROVARA_E010, &quot;DUPLICATE_EVENT_ID&quot;)
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>        event_by_id[e.event_id] = e
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a>        derived = derive_event_id(remove_fields(e, [&quot;event_id&quot;, &quot;sig&quot;]))
+<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>        if derived != e.event_id:
+<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a>            fail(PROVARA_E001, &quot;HASH_MISMATCH&quot;)
+<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a>
+<a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a>        actor_events[e.actor].append(e)
+<a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a>
+<a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a>    for actor in actor_events:
+<a id="__codelineno-16-19" name="__codelineno-16-19" href="#__codelineno-16-19"></a>        chain = sort(actor_events[actor], by=[&quot;timestamp_utc&quot;, &quot;event_id&quot;])
+<a id="__codelineno-16-20" name="__codelineno-16-20" href="#__codelineno-16-20"></a>        for i in range(0, len(chain)):
+<a id="__codelineno-16-21" name="__codelineno-16-21" href="#__codelineno-16-21"></a>            curr = chain[i]
+<a id="__codelineno-16-22" name="__codelineno-16-22" href="#__codelineno-16-22"></a>            if i == 0:
+<a id="__codelineno-16-23" name="__codelineno-16-23" href="#__codelineno-16-23"></a>                if curr.prev_event_hash is not null:
+<a id="__codelineno-16-24" name="__codelineno-16-24" href="#__codelineno-16-24"></a>                    fail(PROVARA_E002, &quot;BROKEN_CAUSAL_CHAIN&quot;)
+<a id="__codelineno-16-25" name="__codelineno-16-25" href="#__codelineno-16-25"></a>            else:
+<a id="__codelineno-16-26" name="__codelineno-16-26" href="#__codelineno-16-26"></a>                prev = chain[i - 1]
+<a id="__codelineno-16-27" name="__codelineno-16-27" href="#__codelineno-16-27"></a>                if curr.prev_event_hash != prev.event_id:
+<a id="__codelineno-16-28" name="__codelineno-16-28" href="#__codelineno-16-28"></a>                    fail(PROVARA_E002, &quot;BROKEN_CAUSAL_CHAIN&quot;)
+<a id="__codelineno-16-29" name="__codelineno-16-29" href="#__codelineno-16-29"></a>
+<a id="__codelineno-16-30" name="__codelineno-16-30" href="#__codelineno-16-30"></a>                # explicit same-actor check for referenced prev
+<a id="__codelineno-16-31" name="__codelineno-16-31" href="#__codelineno-16-31"></a>                linked = event_by_id.get(curr.prev_event_hash)
+<a id="__codelineno-16-32" name="__codelineno-16-32" href="#__codelineno-16-32"></a>                if linked is null or linked.actor != actor:
+<a id="__codelineno-16-33" name="__codelineno-16-33" href="#__codelineno-16-33"></a>                    fail(PROVARA_E011, &quot;CROSS_ACTOR_REFERENCE&quot;)
+<a id="__codelineno-16-34" name="__codelineno-16-34" href="#__codelineno-16-34"></a>
+<a id="__codelineno-16-35" name="__codelineno-16-35" href="#__codelineno-16-35"></a>            if has_field(curr, &quot;sig&quot;):
+<a id="__codelineno-16-36" name="__codelineno-16-36" href="#__codelineno-16-36"></a>                key = key_registry.get(curr.actor_key_id)
+<a id="__codelineno-16-37" name="__codelineno-16-37" href="#__codelineno-16-37"></a>                if key is null:
+<a id="__codelineno-16-38" name="__codelineno-16-38" href="#__codelineno-16-38"></a>                    fail(PROVARA_E012, &quot;UNKNOWN_KEY_ID&quot;)
+<a id="__codelineno-16-39" name="__codelineno-16-39" href="#__codelineno-16-39"></a>                if key.status == &quot;revoked&quot;:
+<a id="__codelineno-16-40" name="__codelineno-16-40" href="#__codelineno-16-40"></a>                    fail(PROVARA_E006, &quot;REVOKED_KEY_USE&quot;)
+<a id="__codelineno-16-41" name="__codelineno-16-41" href="#__codelineno-16-41"></a>                if !verify_ed25519_signature(curr, key.public_key):
+<a id="__codelineno-16-42" name="__codelineno-16-42" href="#__codelineno-16-42"></a>                    fail(PROVARA_E003, &quot;INVALID_SIGNATURE&quot;)
+<a id="__codelineno-16-43" name="__codelineno-16-43" href="#__codelineno-16-43"></a>
+<a id="__codelineno-16-44" name="__codelineno-16-44" href="#__codelineno-16-44"></a>    return ok()
+</code></pre></div>
+<h3 id="133-fencing-tokens">13.3 Fencing Tokens<a class="headerlink" href="#133-fencing-tokens" title="Permanent link">&para;</a></h3>
+<p>Before writing to a backpack, generate a fencing token:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>token_hash = SHA-256(latest_event_id + &quot;:&quot; + timestamp + &quot;:&quot; + nonce)
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>sig = Ed25519_sign(token_hash, active_key)
+</code></pre></div>
+<p>Validation:
+1. Recompute <code>token_hash</code> from the fields
+2. Verify signature against key registry
+3. Verify <code>latest_event_id</code> still exists in the event log</p>
+<p>A stale token (referencing an event that was superseded by a merge) fails validation, preventing lost-update scenarios.</p>
+<h3 id="delta-export-import">Delta Export / Import<a class="headerlink" href="#delta-export-import" title="Permanent link">&para;</a></h3>
+<p>Delta bundles enable partial sync (only events after a known hash):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>Header: {&quot;type&quot;: &quot;provara_delta_v1&quot;, &quot;since_hash&quot;: &quot;...&quot;, &quot;event_count&quot;: N, &quot;keys&quot;: [...]}
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>Body:   One NDJSON line per event
+</code></pre></div>
+<p>Unknown event types MUST be preserved in the merged log. They MUST NOT affect core reducer state.</p>
+<hr />
+<h2 id="14-event-permanence">14. Event Permanence<a class="headerlink" href="#14-event-permanence" title="Permanent link">&para;</a></h2>
+<p>Events MUST be permanent. Implementations MUST NOT delete events.</p>
+<table>
+<thead>
+<tr>
+<th>Data Type</th>
+<th>Retention</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Events</td>
+<td>Permanent</td>
+</tr>
+<tr>
+<td>Checkpoints</td>
+<td>Permanent</td>
+</tr>
+<tr>
+<td>Perception raw data</td>
+<td>30-day default, oldest-first eviction (MAY vary)</td>
+</tr>
+<tr>
+<td>CAS artifacts</td>
+<td>Permanent if referenced; 90-day if unreferenced (MAY vary)</td>
+</tr>
+<tr>
+<td>State caches</td>
+<td>MAY be evicted (regeneratable from events)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="15-directory-structure">15. Directory Structure<a class="headerlink" href="#15-directory-structure" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>My_Backpack/
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>├── identity/
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>│   ├── genesis.json              # Birth certificate
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>│   └── keys.json                 # Public key registry
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>├── events/
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>│   └── events.ndjson             # THE source of truth (append-only NDJSON)
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>├── policies/
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>│   ├── safety_policy.json        # L0-L3 kinetic risk tiers
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>│   ├── retention_policy.json     # Data permanence rules
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>│   ├── sync_contract.json        # Governance + authority ladder
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>│   └── ontology/
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a>│       └── perception_ontology_v1.json
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a>├── state/                        # Regeneratable cache (may be absent)
+<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a>│   └── current_state.json
+<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a>├── artifacts/
+<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a>│   └── cas/                      # Content-addressed storage
+<a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a>├── manifest.json                 # File inventory with SHA-256 hashes
+<a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a>├── manifest.sig                  # Ed25519 signature over manifest
+<a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a>└── merkle_root.txt               # Integrity anchor (single hex string)
+</code></pre></div>
+<h3 id="path-safety">Path Safety<a class="headerlink" href="#path-safety" title="Permanent link">&para;</a></h3>
+<p>All file paths in the manifest MUST:
+- Be relative to the backpack root
+- Not contain <code>..</code> or symlinks pointing outside the root
+- Be lexicographically sorted in the manifest</p>
+<hr />
+<h2 id="16-compliance-requirements">16. Compliance Requirements<a class="headerlink" href="#16-compliance-requirements" title="Permanent link">&para;</a></h2>
+<h3 id="161-error-taxonomy">16.1 Error Taxonomy<a class="headerlink" href="#161-error-taxonomy" title="Permanent link">&para;</a></h3>
+<p>Standardized error codes for validation failures. Implementations SHOULD use these codes to ensure interoperability and clear auditing.</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Label</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PROVARA_E001</code></td>
+<td><code>HASH_MISMATCH</code></td>
+<td>Event ID does not match computed content hash</td>
+</tr>
+<tr>
+<td><code>PROVARA_E002</code></td>
+<td><code>BROKEN_CAUSAL_CHAIN</code></td>
+<td><code>prev_event_hash</code> does not link to correct previous event</td>
+</tr>
+<tr>
+<td><code>PROVARA_E003</code></td>
+<td><code>INVALID_SIGNATURE</code></td>
+<td>Signature verification failed for the given public key</td>
+</tr>
+<tr>
+<td><code>PROVARA_E004</code></td>
+<td><code>MISSING_FIELD</code></td>
+<td>A required top-level or payload field is missing</td>
+</tr>
+<tr>
+<td><code>PROVARA_E005</code></td>
+<td><code>UNAUTHORIZED_SIGNER</code></td>
+<td>The signing key does not have authority for the event type</td>
+</tr>
+<tr>
+<td><code>PROVARA_E006</code></td>
+<td><code>REVOKED_KEY_USE</code></td>
+<td>Event signed by a key that was revoked at the time of signing</td>
+</tr>
+<tr>
+<td><code>PROVARA_E007</code></td>
+<td><code>MALFORMED_JSON</code></td>
+<td>Event or file is not valid UTF-8 or standard JSON</td>
+</tr>
+<tr>
+<td><code>PROVARA_E008</code></td>
+<td><code>MERKLE_ROOT_MISMATCH</code></td>
+<td>Recomputed Merkle root does not match <code>merkle_root.txt</code></td>
+</tr>
+<tr>
+<td><code>PROVARA_E009</code></td>
+<td><code>UNSAFE_PATH</code></td>
+<td>Manifest entry path is absolute, traverses <code>..</code>, or escapes root</td>
+</tr>
+<tr>
+<td><code>PROVARA_E010</code></td>
+<td><code>DUPLICATE_EVENT_ID</code></td>
+<td>Duplicate <code>event_id</code> found in a log that requires uniqueness</td>
+</tr>
+<tr>
+<td><code>PROVARA_E011</code></td>
+<td><code>CROSS_ACTOR_REFERENCE</code></td>
+<td>Event references previous hash from a different actor chain</td>
+</tr>
+<tr>
+<td><code>PROVARA_E012</code></td>
+<td><code>UNKNOWN_KEY_ID</code></td>
+<td><code>actor_key_id</code> cannot be resolved in active key registry</td>
+</tr>
+</tbody>
+</table>
+<p>Canonical source for these codes: <code>docs/ERROR_CODES.md</code></p>
+<h3 id="162-minimum-test-coverage">16.2 Minimum Test Coverage<a class="headerlink" href="#162-minimum-test-coverage" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th style="text-align: right;">Tests</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Directory structure</td>
+<td style="text-align: right;">2</td>
+<td>Required folders and files exist</td>
+</tr>
+<tr>
+<td>Identity schema</td>
+<td style="text-align: right;">2</td>
+<td>Genesis event and key registry validity</td>
+</tr>
+<tr>
+<td>Event schema + causal chain</td>
+<td style="text-align: right;">3</td>
+<td>Event format, uniqueness, causal ordering</td>
+</tr>
+<tr>
+<td>Manifest integrity + Merkle</td>
+<td style="text-align: right;">5</td>
+<td>File hashes, Merkle computation, no phantoms, path safety</td>
+</tr>
+<tr>
+<td>Safety policy structure</td>
+<td style="text-align: right;">2</td>
+<td>L0-L3 structure and ratchet constraints</td>
+</tr>
+<tr>
+<td>Sync contract schema</td>
+<td style="text-align: right;">1</td>
+<td>Governance schema validity</td>
+</tr>
+<tr>
+<td>Reducer determinism</td>
+<td style="text-align: right;">1</td>
+<td>Same events → identical state hash</td>
+</tr>
+<tr>
+<td>Retention permanence</td>
+<td style="text-align: right;">1</td>
+<td>Events are never deleted</td>
+</tr>
+</tbody>
+</table>
+<p>Run against the reference backpack:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nb">cd</span><span class="w"> </span>SNP_Core/test<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span>../bin<span class="w"> </span>python<span class="w"> </span>backpack_compliance_v1.py<span class="w"> </span>../examples/reference_backpack<span class="w"> </span>-v
+</code></pre></div></p>
+<hr />
+<h2 id="17-reimplementation-guide">17. Reimplementation Guide<a class="headerlink" href="#17-reimplementation-guide" title="Permanent link">&para;</a></h2>
+<p>To implement Provara v1.0 in another language:</p>
+<h3 id="step-1-cryptographic-primitives">Step 1 — Cryptographic Primitives<a class="headerlink" href="#step-1-cryptographic-primitives" title="Permanent link">&para;</a></h3>
+<p>Implement:
+- SHA-256 (FIPS 180-4)
+- Ed25519 sign and verify (RFC 8032)
+- RFC 8785 canonical JSON</p>
+<h3 id="step-2-validate-against-test-vectors">Step 2 — Validate Against Test Vectors<a class="headerlink" href="#step-2-validate-against-test-vectors" title="Permanent link">&para;</a></h3>
+<p>Validate your implementations against <code>test_vectors/vectors.json</code>. The 7 vectors cover canonical JSON, SHA-256, event ID derivation, key ID derivation, Ed25519 sign/verify, Merkle root, and reducer determinism.</p>
+<h3 id="step-3-implement-the-reducer">Step 3 — Implement the Reducer<a class="headerlink" href="#step-3-implement-the-reducer" title="Permanent link">&para;</a></h3>
+<p>Handle: <code>OBSERVATION</code>, <code>ASSERTION</code>, <code>ATTESTATION</code>, <code>RETRACTION</code>, <code>REDUCER_EPOCH</code>, <code>KEY_REVOCATION</code>, <code>KEY_PROMOTION</code></p>
+<p>For unknown event types: count them, do not modify namespace state, preserve in event log on merge.</p>
+<h3 id="step-4-verify-determinism">Step 4 — Verify Determinism<a class="headerlink" href="#step-4-verify-determinism" title="Permanent link">&para;</a></h3>
+<p>Run your reducer against the test vector event sequence. Compare your <code>state_hash</code> to the reference value. If they match, your implementation is correct. If they diverge, the canonical JSON or hash computation has a bug.</p>
+<h3 id="step-5-pass-compliance-tests">Step 5 — Pass Compliance Tests<a class="headerlink" href="#step-5-pass-compliance-tests" title="Permanent link">&para;</a></h3>
+<p>Generate a backpack with your implementation and run the 17 compliance tests. If all pass, your implementation is conformant.</p>
+<h3 id="if-state-hashes-diverge">If State Hashes Diverge<a class="headerlink" href="#if-state-hashes-diverge" title="Permanent link">&para;</a></h3>
+<p>Common causes:
+1. <strong>Non-canonical JSON</strong> — check key sorting, whitespace, null handling
+2. <strong>Float serialization</strong> — JSON float encoding differs across languages; use integers or string-wrapped values for fractional confidence scores
+3. <strong>UTF-8 encoding</strong> — ensure no BOM, no alternate encodings
+4. <strong>Missing metadata fields</strong> — <code>state_hash</code> excludes <code>metadata.state_hash</code> but includes all other metadata fields</p>
+<p>The Python reference implementation is the canonical source of truth for any ambiguity.</p>
+<hr />
+<h2 id="18-security-considerations">18. Security Considerations<a class="headerlink" href="#18-security-considerations" title="Permanent link">&para;</a></h2>
+<h3 id="181-threat-model">18.1 Threat Model<a class="headerlink" href="#181-threat-model" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Threat</th>
+<th>Primary Defense</th>
+<th>Residual Risk / Operator Duty</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Payload/data tampering</strong></td>
+<td>Event signatures + manifest file hashes + Merkle root verification</td>
+<td>Private key compromise can still produce valid malicious events until revocation.</td>
+</tr>
+<tr>
+<td><strong>History re-ordering</strong></td>
+<td>Per-actor causal chain (<code>prev_event_hash</code>) + deterministic sort on replay</td>
+<td>Incorrect timestamp parsing in non-conformant ports can still cause divergence.</td>
+</tr>
+<tr>
+<td><strong>Silent deletion / truncation</strong></td>
+<td>Missing links (<code>prev_event_hash</code>) and manifest mismatch detection</td>
+<td>Deletion of newest tail events can appear as a stale snapshot if no external anchor/checkpoint is compared.</td>
+</tr>
+<tr>
+<td><strong>Identity takeover</strong></td>
+<td>Rotation requires surviving signer; self-promotion is prohibited</td>
+<td>If all authorities are compromised, identity continuity is cryptographically lost (new genesis required).</td>
+</tr>
+<tr>
+<td><strong>Stale-write overwrite</strong></td>
+<td>Fencing token includes latest event ID, timestamp, nonce, and signature</td>
+<td>Long offline windows increase merge complexity and contested state volume.</td>
+</tr>
+<tr>
+<td><strong>Fork-and-discard (equivocation)</strong></td>
+<td>Fork detection by identical actor + identical <code>prev_event_hash</code>; conflicting branches remain auditable</td>
+<td>Governance must define how forks are adjudicated and whether one branch is quarantined.</td>
+</tr>
+<tr>
+<td><strong>Time/backdating manipulation</strong></td>
+<td>Event ID is content-addressed and signed; chain linkage is authoritative, not wall-clock time</td>
+<td><code>timestamp_utc</code> is still untrusted metadata and can mislead human readers if not cross-checked.</td>
+</tr>
+<tr>
+<td><strong>Resource-exhaustion (DoS)</strong></td>
+<td>Streaming hash/verification, bounded input handling, malformed-line rejection</td>
+<td>Operators must enforce max event size, max payload depth, and replay quotas in production deployments.</td>
+</tr>
+<tr>
+<td><strong>Key ID collision attempt</strong></td>
+<td>Key IDs are SHA-256-derived; practical collision resistance at current security levels</td>
+<td>Profile migration plan needed if SHA-256 security assumptions materially degrade in future.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="182-mandatory-validation-order">18.2 Mandatory Validation Order<a class="headerlink" href="#182-mandatory-validation-order" title="Permanent link">&para;</a></h3>
+<p>To reduce attack surface and ambiguous error handling, implementations SHOULD validate in this order:</p>
+<ol>
+<li>UTF-8 + JSON parse checks</li>
+<li>Required field checks</li>
+<li>Event ID recomputation checks</li>
+<li>Causal chain linkage checks</li>
+<li>Key resolution/revocation checks</li>
+<li>Signature verification checks</li>
+<li>Manifest and Merkle verification checks</li>
+</ol>
+<p>Fail closed at the first critical invariant break and emit the corresponding <code>PROVARA_E###</code> code.</p>
+<h3 id="183-replay-and-duplication-attacks">18.3 Replay and Duplication Attacks<a class="headerlink" href="#183-replay-and-duplication-attacks" title="Permanent link">&para;</a></h3>
+<p>Replay of already-seen events is constrained by unique <code>event_id</code> and dedup rules. Implementations MUST reject duplicate IDs in contexts that require uniqueness and MUST NOT permit duplicate events to mutate derived state more than once.</p>
+<p>For delta import/sync workflows, unknown event types are preserved, but replayed known events still require full ID/signature/chain validation before acceptance.</p>
+<h3 id="184-truncation-and-partial-snapshot-risk">18.4 Truncation and Partial Snapshot Risk<a class="headerlink" href="#184-truncation-and-partial-snapshot-risk" title="Permanent link">&para;</a></h3>
+<p>Protocol checks can prove integrity of what is present; they cannot prove the local copy is globally complete without comparison to a stronger anchor (signed checkpoint, remote peer state, or externally pinned digest).</p>
+<p>Operational guidance:</p>
+<ul>
+<li>Keep signed checkpoints.</li>
+<li>Compare latest known event IDs across peers.</li>
+<li>Treat unexplained chain-head regressions as incident conditions.</li>
+</ul>
+<h3 id="185-time-semantics-and-backdating">18.5 Time Semantics and Backdating<a class="headerlink" href="#185-time-semantics-and-backdating" title="Permanent link">&para;</a></h3>
+<p><code>timestamp_utc</code> supports ordering and audit readability but is not a trust root. Chain linkage and signatures are authoritative. Implementations SHOULD prefer deterministic chain order (<code>timestamp_utc</code>, then <code>event_id</code>) and SHOULD log suspicious clock drift for operators.</p>
+<h3 id="186-privacy-and-confidentiality">18.6 Privacy and Confidentiality<a class="headerlink" href="#186-privacy-and-confidentiality" title="Permanent link">&para;</a></h3>
+<p>Provara provides integrity and authenticity, not confidentiality. Events are plaintext JSON unless encrypted upstream.</p>
+<p>Recommendations:</p>
+<ul>
+<li>Encrypt sensitive payloads before event creation.</li>
+<li>Avoid direct storage of PII/secrets in <code>payload.value</code>.</li>
+<li>Separate key-management concerns from vault transport/storage concerns.</li>
+</ul>
+<h3 id="187-key-compromise-and-rotation-boundaries">18.7 Key Compromise and Rotation Boundaries<a class="headerlink" href="#187-key-compromise-and-rotation-boundaries" title="Permanent link">&para;</a></h3>
+<p>Key compromise is handled by <code>KEY_REVOCATION</code> + <code>KEY_PROMOTION</code> signed by surviving authority. Implementations SHOULD surface <code>trust_boundary_event_id</code> prominently in audit output to distinguish trusted pre-compromise history from post-compromise uncertainty.</p>
+<h3 id="188-denial-of-service-considerations">18.8 Denial-of-Service Considerations<a class="headerlink" href="#188-denial-of-service-considerations" title="Permanent link">&para;</a></h3>
+<p>Implementations SHOULD set explicit limits for:</p>
+<ul>
+<li>maximum event byte size</li>
+<li>maximum payload nesting depth</li>
+<li>maximum lines processed per import batch</li>
+<li>maximum replay wall-clock budget before checkpoint fallback</li>
+</ul>
+<p>Malformed input MUST be rejected or quarantined deterministically, never silently coerced into valid state transitions.</p>
+<h3 id="189-cryptographic-agility">18.9 Cryptographic Agility<a class="headerlink" href="#189-cryptographic-agility" title="Permanent link">&para;</a></h3>
+<p>Profile A fixes SHA-256 and Ed25519 for interoperability. Future profiles SHOULD define migration events and dual-signing windows for algorithm transition (including post-quantum profiles) without breaking append-only verification semantics.</p>
+<hr />
+<h2 id="19-extension-registry-process">19. Extension Registry Process<a class="headerlink" href="#19-extension-registry-process" title="Permanent link">&para;</a></h2>
+<p>Custom event type and future core-type promotion workflow is defined in:</p>
+<ul>
+<li><code>docs/EXTENSION_REGISTRY.md</code></li>
+</ul>
+<p>This process is the canonical governance path for extension naming, acceptance, and promotion.</p>
+<hr />
+<h2 id="20-iana-style-considerations">20. IANA-Style Considerations<a class="headerlink" href="#20-iana-style-considerations" title="Permanent link">&para;</a></h2>
+<p>A standards-track stub (media type, URN, registry concepts) is maintained in:</p>
+<ul>
+<li><code>docs/IANA_CONSIDERATIONS.md</code></li>
+</ul>
+<p>This is informational for future interoperability and does not override v1.0 profile authority.</p>
+<hr />
+<p><em>Derived from <code>PROTOCOL_PROFILE.txt</code> (frozen normative spec). In case of conflict, the profile wins.</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,274 @@
+================================================================================
+PROVARA PROTOCOL v1.0 — NORMATIVE SPECIFICATION
+================================================================================
+
+Profile ID:       PROVARA-1.0_PROFILE_A
+Date Frozen:      2026-02-13
+Status:           IMMUTABLE — Do not modify after distribution
+Canonical URL:    https://provara.dev/spec/v1.0
+License:          Apache 2.0
+
+The key words "MUST", "MUST NOT", "SHALL", "SHALL NOT", and "MAY" in this
+document are to be interpreted as described in RFC 2119.
+
+This document is the normative cryptographic and serialization profile for
+Provara v1.0. Two compliant implementations processing the same event log
+MUST produce byte-identical state hashes. Test vectors are provided in
+test_vectors/vectors.json for cross-validation.
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+1.  Hash Algorithm
+2.  Signature Algorithm
+3.  Canonicalization
+4.  Event Identity
+5.  Merkle Tree
+6.  Reducer Determinism
+7.  Causal Chain
+8.  Key Rotation
+9.  Safety Tiers
+10. Event Permanence
+11. Extension Rules
+12. Spec Version
+13. Compliance
+14. Reimplementation Guidance
+
+================================================================================
+1. HASH ALGORITHM
+================================================================================
+
+Implementations MUST use SHA-256 (FIPS 180-4).
+
+Requirements:
+  - Output MUST be 64 lowercase hexadecimal characters
+  - Input MUST be UTF-8 encoded bytes
+  - No other hash algorithm is permitted in Profile A
+
+SHA-256 MUST be used for:
+  - Event content addressing (event_id)
+  - File integrity (manifest entries)
+  - Merkle tree computation (leaves and nodes)
+  - State hash (reducer output)
+  - Key ID derivation
+
+================================================================================
+2. SIGNATURE ALGORITHM
+================================================================================
+
+Implementations MUST use Ed25519 (RFC 8032).
+
+Requirements:
+  - Key size MUST be 256-bit (32 bytes public, 64 bytes private with seed)
+  - Signatures MUST be 64 bytes
+  - Signature encoding MUST be Base64 (standard alphabet, with padding)
+  - No other signature algorithm is permitted in Profile A
+
+Signing Payload for Events:
+  - Implementations MUST sign canonical_bytes(event_without_sig_field)
+  - The "sig" field MUST be excluded before signing
+  - The "event_id" field MUST be included in the signing payload
+
+Key ID Derivation:
+  - key_id MUST equal "bp1_" + SHA-256(raw_public_key_bytes)[:16 hex chars]
+  - Raw public key bytes MUST be the 32-byte Ed25519 public key
+  - Example: bp1_27a6549d43046062
+
+================================================================================
+3. CANONICALIZATION
+================================================================================
+
+Implementations MUST use RFC 8785 (JSON Canonicalization Scheme).
+
+The following rules MUST be applied:
+  - Object keys MUST be sorted lexicographically by Unicode code point
+  - There MUST be no whitespace between tokens
+  - There MUST be no trailing commas
+  - Numbers MUST NOT have leading zeros, positive signs, or trailing
+    decimal zeros
+  - Strings MUST use minimal escape sequences
+  - Encoding MUST be UTF-8 without BOM
+  - Null values MUST be preserved as "null" (MUST NOT be omitted)
+
+Implementation reference: canonical_json.py (canonical_bytes, canonical_dumps)
+
+================================================================================
+4. EVENT IDENTITY
+================================================================================
+
+Event IDs MUST be content-addressed using derived hashes.
+UUIDv7 is NOT permitted for event IDs in Profile A.
+
+Derivation Rule (MUST):
+  1. Remove "event_id" and "sig" fields from the event
+  2. Compute canonical JSON bytes of the remaining object
+  3. event_id = "evt_" + SHA-256(canonical_bytes)[:24 hex chars]
+
+This rule MUST be deterministic: identical event content MUST always produce
+the same event_id.
+
+================================================================================
+5. MERKLE TREE
+================================================================================
+
+Structure MUST be binary, balanced.
+If leaf count is odd, the last leaf MUST be duplicated.
+
+Leaf Computation (MUST):
+  leaf_hash = SHA-256(canonical_bytes(file_entry_object))
+
+  File entry object MUST contain exactly:
+    {"path": "...", "sha256": "...", "size": N}
+
+  Leaf ordering MUST be lexicographic by file path.
+
+Node Computation (MUST):
+  node_hash = SHA-256(left_child_bytes || right_child_bytes)
+
+  Concatenation is raw bytes (32 bytes + 32 bytes), NOT hex strings.
+
+Root MUST be a single 64-character lowercase hex string stored in
+merkle_root.txt.
+
+================================================================================
+6. REDUCER DETERMINISM
+================================================================================
+
+*** MANDATORY COMPLIANCE REQUIREMENT (Test 16) ***
+
+Rule (MUST):
+  Given the same event sequence, any compliant reducer MUST produce a
+  byte-identical state_hash.
+
+State Hash Computation (MUST):
+  state_hash = SHA-256(canonical_bytes(state_without_metadata_block))
+
+  Scope MUST include: canonical, local, contested, archived namespaces
+  Scope MUST exclude: metadata block
+
+Violation of this rule indicates a non-compliant implementation.
+
+================================================================================
+7. CAUSAL CHAIN
+================================================================================
+
+Model MUST be per-actor linked list via prev_event_hash.
+
+Rules (MUST):
+  - First event by an actor: prev_event_hash MUST be null
+  - Subsequent events: prev_event_hash MUST equal the event_id of that
+    actor's immediately preceding event
+  - Cross-actor references: prev_event_hash MUST NOT reference another
+    actor's events
+
+Integrity Rule (MUST):
+  For any event E by actor A, if E.prev_event_hash is not null, there MUST
+  exist an event P where P.event_id == E.prev_event_hash AND P.actor == A.
+
+================================================================================
+8. KEY ROTATION
+================================================================================
+
+Model MUST be two-event: KEY_REVOCATION followed by KEY_PROMOTION.
+
+Requirements:
+  - The revoking/promoting signer MUST be a surviving trusted authority
+  - Self-signing MUST NOT be permitted: a new key MUST NOT authorize its
+    own promotion
+  - KEY_REVOCATION MUST set trust_boundary_event_id (the last event trusted
+    under the old key)
+
+================================================================================
+9. SAFETY TIERS
+================================================================================
+
+Implementations MUST support four tiers:
+
+  L0: Data-only, reversible          → local reducer
+  L1: Low-kinetic                    → reducer + policy, logged
+  L2: High-kinetic                   → multi-sensor + signed policy
+  L3: Critical, irreversible         → human MFA or remote signature
+
+Merge Ratchet Rule (MUST):
+  most_restrictive_wins
+
+  Safety tiers MUST only tighten on merge. Loosening MUST NOT occur without
+  explicit authority from a key with L3 clearance.
+
+================================================================================
+10. EVENT PERMANENCE
+================================================================================
+
+  - Events MUST be permanent. Implementations MUST NOT delete events.
+  - Checkpoints MUST be permanent.
+  - Perception raw data: 30-day default, oldest-first eviction (MAY vary)
+  - CAS artifacts: permanent if referenced, 90-day if unreferenced (MAY vary)
+  - State caches: MAY be evicted (regeneratable from events)
+
+================================================================================
+11. EXTENSION RULES
+================================================================================
+
+Custom event types MUST use reverse-domain prefix:
+  com.huntinfo.ar.perception_frame
+  org.example.custom_event
+
+Core event types (OBSERVATION, ATTESTATION, RETRACTION, GENESIS,
+KEY_REVOCATION, KEY_PROMOTION) MUST NOT use a prefix.
+
+Forward Compatibility:
+  - Unknown event types MUST be preserved in the event log on merge
+  - Unknown event types MUST NOT affect core reducer state (canonical,
+    local, contested, archived)
+  - Unknown fields in known event types MUST be preserved and MUST NOT
+    affect core reducer output
+
+================================================================================
+12. SPEC VERSION
+================================================================================
+
+Manifest MUST contain: backpack_spec_version = "1.0"
+Manifest format MUST be: manifest.v0
+
+================================================================================
+13. COMPLIANCE
+================================================================================
+
+Minimum compliance requires passing 17 tests (backpack_compliance_v1.py).
+
+Test Coverage:
+  - Directory structure (2 tests)                         — MUST pass
+  - Identity schema (2 tests)                             — MUST pass
+  - Event schema + uniqueness + causal chain (3 tests)    — MUST pass
+  - Manifest integrity + Merkle + phantoms + paths (5)    — MUST pass
+  - Safety policy structure + ratchet (2 tests)           — MUST pass
+  - Sync contract schema (1 test)                         — MUST pass
+  - Reducer determinism (1 test)                          — MUST pass
+  - Retention permanence (1 test)                         — MUST pass
+
+================================================================================
+14. REIMPLEMENTATION GUIDANCE
+================================================================================
+
+To reimplement Provara v1.0 in another language:
+
+1. Implement SHA-256, Ed25519, and RFC 8785 canonical JSON
+2. Validate against test_vectors/vectors.json (7 vectors)
+3. Build a reducer that processes OBSERVATION, ATTESTATION, RETRACTION events
+4. Verify: your reducer produces the same state_hash as the Python reference
+   for the test vector event sequence
+5. Run the 17 compliance tests against your output
+
+If the state hashes match, the implementation is correct. If they do not match,
+the canonical JSON or hash computation has a bug. The Python reference
+implementation is the canonical source of truth for any ambiguity not covered
+by this profile.
+
+================================================================================
+END OF SPECIFICATION
+================================================================================
+
+Provara Protocol v1.0 — Profile A
+Frozen: 2026-02-13 | License: Apache 2.0
+provara.dev | github.com/provara-protocol/provara

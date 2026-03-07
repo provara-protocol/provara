@@ -1,0 +1,182 @@
+# Source Contract Registry — Provara Master Vault
+# Generated: 2026-03-02
+# Purpose: Define expectations for each data source
+#
+# Each source defines: cadence, keys, units, caveats
+# Used by importers, query builders, and data quality checks
+
+sources:
+  treasury:
+    source_id: treasury
+    cadence: business-day
+    primary_keys: ["event_id"]
+    natural_keys: ["payload.date"]
+    timestamp_semantics: market-close (16:00 UTC)
+    units:
+      yields: percent
+      spread_2_10: percent (10Y - 2Y)
+    coverage: 1990-01-02 to 2024-12-31
+    caveats:
+      - No weekends or federal holidays
+      - Missing 2025-2026 data
+
+  worldbank:
+    source_id: worldbank
+    cadence: yearly
+    primary_keys: ["event_id"]
+    natural_keys: ["payload.country_code", "payload.year"]
+    timestamp_semantics: mid-year (June 30)
+    units:
+      value_usd: USD current dollars
+      value_trillion: USD trillions (derived)
+    coverage: 2000 to 2024
+    caveats:
+      - ~196 countries per year
+      - NULLs excluded at import
+
+  blockchain_com:
+    source_id: blockchain_com
+    cadence: daily
+    primary_keys: ["event_id"]
+    natural_keys: ["payload.metric", "timestamp"]
+    timestamp_semantics: midnight UTC
+    units:
+      hash_rate: TH/s (divide by 1e6 for EH/s display)
+      n_transactions: count
+      n_unique_addresses: count
+      mempool_size: bytes
+      market_price: USD
+    coverage: 2025-03-02 to present
+    caveats:
+      - 5 metrics per calendar date
+      - hash_rate magnitude is misleading (692M TH/s = 692 EH/s)
+
+  fear_greed:
+    source_id: fear_greed
+    cadence: daily
+    primary_keys: ["event_id"]
+    natural_keys: ["timestamp"]
+    timestamp_semantics: midnight UTC
+    units:
+      value: index 0-100
+      classification: text label
+    coverage: 2018-02-01 to present
+    caveats:
+      - Crypto-specific sentiment
+      - 1 gap (4 days) near series start
+
+  yfinance:
+    source_id: yfinance
+    cadence: business-day
+    primary_keys: ["event_id"]
+    natural_keys: ["payload.ticker", "timestamp"]
+    timestamp_semantics: market-close (16:00 UTC)
+    units:
+      open/high/low/close: USD
+      volume: shares or units
+    coverage: 2025-03-02 to present
+    tickers: [SPY, QQQ, BTC-USD, ETH-USD, GC=F, ^VIX]
+    caveats:
+      - No weekends/holidays for equity tickers
+      - Crypto trades 24/7 but reported as daily
+
+  coingecko:
+    source_id: coingecko
+    cadence: sub-daily
+    primary_keys: ["event_id"]
+    natural_keys: ["payload.coin", "timestamp"]
+    timestamp_semantics: candle open time UTC
+    units:
+      open/high/low/close: USD
+    coverage: 2026-02-01 to present (30 days)
+    coins: [bitcoin, ethereum, solana]
+    caveats:
+      - Rate limited (30 req/min)
+      - Candle granularity varies by timespan
+
+  gdelt:
+    source_id: gdelt
+    cadence: event-based
+    primary_keys: ["event_id"]
+    natural_keys: ["payload.actor1", "payload.actor2", "timestamp"]
+    timestamp_semantics: event date midnight UTC
+    units:
+      goldstein_scale: "-10 to +10"
+      num_mentions: count
+    coverage: 2025-03-02 to 2026-03-02
+    caveats:
+      - Batch loaded (1000+ events per day)
+      - Single day snapshot
+
+  cisa_kev:
+    source_id: cisa_kev
+    cadence: event-based
+    primary_keys: ["event_id"]
+    natural_keys: ["payload.cve_id"]
+    timestamp_semantics: date added to catalog
+    coverage: 2021-11-03 to 2026-02-25
+    caveats:
+      - 287 CVEs on catalog launch day
+
+  mitre_attack:
+    source_id: mitre_attack
+    cadence: event-based
+    primary_keys: ["event_id"]
+    natural_keys: ["payload.attack_id"]
+    timestamp_semantics: STIX object creation date
+    coverage: 2017-05-31 to 2025-10-22
+
+  usgs:
+    source_id: usgs
+    cadence: event-based
+    primary_keys: ["event_id"]
+    timestamp_semantics: earthquake origin time UTC
+    units:
+      magnitude: Richter scale
+      depth_km: kilometers
+      lat/lon: decimal degrees
+    coverage: 2026-03-01 to 2026-03-02 (24hr snapshot)
+    caveats:
+      - Single API fetch, not continuous
+
+  psmc:
+    source_id: psmc
+    cadence: event-based
+    primary_keys: ["event_id"]
+    timestamp_semantics: event creation time UTC
+    coverage: 2026-03-01 to present
+    caveats:
+      - Agent memory (heterogeneous schemas by design)
+      - Hash-chained
+
+  synthetic:
+    source_id: synthetic
+    cadence: hourly
+    primary_keys: ["event_id"]
+    coverage: 2025-03-07 to 2026-03-01
+    caveats:
+      - TEST DATA — exclude from production queries
+      - 1,958 events
+
+  backpack:
+    source_id: backpack
+    cadence: event-based
+    primary_keys: ["event_id"]
+    coverage: 2026-03-01 (2 events only)
+    caveats:
+      - Only source with cryptographic signatures
+      - Provara Backpack format
+
+# Entity Namespace Mapping
+entity_namespaces:
+  "asset:BTC": ["coingecko:bitcoin", "yfinance:BTC-USD", "chain:BTC"]
+  "asset:ETH": ["coingecko:ethereum", "yfinance:ETH-USD"]
+  "asset:SOL": ["coingecko:solana"]
+  "asset:SPY": ["yfinance:SPY"]
+  "asset:QQQ": ["yfinance:QQQ"]
+  "asset:GOLD": ["yfinance:GC=F"]
+  "asset:VIX": ["yfinance:^VIX"]
+  "sentiment:FNG": ["fear_greed:*"]
+  "chain:BTC": ["blockchain_com:*"]
+  "macro:TREASURY": ["treasury:*"]
+  "macro:GDP": ["worldbank:*"]
