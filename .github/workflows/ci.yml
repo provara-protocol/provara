@@ -79,6 +79,9 @@ jobs:
       - name: Run PSMC tests
         run: python -m pytest tools/psmc/test_psmc.py -v
 
+      - name: Install MCP server dependencies
+        run: pip install -r tools/mcp_server/requirements.txt
+
       - name: Run MCP server tests
         run: python -m pytest tools/mcp_server/test_server.py -v
 
