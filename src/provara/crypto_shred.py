@@ -679,15 +679,20 @@ def count_shredded_events(vault_path: Path) -> Tuple[int, int]:
     if not events_path.exists():
         return 0, 0
     
-    key_store = PrivacyKeyStore(vault_path)
     all_events = load_events(events_path)
+    db_path = vault_path / "identity" / "privacy_keys.db"
+    key_store = PrivacyKeyStore(vault_path) if db_path.exists() else None
     
     shredded = 0
     for event in all_events:
         payload = event.get("payload", {})
         if isinstance(payload, dict) and payload.get("_privacy") == "aes-gcm-v1":
             kid = payload.get("kid")
-            if kid and not key_store.key_exists(kid):
+            if not kid:
+                continue
+            # If the key DB is absent, treat encrypted events as shredded without
+            # creating mutable sidecar state during a read-only verification path.
+            if key_store is None or not key_store.key_exists(kid):
                 shredded += 1
     
     return len(all_events), shredded

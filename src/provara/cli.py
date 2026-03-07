@@ -42,14 +42,12 @@ from .query import VaultIndex
 from .migrate import migrate_vault
 from .checkpoint_v0 import create_checkpoint, save_checkpoint, load_latest_checkpoint, verify_checkpoint
 from .sync_v0 import load_events, write_events
+from .sync_v0 import verify_all_causal_chains, verify_all_signatures
 from .refactor import normalize_identities
 from .export import export_vault_scitt_compat
 from .errors import ProvaraError, VaultStructureInvalidError
 from .plugins import registry as plugin_registry
 from .rfc3161 import request_timestamp, store_timestamp, verify_all_timestamps, TimestampResult
-
-# Repo root: src/provara/../../  (two levels up from this file's directory)
-_repo_root = Path(__file__).resolve().parents[2]
 
 def _fail_with_error(err: ProvaraError) -> NoReturn:
     """Print a structured error message from a ``ProvaraError`` and exit."""
@@ -176,6 +174,52 @@ def verify_sovereign_events(events: list) -> list:
     return errors
 
 
+def _collect_integrity_errors(target: Path) -> tuple[list[str], list[dict[str, Any]]]:
+    """Run built-in vault integrity checks used by verify/backup."""
+    errors: list[str] = []
+
+    manifest_path = target / "manifest.json"
+    merkle_root_path = target / "merkle_root.txt"
+    keys_path = target / "identity" / "keys.json"
+    events_path = target / "events" / "events.ndjson"
+
+    try:
+        current_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return ([f"Unable to read manifest.json: {exc}"], [])
+
+    rebuilt_manifest = build_manifest(target, set(MANIFEST_EXCLUDE))
+    if (
+        current_manifest.get("backpack_spec_version") != rebuilt_manifest.get("backpack_spec_version")
+        or current_manifest.get("manifest_version") != rebuilt_manifest.get("manifest_version")
+        or current_manifest.get("file_count") != rebuilt_manifest.get("file_count")
+        or current_manifest.get("files") != rebuilt_manifest.get("files")
+    ):
+        errors.append("manifest.json content does not match deterministic rebuild")
+
+    rebuilt_merkle = merkle_root_hex(manifest_leaves(rebuilt_manifest))
+    recorded_merkle = merkle_root_path.read_text(encoding="utf-8").strip()
+    if recorded_merkle != rebuilt_merkle:
+        errors.append("merkle_root.txt does not match computed Merkle root")
+
+    # Note: manifest.sig is not a hard-fail gate here because `provara manifest`
+    # updates manifest/merkle without re-signing.
+    keys_registry = load_keys_registry(keys_path)
+
+    all_events = load_events(events_path)
+    chain_results = verify_all_causal_chains(all_events)
+    bad_actors = [actor for actor, ok in chain_results.items() if not ok]
+    if bad_actors:
+        errors.append(f"causal chain verification failed for actor(s): {', '.join(sorted(bad_actors))}")
+
+    _, invalid, sig_errors = verify_all_signatures(all_events, keys_registry)
+    if invalid:
+        detail = "; ".join(sig_errors[:3]) if sig_errors else "unknown signature errors"
+        errors.append(f"event signature verification failed ({invalid} invalid): {detail}")
+
+    return errors, all_events
+
+
 def cmd_verify(args: argparse.Namespace) -> None:
     """Handle ``provara verify`` integrity/compliance execution.
 
@@ -210,41 +254,25 @@ def cmd_verify(args: argparse.Namespace) -> None:
         print(f"\nPASS: All {len(results)} vaults in the chain are valid.")
         return
 
-    sys.path.insert(0, str(_repo_root / "tests"))
-    from backpack_compliance_v1 import TestBackpackComplianceV1
-    import unittest
-
     print(f"Verifying vault integrity: {target}")
-    TestBackpackComplianceV1.backpack_path = str(target)
+    integrity_errors, all_events = _collect_integrity_errors(target)
 
-    # Create a test suite with the compliance tests
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestBackpackComplianceV1)
-
-    # Run the tests quietly or verbosely
-    verbosity = 2 if args.verbose else 1
-    runner = unittest.TextTestRunner(verbosity=verbosity)
-    result = runner.run(suite)
-
-    if result.wasSuccessful():
-        print("\nPASS: All 17 integrity checks passed.")
+    if not integrity_errors:
+        print("\nPASS: Integrity checks passed.")
 
         # Sovereign event verification (always runs if sovereign events exist,
         # --pipeline additionally checks reducer pipeline completeness)
-        from .sync_v0 import iter_events as _iter_sov
-        events_path_sov = target / "events" / "events.ndjson"
-        if events_path_sov.exists():
-            all_events = list(_iter_sov(events_path_sov))
-            sovereign_present = any("schema_version" in e for e in all_events)
-            if sovereign_present or getattr(args, "pipeline", False):
-                sov_errors = verify_sovereign_events(all_events)
-                if sov_errors:
-                    print(f"\nSOVEREIGN: {len(sov_errors)} error(s) detected:")
-                    for err in sov_errors:
-                        print(f"  - {err}")
-                    sys.exit(1)
-                else:
-                    sov_count = sum(1 for e in all_events if "schema_version" in e)
-                    print(f"\nSOVEREIGN: {sov_count} sovereign event(s) verified OK.")
+        sovereign_present = any("schema_version" in e for e in all_events)
+        if sovereign_present or getattr(args, "pipeline", False):
+            sov_errors = verify_sovereign_events(all_events)
+            if sov_errors:
+                print(f"\nSOVEREIGN: {len(sov_errors)} error(s) detected:")
+                for err in sov_errors:
+                    print(f"  - {err}")
+                sys.exit(1)
+            else:
+                sov_count = sum(1 for e in all_events if "schema_version" in e)
+                print(f"\nSOVEREIGN: {sov_count} sovereign event(s) verified OK.")
 
         # Show shredded events info
         from .crypto_shred import count_shredded_events
@@ -271,6 +299,8 @@ def cmd_verify(args: argparse.Namespace) -> None:
                 if count == 0:
                     print("  None detected.")
     else:
+        for err in integrity_errors:
+            print(f" - {err}")
         _cli_error(
             "Vault integrity verification failed",
             "one or more compliance checks detected a mismatch in required protocol invariants",
@@ -392,16 +422,10 @@ def cmd_backup(args: argparse.Namespace) -> None:
     print(f"Backing up vault: {vault}")
     
     # 1. Verify before backup
-    sys.path.insert(0, str(_repo_root / "tests"))
-    from backpack_compliance_v1 import TestBackpackComplianceV1
-    import unittest
-    
-    TestBackpackComplianceV1.backpack_path = str(vault)
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestBackpackComplianceV1)
-    runner = unittest.TextTestRunner(verbosity=0)
-    result = runner.run(suite)
-    
-    if not result.wasSuccessful():
+    integrity_errors, _ = _collect_integrity_errors(vault)
+    if integrity_errors:
+        for err in integrity_errors:
+            print(f" - {err}")
         _cli_error(
             "Source vault integrity check failed",
             "backup is blocked when integrity checks fail to avoid archiving corrupted evidence",

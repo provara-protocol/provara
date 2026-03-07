@@ -156,7 +156,7 @@ def _append_migration_event(
             "from_version": from_version,
             "to_version": to_version,
             "changes": changes,
-            "tool_version": "1.0.1",
+            "tool_version": "1.0.2",
         },
     }
     event["event_id"] = f"evt_{canonical_hash(event)[:24]}"

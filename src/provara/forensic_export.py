@@ -41,7 +41,7 @@ from typing import Any
 from .canonical_json import canonical_bytes
 from .sync_v0 import load_events
 
-_SOFTWARE_VERSION = "provara 1.0.1"
+_SOFTWARE_VERSION = "provara 1.0.2"
 
 
 # ---------------------------------------------------------------------------
