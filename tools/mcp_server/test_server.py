@@ -1,5 +1,6 @@
 import json
 import shutil
+import socket
 import subprocess
 import sys
 import time
@@ -16,6 +17,18 @@ def _stop_proc(proc: subprocess.Popen) -> None:
     except subprocess.TimeoutExpired:
         proc.kill()
         proc.wait(timeout=3)
+
+
+def _wait_for_server(port: int, timeout: float = 15.0) -> None:
+    """Poll until a TCP server accepts connections on *port* or timeout expires."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.1)
+            if s.connect_ex(("127.0.0.1", port)) == 0:
+                return
+        time.sleep(0.05)
+    raise RuntimeError(f"Server on port {port} did not start within {timeout}s")
 
 
 def _stdio_request(proc, method, params=None, request_id=None):
@@ -539,7 +552,7 @@ class TestMCPServerSSE(unittest.TestCase):
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
-        time.sleep(1)
+        _wait_for_server(port)
 
         try:
             sse_conn = urllib.request.urlopen(f"http://127.0.0.1:{port}/sse", timeout=5)
@@ -580,7 +593,7 @@ class TestMCPServerSSE(unittest.TestCase):
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
-        time.sleep(1)
+        _wait_for_server(self.port)
 
         try:
             sse_conn = urllib.request.urlopen(f"http://127.0.0.1:{self.port}/sse", timeout=5)
@@ -639,7 +652,7 @@ class TestMCPServerSSE(unittest.TestCase):
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
-        time.sleep(1)
+        _wait_for_server(self.port)
 
         try:
             sse_conn = urllib.request.urlopen(f"http://127.0.0.1:{self.port}/sse", timeout=5)
@@ -688,7 +701,7 @@ class TestMCPServerSSE(unittest.TestCase):
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
-        time.sleep(1)
+        _wait_for_server(self.port)
 
         try:
             sse_conn = urllib.request.urlopen(f"http://127.0.0.1:{self.port}/sse", timeout=5)
@@ -735,7 +748,7 @@ class TestMCPServerSSE(unittest.TestCase):
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
-        time.sleep(1)
+        _wait_for_server(self.port)
 
         try:
             sse_conn = urllib.request.urlopen(f"http://127.0.0.1:{self.port}/sse", timeout=5)
@@ -783,7 +796,7 @@ class TestMCPServerSSE(unittest.TestCase):
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
-        time.sleep(1)
+        _wait_for_server(self.port)
 
         try:
             sse_conn = urllib.request.urlopen(f"http://127.0.0.1:{self.port}/sse", timeout=5)
@@ -885,7 +898,7 @@ class TestMCPServerSSE(unittest.TestCase):
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
-        time.sleep(1)
+        _wait_for_server(self.port)
 
         try:
             with urllib.request.urlopen(f"http://127.0.0.1:{self.port}/health", timeout=5) as resp:
