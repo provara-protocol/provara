@@ -3,58 +3,344 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Use Cases — Provara Family Vault</title>
-<meta name="description" content="Discover how families, AI agents, and individuals use Provara to protect their most important memories and evidence.">
-<meta name="theme-color" content="#5b4dc7">
+<title>Use Cases — Provara</title>
+<meta name="description" content="How teams use Provara for EU AI Act compliance, SOC 2 audit trails, AI agent accountability, and HIPAA-friendly healthcare AI logging.">
+<meta name="theme-color" content="#14b8a6">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
 <style>
-/* Reusing core styles */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --primary: #5b4dc7;
-  --primary-light: #7c6fd4;
-  --primary-bg: #f0edf9;
-  --secondary: #10b981;
-  --text: #1e1b33;
-  --text-muted: #5c5775;
-  --bg: #fafaf9;
-  --bg-white: #ffffff;
-  --border-light: #f0ede8;
-  --radius-xl: 28px;
+  --teal: #14b8a6;
+  --teal-dim: #0f9488;
+  --teal-bg: rgba(20, 184, 166, 0.08);
+  --teal-border: rgba(20, 184, 166, 0.25);
+  --bg: #0d1117;
+  --bg-card: #161b22;
+  --bg-card-2: #1c2128;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --text-dim: #6e7681;
   --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --max-width: 1140px;
-  --nav-height: 72px;
+  --mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+  --max-width: 1100px;
+  --nav-height: 64px;
+  --radius: 8px;
+  --radius-lg: 12px;
 }
-body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.65; }
-.container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
-.section { padding: 100px 0; }
-h1, h2, h3 { line-height: 1.25; font-weight: 700; color: var(--text); }
-h1 { font-size: 3rem; margin-bottom: 1.5rem; }
-p { color: var(--text-muted); margin-bottom: 1.5rem; }
-.nav { height: var(--nav-height); background: rgba(250, 250, 249, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-light); position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
-.nav-inner { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; height: 100%; display: flex; align-items: center; justify-content: space-between; }
-.nav-brand { font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; }
-.nav-logo { width: 32px; height: 32px; background: var(--primary); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
-.nav-links { display: flex; gap: 32px; list-style: none; }
-.nav-links a { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); text-decoration: none; }
-.btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 28px; border-radius: 12px; font-weight: 600; text-decoration: none; }
-.btn-primary { background: var(--secondary); color: #fff; }
 
-.use-case-card { background: var(--bg-white); border-radius: var(--radius-xl); padding: 48px; margin-bottom: 48px; border: 1px solid var(--border-light); display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
-.use-case-card:nth-child(even) { direction: rtl; }
-.use-case-card:nth-child(even) .content { direction: ltr; }
-.icon-box { width: 64px; height: 64px; background: var(--primary-bg); color: var(--primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 16px;
+}
 
-footer { background: var(--bg-white); padding: 64px 0 32px; border-top: 1px solid var(--border-light); margin-top: 80px; }
-.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
-.footer-col h4 { margin-bottom: 20px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
-.footer-col ul { list-style: none; }
-.footer-col li { margin-bottom: 12px; }
-.footer-col a { color: var(--text-muted); font-size: 0.9rem; text-decoration: none; }
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 24px;
+}
 
+/* NAV */
+.nav {
+  height: var(--nav-height);
+  background: rgba(13, 17, 23, 0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+}
+.nav-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.nav-brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+.nav-links {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  align-items: center;
+}
+.nav-links a {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  transition: color 0.15s, background 0.15s;
+}
+.nav-links a:hover { color: var(--text); background: var(--bg-card); }
+.nav-links a.active { color: var(--teal); }
+.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  background: var(--teal);
+  color: #0d1117;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.nav-cta:hover { background: var(--teal-dim); }
+
+/* HERO */
+.hero {
+  padding: calc(var(--nav-height) + 80px) 0 80px;
+  border-bottom: 1px solid var(--border);
+}
+.hero h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+.hero-sub {
+  font-size: 1.125rem;
+  color: var(--text-muted);
+  max-width: 600px;
+  line-height: 1.65;
+}
+
+/* USE CASE SECTIONS */
+.use-case {
+  padding: 72px 0;
+  border-bottom: 1px solid var(--border);
+}
+.use-case:last-of-type { border-bottom: none; }
+
+.use-case-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.use-case-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--teal);
+  background: var(--teal-bg);
+  border: 1px solid var(--teal-border);
+  padding: 4px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.use-case h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 0;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.detail-block {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.detail-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.detail-row p {
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* CODE BLOCKS */
+.code-block {
+  background: #010409;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+.code-block-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+.code-dot { width: 10px; height: 10px; border-radius: 50%; }
+.code-dot-red { background: #ff5f57; }
+.code-dot-yellow { background: #febc2e; }
+.code-dot-green { background: #28c840; }
+.code-block-filename {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+.code-block pre {
+  padding: 20px 24px;
+  overflow-x: auto;
+  color: #e6edf3;
+  white-space: pre;
+}
+.c-key { color: #79c0ff; }
+.c-str { color: #a5d6ff; }
+.c-num { color: #f2cc60; }
+.c-hash { color: #8b949e; }
+.c-teal { color: #56d364; }
+.c-comment { color: #6e7681; font-style: italic; }
+.c-kw { color: #ff7b72; }
+.c-fn { color: #d2a8ff; }
+
+/* CALLOUT */
+.callout {
+  background: var(--teal-bg);
+  border: 1px solid var(--teal-border);
+  border-radius: var(--radius-lg);
+  padding: 18px 22px;
+}
+.callout p {
+  color: var(--text);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* CTA SECTION */
+.cta-section {
+  padding: 80px 0;
+  text-align: center;
+}
+.cta-section h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.cta-section p {
+  color: var(--text-muted);
+  margin-bottom: 32px;
+}
+.cta-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 32px;
+  background: var(--teal);
+  color: #0d1117;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition: background 0.15s;
+}
+.cta-btn:hover { background: var(--teal-dim); }
+.cta-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 32px;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.15s, color 0.15s;
+}
+.cta-btn-secondary:hover { border-color: var(--text-dim); color: var(--text); }
+
+/* FOOTER */
+footer {
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  padding: 48px 0 32px;
+}
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.footer-brand {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+  text-decoration: none;
+}
+.footer-links {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+  flex-wrap: wrap;
+}
+.footer-links a {
+  font-size: 0.875rem;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.footer-links a:hover { color: var(--text-muted); }
+.footer-copy {
+  width: 100%;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+/* MOBILE */
 @media (max-width: 768px) {
-  .use-case-card { grid-template-columns: 1fr; padding: 32px; }
-  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .two-col { grid-template-columns: 1fr; gap: 32px; }
+  .nav-links { display: none; }
+  .hero { padding: calc(var(--nav-height) + 48px) 0 48px; }
+  .use-case { padding: 48px 0; }
+  .cta-buttons { flex-direction: column; align-items: center; }
 }
 </style>
 </head>
@@ -62,107 +348,290 @@ footer { background: var(--bg-white); padding: 64px 0 32px; border-top: 1px soli
 
 <nav class="nav">
   <div class="nav-inner">
-    <a href="/" class="nav-brand">
-      <div class="nav-logo">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      </div>
-      Provara
-    </a>
+    <a href="/" class="nav-brand">Provara</a>
     <ul class="nav-links">
-      <li><a href="/#features">Features</a></li>
-      <li><a href="/how-it-works/">How It Works</a></li>
-      <li><a href="/use-cases/">Use Cases</a></li>
+      <li><a href="/how-it-works/">How it works</a></li>
       <li><a href="/pricing/">Pricing</a></li>
+      <li><a href="https://provara.dev/docs/" target="_blank" rel="noopener">Docs</a></li>
+      <li><a href="https://github.com/provara-protocol/provara" target="_blank" rel="noopener">GitHub</a></li>
     </ul>
-    <a href="/signup/" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.85rem;">Join Waitlist</a>
+    <a href="/signup/" class="nav-cta">Get started free</a>
   </div>
 </nav>
 
-<section class="section" style="padding-top: 140px;">
+<section class="hero">
   <div class="container">
-    <h1 style="text-align: center; margin-bottom: 80px;">Built for What Matters</h1>
+    <h1>How teams use Provara</h1>
+    <p class="hero-sub">From EU AI Act compliance to SOC 2 audits to AI agent accountability.</p>
+  </div>
+</section>
 
-    <!-- Case 1: Family Heritage -->
-    <div class="use-case-card">
-      <div class="content">
-        <div class="icon-box">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        </div>
-        <h2>Multi-Generational Heritage</h2>
-        <p>Family photos and stories shouldn't just live on a social media platform that might not exist in 20 years. Provara allows you to create a cryptographically signed heritage vault that can be passed down to your grandchildren.</p>
-        <p>Every memory is timestamped and verified, ensuring your family history remains authentic and untampered.</p>
-      </div>
-      <div style="background: var(--primary-bg); height: 300px; border-radius: 20px;"></div>
+<!-- USE CASE 1: EU AI Act -->
+<section class="use-case">
+  <div class="container">
+    <div class="use-case-header">
+      <span class="use-case-badge">EU AI Act</span>
+      <h2>Article 12 logging for high-risk AI systems</h2>
     </div>
-
-    <!-- Case 2: Digital Inheritance -->
-    <div class="use-case-card">
-      <div class="content">
-        <div class="icon-box">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <div class="two-col">
+      <div class="detail-block">
+        <div class="detail-row">
+          <span class="detail-label">Who</span>
+          <p>Teams building high-risk AI systems — credit scoring, hiring tools, medical decision support. If your system is in Annex III, you need this.</p>
         </div>
-        <h2>Digital Estate & Inheritance</h2>
-        <p>Ensure your loved ones have access to your digital life when it matters most. Securely store recovery phrases, account lists, and legal documents.</p>
-        <p>With Provara's inheritance logic, you can designate trusted actors who can unlock specific sections of your vault under conditions you define, without ever needing a central authority.</p>
-      </div>
-      <div style="background: rgba(16, 185, 129, 0.1); height: 300px; border-radius: 20px;"></div>
-    </div>
-
-    <!-- Case 3: AI Agent Memory -->
-    <div class="use-case-card">
-      <div class="content">
-        <div class="icon-box">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <div class="detail-row">
+          <span class="detail-label">The requirement</span>
+          <p>EU AI Act Article 12 requires automatic logging for high-risk AI systems. Logs must enable post-hoc monitoring, be available to competent authorities, and cover the full operational lifecycle. "We have logs" isn't enough — the logs have to be trustworthy.</p>
         </div>
-        <h2>Verifiable AI Agent Memory</h2>
-        <p>As AI agents become part of our daily lives, they need a memory layer that we can trust. Provara provides a tamper-evident event log for AI observations and decisions.</p>
-        <p>Verify that your AI assistant is operating within its policy boundaries and has a consistent, auditable history of its actions.</p>
+        <div class="detail-row">
+          <span class="detail-label">How Provara helps</span>
+          <p>Every inference is appended as a signed event. The chain is independently verifiable. When auditors ask for evidence, you don't hand them a CSV — you hand them a cryptographically verified chain they can check themselves with a single command.</p>
+        </div>
+        <div class="callout">
+          <p>The signature proves the log wasn't edited after the fact. The chain proves no events were deleted or reordered. That combination is what Article 12 is actually asking for.</p>
+        </div>
       </div>
-      <div style="background: #1a1730; height: 300px; border-radius: 20px;"></div>
-    </div>
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-dot code-dot-red"></div>
+          <div class="code-dot code-dot-yellow"></div>
+          <div class="code-dot code-dot-green"></div>
+          <span class="code-block-filename">eu_ai_act_logging.py</span>
+        </div>
+        <pre><span class="c-kw">import</span> psmc
 
-    <div style="text-align: center; margin-top: 80px;">
-      <a href="/signup/" class="btn btn-primary" style="padding: 16px 48px; font-size: 1.1rem;">Start Your Vault Today</a>
+vault = psmc.Vault(<span class="c-str">"~/.provara/inference-log"</span>)
+
+<span class="c-comment"># Log every high-risk inference</span>
+<span class="c-kw">def</span> <span class="c-fn">log_inference</span>(model, input_hash, output, score):
+    vault.append(
+        type=<span class="c-str">"inference"</span>,
+        data={
+            <span class="c-str">"model"</span>: model,
+            <span class="c-str">"input_hash"</span>: input_hash,  <span class="c-comment"># not raw input</span>
+            <span class="c-str">"output"</span>: output,
+            <span class="c-str">"risk_score"</span>: score,
+            <span class="c-str">"human_oversight"</span>: score &gt; <span class="c-num">0.8</span>,
+        },
+        tags=[<span class="c-str">"eu-ai-act"</span>, <span class="c-str">"annex-iii"</span>, <span class="c-str">"article-12"</span>],
+    )
+
+<span class="c-comment"># Auditor verification — no Provara access needed</span>
+<span class="c-comment">$ psmc --vault inference-log verify</span>
+<span class="c-teal">Chain integrity: CLEAN (8,441 events, 0 gaps)</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASE 2: SOC 2 -->
+<section class="use-case">
+  <div class="container">
+    <div class="use-case-header">
+      <span class="use-case-badge">SOC 2</span>
+      <h2>Tamper-evident audit trails for Type II compliance</h2>
+    </div>
+    <div class="two-col">
+      <div class="detail-block">
+        <div class="detail-row">
+          <span class="detail-label">Who</span>
+          <p>SaaS companies seeking SOC 2 Type II certification. Typically required by enterprise customers before signing.</p>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">The requirement</span>
+          <p>SOC 2 auditors want evidence of controls operating over time. Logs work — but only if they're tamper-evident. A log you could have edited before the audit is not evidence; it's a document with no provenance.</p>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">How Provara helps</span>
+          <p>Every security event, access log, and administrative action is appended as a signed event. The audit trail is verifiable by the auditor directly. You're not asking them to trust your screenshots — you're handing them a chain they can verify with open-source tooling.</p>
+        </div>
+      </div>
+      <div class="detail-block">
+        <div class="detail-row">
+          <span class="detail-label">What goes in the vault</span>
+          <p style="margin-bottom:0;">Authentication events. Permission changes. Data access by admins. Configuration changes. Deployment events. Incident response actions. Anything a SOC 2 auditor would ask "can you prove that happened?"</p>
+        </div>
+        <div class="callout" style="margin-top:4px;">
+          <p>The key word in SOC 2 Type II is "over time." The timestamp in each event is part of the signed content — it can't be backdated without invalidating the signature.</p>
+        </div>
+        <div class="code-block" style="margin-top:0;">
+          <div class="code-block-header">
+            <div class="code-dot code-dot-red"></div>
+            <div class="code-dot code-dot-yellow"></div>
+            <div class="code-dot code-dot-green"></div>
+            <span class="code-block-filename">access_log.py</span>
+          </div>
+          <pre>vault.append(
+    type=<span class="c-str">"access"</span>,
+    data={
+        <span class="c-str">"actor"</span>: user_id,
+        <span class="c-str">"resource"</span>: resource_id,
+        <span class="c-str">"action"</span>: <span class="c-str">"read"</span>,
+        <span class="c-str">"ip"</span>: request.remote_addr,
+        <span class="c-str">"granted"</span>: <span class="c-kw">True</span>,
+    },
+    tags=[<span class="c-str">"soc2"</span>, <span class="c-str">"cc6"</span>],
+)</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASE 3: AI Agent Accountability -->
+<section class="use-case">
+  <div class="container">
+    <div class="use-case-header">
+      <span class="use-case-badge">AI agents</span>
+      <h2>Exact replay of what your agents did, and when</h2>
+    </div>
+    <div class="two-col">
+      <div class="detail-block">
+        <div class="detail-row">
+          <span class="detail-label">Who</span>
+          <p>Teams running multi-agent workflows, LLM pipelines, or autonomous AI systems that take actions in the real world.</p>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">The problem</span>
+          <p>When an AI agent calls a tool, makes a decision, or updates state, there's often no receipt. Something goes wrong, and you can't reconstruct what happened. You have the outcome. You don't have the chain of reasoning that produced it.</p>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">How Provara helps</span>
+          <p>Instrument your agents to append an event at every decision point. The chain gives you exact replay of what happened, in order, with signatures proving the log wasn't altered after the incident.</p>
+        </div>
+      </div>
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-dot code-dot-red"></div>
+          <div class="code-dot code-dot-yellow"></div>
+          <div class="code-dot code-dot-green"></div>
+          <span class="code-block-filename">agent_loop.py</span>
+        </div>
+        <pre><span class="c-kw">class</span> <span class="c-fn">AccountableAgent</span>:
+    <span class="c-kw">def</span> <span class="c-fn">__init__</span>(self, vault_path):
+        self.vault = psmc.Vault(vault_path)
+
+    <span class="c-kw">def</span> <span class="c-fn">decide</span>(self, context):
+        decision = self.model.run(context)
+
+        <span class="c-comment"># Append before acting — not after</span>
+        self.vault.append(
+            type=<span class="c-str">"decision"</span>,
+            data={
+                <span class="c-str">"context_hash"</span>: sha256(context),
+                <span class="c-str">"model"</span>: self.model.id,
+                <span class="c-str">"output"</span>: decision.action,
+                <span class="c-str">"confidence"</span>: decision.score,
+                <span class="c-str">"tool_calls"</span>: decision.tools,
+            },
+            tags=[<span class="c-str">"agent"</span>, <span class="c-str">"production"</span>],
+        )
+
+        <span class="c-kw">return</span> decision
+
+    <span class="c-kw">def</span> <span class="c-fn">tool_call</span>(self, tool, args, result):
+        self.vault.append(
+            type=<span class="c-str">"tool_call"</span>,
+            data={
+                <span class="c-str">"tool"</span>: tool,
+                <span class="c-str">"args_hash"</span>: sha256(str(args)),
+                <span class="c-str">"result_hash"</span>: sha256(str(result)),
+                <span class="c-str">"success"</span>: result.ok,
+            },
+        )</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASE 4: HIPAA / Healthcare AI -->
+<section class="use-case">
+  <div class="container">
+    <div class="use-case-header">
+      <span class="use-case-badge">Healthcare AI</span>
+      <h2>HIPAA-friendly audit trails via input hashing</h2>
+    </div>
+    <div class="two-col">
+      <div class="detail-block">
+        <div class="detail-row">
+          <span class="detail-label">Who</span>
+          <p>Teams building AI for healthcare — diagnosis support, patient triage, clinical decision support — where recommendations need a verifiable paper trail.</p>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">The requirement</span>
+          <p>Healthcare AI decisions need audit trails for HIPAA compliance and liability. Who made this recommendation? When? What data was used? The answers have to be provable, not reconstructed from memory.</p>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">How Provara helps</span>
+          <p>Log the hash of the input, not the input itself. This gives you a cryptographically provable link between the input and the decision — without storing patient data in the event log. GDPR-compatible, HIPAA-friendly, and still tamper-evident.</p>
+        </div>
+        <div class="callout">
+          <p>If you later need to prove that decision X was made on input Y, present the original input and show that sha256(Y) matches the <code style="font-family:var(--mono);font-size:0.875rem">input_hash</code> in the signed event. The signature proves it wasn't changed after the fact.</p>
+        </div>
+      </div>
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-dot code-dot-red"></div>
+          <div class="code-dot code-dot-yellow"></div>
+          <div class="code-dot code-dot-green"></div>
+          <span class="code-block-filename">clinical_log.py</span>
+        </div>
+        <pre><span class="c-kw">import</span> hashlib, psmc
+
+vault = psmc.Vault(<span class="c-str">"~/.provara/clinical-ai"</span>)
+
+<span class="c-kw">def</span> <span class="c-fn">log_clinical_decision</span>(
+    patient_data,  <span class="c-comment"># never stored</span>
+    model_id,
+    recommendation,
+    clinician_id,
+):
+    <span class="c-comment"># Hash the input — prove the link without storing PHI</span>
+    input_hash = hashlib.sha256(
+        patient_data.encode()
+    ).hexdigest()
+
+    vault.append(
+        type=<span class="c-str">"clinical_decision"</span>,
+        data={
+            <span class="c-str">"input_hash"</span>: input_hash,   <span class="c-comment"># not raw data</span>
+            <span class="c-str">"model"</span>: model_id,
+            <span class="c-str">"recommendation"</span>: recommendation,
+            <span class="c-str">"reviewed_by"</span>: clinician_id,
+            <span class="c-str">"overridden"</span>: <span class="c-kw">False</span>,
+        },
+        tags=[<span class="c-str">"hipaa"</span>, <span class="c-str">"clinical"</span>, <span class="c-str">"gdpr-compatible"</span>],
+    )</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <h2>Ready to instrument your system?</h2>
+    <p>Set up a vault and start appending tamper-evident events in minutes.</p>
+    <div class="cta-buttons">
+      <a href="/pricing/" class="cta-btn-secondary">See pricing</a>
+      <a href="/signup/" class="cta-btn">Get started free</a>
     </div>
   </div>
 </section>
 
 <footer>
   <div class="container">
-    <div class="footer-grid">
-      <div class="footer-col" style="grid-column: span 1;">
-        <div class="nav-brand" style="margin-bottom: 16px;">
-          <div class="nav-logo" style="width: 24px; height: 24px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </div>
-          Provara
-        </div>
-        <p style="font-size: 0.85rem;">Sovereign Memory. Verifiable Continuity. Designed for 50-year readability.</p>
-      </div>
-      <div class="footer-col">
-        <h4>Product</h4>
-        <ul>
-          <li><a href="/#features">Features</a></li>
-          <li><a href="/how-it-works/">How It Works</a></li>
-          <li><a href="/pricing/">Pricing</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Trust</h4>
-        <ul>
-          <li><a href="https://provara.dev">Protocol Spec</a></li>
-          <li><a href="/security/">Security</a></li>
-          <li><a href="/privacy/">Privacy</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Company</h4>
-        <ul>
-          <li><a href="https://huntinformationsystems.com">Hunt Information Systems</a></li>
-          <li><a href="mailto:hello@provara.app">Contact</a></li>
-        </ul>
-      </div>
+    <div class="footer-inner">
+      <a href="/" class="footer-brand">Provara</a>
+      <ul class="footer-links">
+        <li><a href="/how-it-works/">How it works</a></li>
+        <li><a href="/pricing/">Pricing</a></li>
+        <li><a href="https://provara.dev/docs/" target="_blank" rel="noopener">Docs</a></li>
+        <li><a href="https://github.com/provara-protocol/provara" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="/use-cases/">Use cases</a></li>
+      </ul>
     </div>
+    <div class="footer-copy">&copy; 2026 Hunt Information Systems LLC. All rights reserved.</div>
   </div>
 </footer>
 

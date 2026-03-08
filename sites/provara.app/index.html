@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Provara Family Vault — Your Family's Legacy, Secured Forever</title>
-<meta name="description" content="Provara Family Vault is a secure, tamper-proof family memory vault. Store documents, memories, and important records with cryptographic verification. Designed to last 50 years.">
-<meta name="theme-color" content="#5b4dc7">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+<title>Provara — Tamper-evident audit trails for AI systems</title>
+<meta name="description" content="Cryptographically-signed, hash-chained event logs for AI systems. Every AI decision gets a receipt you can verify independently. Open source protocol, managed hosted vault.">
+<meta name="theme-color" content="#14b8a6">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>P</text></svg>">
 <style>
 /* ===== RESET & BASE ===== */
 *, *::before, *::after {
@@ -16,193 +16,70 @@
 }
 
 :root {
-  --primary: #5b4dc7;
-  --primary-light: #7c6fd4;
-  --primary-dark: #4a3da6;
-  --primary-bg: #f0edf9;
-  --secondary: #10b981;
-  --secondary-dark: #0d9668;
-  --text: #1e1b33;
-  --text-muted: #5c5775;
-  --text-light: #8a849d;
-  --bg: #fafaf9;
-  --bg-white: #ffffff;
-  --bg-warm: #f5f3f0;
-  --border: #e8e5e0;
-  --border-light: #f0ede8;
-  --shadow-sm: 0 1px 3px rgba(91, 77, 199, 0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 16px rgba(91, 77, 199, 0.08), 0 2px 6px rgba(0,0,0,0.04);
-  --shadow-lg: 0 12px 40px rgba(91, 77, 199, 0.12), 0 4px 12px rgba(0,0,0,0.04);
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
+  --accent: #14b8a6;
+  --accent-dark: #0d9488;
+  --accent-dim: rgba(20, 184, 166, 0.15);
+  --accent-border: rgba(20, 184, 166, 0.3);
+  --bg: #0d1117;
+  --bg-surface: #161b22;
+  --bg-raised: #1c2330;
+  --bg-card: #1c2330;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --text-dim: #6e7681;
+  --border: #30363d;
+  --border-subtle: #21262d;
+  --green: #3fb950;
+  --yellow: #d29922;
+  --red: #f85149;
   --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
-  --max-width: 1140px;
-  --nav-height: 72px;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+  --max-width: 1120px;
+  --nav-height: 64px;
+  --radius: 8px;
+  --radius-lg: 12px;
 }
 
 html {
   scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
+  font-size: 16px;
 }
 
 body {
   font-family: var(--font);
   background: var(--bg);
   color: var(--text);
-  line-height: 1.65;
-  font-size: 16px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
 }
 
 a {
-  color: var(--primary);
+  color: var(--accent);
   text-decoration: none;
-  transition: color 0.2s;
 }
 
 a:hover {
-  color: var(--primary-dark);
+  text-decoration: underline;
 }
 
-img {
-  max-width: 100%;
-  display: block;
-}
-
-/* ===== TYPOGRAPHY ===== */
-h1, h2, h3, h4, h5, h6 {
-  line-height: 1.25;
-  font-weight: 700;
-  color: var(--text);
-}
-
-h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); letter-spacing: -0.03em; }
-h2 { font-size: clamp(1.75rem, 3.5vw, 2.5rem); letter-spacing: -0.02em; }
-h3 { font-size: clamp(1.15rem, 2vw, 1.4rem); letter-spacing: -0.01em; }
-h4 { font-size: 1.1rem; }
-
-p {
-  color: var(--text-muted);
-  max-width: 640px;
-}
-
+/* ===== LAYOUT ===== */
 .container {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 24px;
 }
 
-.section {
-  padding: 100px 0;
-}
-
-.section-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--primary);
-  background: var(--primary-bg);
-  padding: 6px 14px;
-  border-radius: 100px;
-  margin-bottom: 20px;
-}
-
-.section-title {
-  margin-bottom: 16px;
-}
-
-.section-subtitle {
-  font-size: 1.1rem;
-  line-height: 1.7;
-  color: var(--text-muted);
-  max-width: 580px;
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: 64px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* ===== BUTTONS ===== */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 32px;
-  border-radius: var(--radius-md);
-  font-size: 1rem;
-  font-weight: 600;
-  font-family: var(--font);
-  border: none;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  text-decoration: none;
-  line-height: 1.4;
-}
-
-.btn-primary {
-  background: var(--secondary);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3), 0 1px 3px rgba(16, 185, 129, 0.2);
-}
-
-.btn-primary:hover {
-  background: var(--secondary-dark);
-  color: #fff;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35), 0 2px 6px rgba(16, 185, 129, 0.25);
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background: var(--bg-white);
-  color: var(--text);
-  border: 1.5px solid var(--border);
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-secondary:hover {
-  border-color: var(--primary-light);
-  color: var(--primary);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
-
-.btn-sm {
-  padding: 10px 22px;
-  font-size: 0.9rem;
-}
-
-/* ===== NAVIGATION ===== */
-.nav {
-  position: fixed;
+/* ===== NAV ===== */
+nav {
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
+  z-index: 100;
   height: var(--nav-height);
-  background: rgba(250, 250, 249, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid transparent;
-  transition: all 0.3s;
-}
-
-.nav.scrolled {
-  border-bottom-color: var(--border-light);
-  box-shadow: 0 1px 12px rgba(0,0,0,0.04);
+  background: rgba(13, 17, 23, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .nav-inner {
@@ -212,998 +89,696 @@ p {
   height: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 32px;
 }
-
-.nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  font-size: 1.2rem;
-  color: var(--text);
-  text-decoration: none;
-}
-
-.nav-brand:hover { color: var(--text); }
 
 .nav-logo {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
 }
 
-.nav-logo svg {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: #fff;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.nav-logo span {
+  color: var(--accent);
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 36px;
+  gap: 24px;
   list-style: none;
+  flex: 1;
 }
 
 .nav-links a {
-  font-size: 0.92rem;
-  font-weight: 500;
   color: var(--text-muted);
-  transition: color 0.2s;
+  font-size: 0.9rem;
+  transition: color 0.15s;
 }
 
 .nav-links a:hover {
   color: var(--text);
+  text-decoration: none;
 }
 
 .nav-cta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
-.hamburger {
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.btn:hover {
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
+
+.btn-primary:hover {
+  background: var(--accent-dark);
+  border-color: var(--accent-dark);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.btn-secondary:hover {
+  border-color: var(--text-muted);
+  background: var(--bg-raised);
+}
+
+.btn-lg {
+  padding: 12px 24px;
+  font-size: 1rem;
+}
+
+.nav-mobile-toggle {
   display: none;
-  flex-direction: column;
-  gap: 5px;
   background: none;
   border: none;
+  color: var(--text-muted);
   cursor: pointer;
   padding: 8px;
-  z-index: 1001;
-}
-
-.hamburger span {
-  width: 22px;
-  height: 2px;
-  background: var(--text);
-  border-radius: 2px;
-  transition: all 0.3s;
-  display: block;
-}
-
-.hamburger.active span:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px);
-}
-
-.hamburger.active span:nth-child(2) {
-  opacity: 0;
-}
-
-.hamburger.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(5px, -5px);
-}
-
-.mobile-menu {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(250, 250, 249, 0.98);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  z-index: 999;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 28px;
-}
-
-.mobile-menu.active {
-  display: flex;
-}
-
-.mobile-menu a {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: var(--text);
+  margin-left: auto;
 }
 
 /* ===== HERO ===== */
 .hero {
-  padding-top: calc(var(--nav-height) + 72px);
-  padding-bottom: 100px;
-  position: relative;
-  overflow: hidden;
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  top: -200px;
-  right: -200px;
-  width: 700px;
-  height: 700px;
-  background: radial-gradient(circle, rgba(91, 77, 199, 0.06) 0%, transparent 70%);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  bottom: -100px;
-  left: -150px;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.04) 0%, transparent 70%);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.hero-inner {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 64px;
-  align-items: center;
-  position: relative;
-  z-index: 1;
-}
-
-.hero-content {
-  max-width: 540px;
+  padding: 96px 0 80px;
+  text-align: center;
 }
 
 .hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--primary);
-  background: var(--primary-bg);
-  padding: 7px 16px;
+  padding: 4px 14px;
+  border: 1px solid var(--accent-border);
   border-radius: 100px;
-  margin-bottom: 28px;
-}
-
-.hero-badge-dot {
-  width: 7px;
-  height: 7px;
-  background: var(--secondary);
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.3); }
+  background: var(--accent-dim);
+  font-size: 0.8rem;
+  color: var(--accent);
+  margin-bottom: 32px;
+  font-family: var(--font-mono);
 }
 
 .hero h1 {
-  margin-bottom: 24px;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
   color: var(--text);
+  max-width: 780px;
+  margin: 0 auto 20px;
 }
 
-.hero h1 span {
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.hero h1 em {
+  font-style: normal;
+  color: var(--accent);
 }
 
-.hero-text {
-  font-size: 1.15rem;
-  line-height: 1.75;
+.hero-sub {
+  font-size: clamp(1rem, 2vw, 1.15rem);
   color: var(--text-muted);
-  margin-bottom: 36px;
-  max-width: 480px;
+  max-width: 580px;
+  margin: 0 auto 40px;
+  line-height: 1.65;
 }
 
 .hero-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
+  gap: 12px;
   flex-wrap: wrap;
+  margin-bottom: 60px;
 }
 
-.hero-proof {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 40px;
-  padding-top: 32px;
-  border-top: 1px solid var(--border-light);
-}
-
-.hero-proof-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.hero-proof-value {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.hero-proof-label {
-  font-size: 0.78rem;
-  color: var(--text-light);
-  font-weight: 500;
-}
-
-.hero-proof-divider {
-  width: 1px;
-  height: 36px;
-  background: var(--border);
-}
-
-/* Hero Vault Visual */
-.hero-visual {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.vault-graphic {
-  width: 100%;
-  max-width: 460px;
-  aspect-ratio: 1;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.vault-ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1.5px solid var(--border);
-}
-
-.vault-ring-1 {
-  width: 100%;
-  height: 100%;
-  animation: rotate-slow 60s linear infinite;
-}
-
-.vault-ring-2 {
-  width: 78%;
-  height: 78%;
-  border-color: rgba(91, 77, 199, 0.12);
-  animation: rotate-slow 45s linear infinite reverse;
-}
-
-.vault-ring-3 {
-  width: 56%;
-  height: 56%;
-  border-color: rgba(91, 77, 199, 0.08);
-  animation: rotate-slow 30s linear infinite;
-}
-
-@keyframes rotate-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.vault-ring-dot {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  top: -5px;
-  left: 50%;
-  margin-left: -5px;
-}
-
-.vault-ring-1 .vault-ring-dot { background: var(--primary); }
-.vault-ring-2 .vault-ring-dot { background: var(--secondary); }
-.vault-ring-3 .vault-ring-dot { background: var(--primary-light); }
-
-.vault-center {
-  width: 180px;
-  height: 180px;
-  background: linear-gradient(145deg, var(--bg-white), var(--bg-warm));
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-lg), inset 0 0 0 1px rgba(91, 77, 199, 0.08);
-  position: relative;
-  z-index: 2;
-}
-
-.vault-icon {
-  width: 72px;
-  height: 72px;
-}
-
-.vault-icon svg {
-  width: 100%;
-  height: 100%;
-  fill: none;
-  stroke: var(--primary);
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* Floating cards around the vault */
-.vault-float-card {
-  position: absolute;
-  background: var(--bg-white);
-  border-radius: var(--radius-md);
-  padding: 14px 18px;
-  box-shadow: var(--shadow-md);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text);
-  z-index: 3;
-  border: 1px solid var(--border-light);
-  animation: float 6s ease-in-out infinite;
-  white-space: nowrap;
-}
-
-.vault-float-card:nth-child(5) {
-  top: 10%;
-  right: -5%;
-  animation-delay: 0s;
-}
-
-.vault-float-card:nth-child(6) {
-  bottom: 18%;
-  left: -8%;
-  animation-delay: -2s;
-}
-
-.vault-float-card:nth-child(7) {
-  bottom: 5%;
-  right: 5%;
-  animation-delay: -4s;
-}
-
-.vault-float-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.vault-float-icon svg {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-/* ===== FEATURES ===== */
-.features {
-  background: var(--bg-white);
-  border-top: 1px solid var(--border-light);
-  border-bottom: 1px solid var(--border-light);
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-}
-
-.feature-card {
-  background: var(--bg);
-  border: 1px solid var(--border-light);
+/* ===== TERMINAL ===== */
+.terminal {
+  background: #010409;
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 36px 32px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: left;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 
-.feature-card:hover {
-  box-shadow: var(--shadow-md);
-  border-color: rgba(91, 77, 199, 0.15);
-  transform: translateY(-2px);
-}
-
-.feature-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: var(--radius-md);
+.terminal-header {
+  background: #161b22;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 12px 16px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-bottom: 22px;
+  gap: 8px;
 }
 
-.feature-icon svg {
-  width: 26px;
-  height: 26px;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
 }
 
-.feature-icon-purple { background: var(--primary-bg); }
-.feature-icon-purple svg { stroke: var(--primary); }
+.terminal-dot.red   { background: #ff5f57; }
+.terminal-dot.yellow { background: #febc2e; }
+.terminal-dot.green  { background: #28c840; }
 
-.feature-icon-green { background: rgba(16, 185, 129, 0.1); }
-.feature-icon-green svg { stroke: var(--secondary); }
-
-.feature-icon-amber { background: rgba(217, 153, 34, 0.1); }
-.feature-icon-amber svg { stroke: #d99922; }
-
-.feature-icon-blue { background: rgba(59, 130, 246, 0.1); }
-.feature-icon-blue svg { stroke: #3b82f6; }
-
-.feature-icon-rose { background: rgba(225, 79, 105, 0.1); }
-.feature-icon-rose svg { stroke: #e14f69; }
-
-.feature-icon-teal { background: rgba(20, 184, 166, 0.1); }
-.feature-icon-teal svg { stroke: #14b8a6; }
-
-.feature-card h3 {
-  margin-bottom: 10px;
+.terminal-title {
+  margin-left: 8px;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
 }
 
-.feature-card p {
-  font-size: 0.94rem;
+.terminal-body {
+  padding: 20px 24px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.8;
+  overflow-x: auto;
+}
+
+.t-prompt {
+  color: var(--accent);
+  user-select: none;
+}
+
+.t-cmd {
+  color: #e6edf3;
+}
+
+.t-flag {
+  color: #79c0ff;
+}
+
+.t-string {
+  color: #a5d6ff;
+}
+
+.t-comment {
+  color: #6e7681;
+}
+
+.t-success {
+  color: var(--green);
+}
+
+.t-line {
+  display: block;
+}
+
+.t-continuation {
+  color: #6e7681;
+  padding-left: 4px;
+}
+
+/* ===== SECTION SHARED ===== */
+section {
+  padding: 80px 0;
+}
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+  font-family: var(--font-mono);
+}
+
+.section-title {
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.section-sub {
+  font-size: 1rem;
   color: var(--text-muted);
+  max-width: 540px;
   line-height: 1.65;
 }
 
 /* ===== HOW IT WORKS ===== */
 .how-it-works {
-  position: relative;
+  border-top: 1px solid var(--border-subtle);
 }
 
-.steps {
+.how-it-works .section-header {
+  margin-bottom: 56px;
+}
+
+.how-cols {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 32px;
-  position: relative;
 }
 
-.steps::before {
+.how-col {
+  padding: 32px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.how-col::before {
   content: '';
   position: absolute;
-  top: 56px;
-  left: calc(16.67% + 28px);
-  right: calc(16.67% + 28px);
+  top: 0; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--primary-bg), var(--primary), var(--primary-bg));
-  z-index: 0;
+  background: var(--accent);
 }
 
-.step {
-  text-align: center;
-  position: relative;
-  z-index: 1;
+.how-icon {
+  font-size: 1.75rem;
+  margin-bottom: 16px;
+  display: block;
+  line-height: 1;
 }
 
-.step-number {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--bg-white);
-  border: 2px solid var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--primary);
-  margin: 0 auto 28px;
-  position: relative;
-}
-
-.step-visual {
-  width: 100%;
-  aspect-ratio: 4/3;
-  background: var(--bg-white);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-}
-
-.step-visual svg {
-  width: 64px;
-  height: 64px;
-  fill: none;
-  stroke: var(--primary);
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.step h3 {
-  margin-bottom: 10px;
-}
-
-.step p {
-  font-size: 0.94rem;
-  color: var(--text-muted);
-  max-width: 300px;
-  margin: 0 auto;
-}
-
-/* ===== TRUST / SECURITY ===== */
-.trust {
-  background: var(--bg-white);
-  border-top: 1px solid var(--border-light);
-  border-bottom: 1px solid var(--border-light);
-}
-
-.trust-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 64px;
-  align-items: center;
-}
-
-.trust-content {
-  max-width: 480px;
-}
-
-.trust-content h2 {
-  margin-bottom: 20px;
-}
-
-.trust-content > p {
+.how-col h3 {
   font-size: 1.05rem;
-  margin-bottom: 36px;
-}
-
-.trust-items {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.trust-item {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-}
-
-.trust-item-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
-  background: var(--primary-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.trust-item-icon svg {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: var(--primary);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.trust-item h4 {
-  margin-bottom: 4px;
-  font-size: 0.98rem;
-}
-
-.trust-item p {
-  font-size: 0.88rem;
-  color: var(--text-muted);
-  line-height: 1.55;
-}
-
-.trust-badge-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 32px;
-  padding: 12px 24px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  font-size: 0.88rem;
   font-weight: 600;
   color: var(--text);
-  transition: all 0.2s;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
 }
 
-.trust-badge-link:hover {
-  border-color: var(--primary-light);
-  color: var(--primary);
-  box-shadow: var(--shadow-sm);
+.how-col p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.65;
 }
 
-.trust-badge-link svg {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: var(--primary);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.how-col code {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  background: var(--bg-raised);
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
 }
 
-/* Trust Visual */
-.trust-visual {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* ===== USE CASES ===== */
+.use-cases {
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
 }
 
-.trust-code-block {
-  background: #1a1730;
+.use-cases .section-header {
+  margin-bottom: 48px;
+}
+
+.use-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.use-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 32px;
-  width: 100%;
-  max-width: 460px;
-  box-shadow: var(--shadow-lg);
-  overflow: hidden;
+  padding: 28px;
+  transition: border-color 0.15s;
 }
 
-.trust-code-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+.use-card:hover {
+  border-color: var(--accent-border);
 }
 
-.trust-code-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-
-.trust-code-header span:nth-child(4) {
-  margin-left: auto;
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.3);
+.use-card-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  padding: 3px 10px;
+  border-radius: 100px;
+  margin-bottom: 16px;
   font-family: var(--font-mono);
 }
 
-.trust-code pre {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  line-height: 1.8;
-  color: rgba(255,255,255,0.7);
-  white-space: pre;
-  overflow-x: auto;
+.use-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
 }
 
-.trust-code .key { color: #c4b5fd; }
-.trust-code .str { color: #6ee7b7; }
-.trust-code .num { color: #fbbf24; }
-.trust-code .brace { color: rgba(255,255,255,0.4); }
-.trust-code .comment { color: rgba(255,255,255,0.25); font-style: italic; }
+.use-card p {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
 
 /* ===== PRICING ===== */
 .pricing {
-  position: relative;
+  border-top: 1px solid var(--border-subtle);
 }
 
-.pricing-cards {
+.pricing .section-header {
+  margin-bottom: 48px;
+}
+
+.pricing-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 28px;
-  max-width: 760px;
-  margin: 0 auto 48px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  align-items: start;
 }
 
 .pricing-card {
-  background: var(--bg-white);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: 40px 36px;
-  position: relative;
-  transition: all 0.3s;
-}
-
-.pricing-card:hover {
-  box-shadow: var(--shadow-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  transition: border-color 0.15s;
 }
 
 .pricing-card.featured {
-  border-color: var(--primary);
-  box-shadow: var(--shadow-md);
+  border-color: var(--accent);
+  position: relative;
 }
 
-.pricing-card-badge {
+.pricing-card.featured::after {
+  content: 'Most popular';
   position: absolute;
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--primary);
-  color: #fff;
-  font-size: 0.75rem;
+  background: var(--accent);
+  color: #000;
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 4px 16px;
-  border-radius: 100px;
-  text-transform: uppercase;
   letter-spacing: 0.05em;
-  white-space: nowrap;
+  text-transform: uppercase;
+  padding: 3px 12px;
+  border-radius: 100px;
+}
+
+.pricing-card:hover {
+  border-color: var(--accent-border);
+}
+
+.pricing-card.featured:hover {
+  border-color: var(--accent);
+}
+
+.pricing-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .pricing-tier {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--primary);
-  margin-bottom: 12px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
 }
 
 .pricing-price {
   display: flex;
   align-items: baseline;
   gap: 4px;
-  margin-bottom: 4px;
 }
 
 .pricing-amount {
-  font-size: 2.8rem;
-  font-weight: 800;
+  font-size: 2.25rem;
+  font-weight: 700;
   color: var(--text);
   letter-spacing: -0.03em;
   line-height: 1;
 }
 
 .pricing-period {
-  font-size: 0.95rem;
-  color: var(--text-light);
-  font-weight: 500;
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
 .pricing-desc {
-  font-size: 0.88rem;
+  font-size: 0.875rem;
   color: var(--text-muted);
-  margin-bottom: 28px;
-  padding-bottom: 28px;
-  border-bottom: 1px solid var(--border-light);
+  line-height: 1.5;
 }
 
 .pricing-features {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-bottom: 32px;
+  gap: 10px;
 }
 
 .pricing-features li {
+  font-size: 0.875rem;
+  color: var(--text-muted);
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  font-size: 0.92rem;
-  color: var(--text-muted);
+  line-height: 1.45;
 }
 
-.pricing-features li svg {
-  width: 18px;
-  height: 18px;
+.pricing-features li::before {
+  content: '';
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
-  margin-top: 2px;
-  fill: none;
-  stroke: var(--secondary);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  margin-top: 1px;
+  background: var(--accent);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
-.pricing-coming {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 32px;
-  background: var(--bg);
-  border: 1.5px dashed var(--border);
-  border-radius: var(--radius-md);
-  color: var(--text-light);
-  font-size: 0.92rem;
-  font-weight: 600;
-  width: 100%;
-}
-
-.pricing-bottom {
+.pricing-cta {
+  display: block;
   text-align: center;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.15s;
+  border: 1px solid var(--border);
+  color: var(--text);
+  background: transparent;
+  text-decoration: none;
 }
 
-.pricing-bottom p {
-  margin: 0 auto 24px;
-  font-size: 1.05rem;
+.pricing-cta:hover {
+  background: var(--bg-raised);
+  border-color: var(--text-muted);
+  text-decoration: none;
 }
 
-/* ===== FAQ ===== */
-.faq {
-  background: var(--bg-white);
-  border-top: 1px solid var(--border-light);
-  border-bottom: 1px solid var(--border-light);
+.pricing-card.featured .pricing-cta {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
 }
 
-.faq-list {
-  max-width: 720px;
-  margin: 0 auto;
+.pricing-card.featured .pricing-cta:hover {
+  background: var(--accent-dark);
+  border-color: var(--accent-dark);
+}
+
+/* ===== OPEN SOURCE ===== */
+.open-source {
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.open-source-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+.os-text .section-sub {
+  max-width: none;
+  margin-bottom: 24px;
+}
+
+.os-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.os-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  transition: all 0.15s;
+  background: var(--bg);
+}
+
+.os-link:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+  text-decoration: none;
+}
+
+.os-link svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.os-code {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-}
-
-.faq-item {
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  transition: all 0.2s;
-}
-
-.faq-item:hover {
-  border-color: rgba(91, 77, 199, 0.15);
-}
-
-.faq-item.active {
-  border-color: rgba(91, 77, 199, 0.2);
-  box-shadow: var(--shadow-sm);
-}
-
-.faq-question {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 16px;
-  padding: 22px 28px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: var(--font);
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text);
-  text-align: left;
-  line-height: 1.45;
-  transition: color 0.2s;
 }
 
-.faq-question:hover {
-  color: var(--primary);
-}
-
-.faq-chevron {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.faq-chevron svg {
-  width: 100%;
-  height: 100%;
-  fill: none;
-  stroke: var(--text-light);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.faq-item.active .faq-chevron {
-  transform: rotate(180deg);
-}
-
-.faq-item.active .faq-chevron svg {
-  stroke: var(--primary);
-}
-
-.faq-answer {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.faq-answer-inner {
-  padding: 0 28px 24px;
-  font-size: 0.94rem;
-  color: var(--text-muted);
+.os-code .code-block {
+  background: #010409;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
   line-height: 1.7;
+  overflow-x: auto;
+}
+
+.os-code .code-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  margin-bottom: 6px;
+}
+
+.github-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-bottom: 20px;
+}
+
+.github-stars svg {
+  width: 14px;
+  height: 14px;
+  color: var(--yellow);
+  fill: var(--yellow);
 }
 
 /* ===== FOOTER ===== */
-.footer {
-  padding: 64px 0 36px;
-  border-top: 1px solid var(--border-light);
+footer {
+  border-top: 1px solid var(--border-subtle);
+  padding: 48px 0 40px;
+  background: var(--bg);
+}
+
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
 }
 
 .footer-top {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 48px;
-  margin-bottom: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 32px;
 }
 
 .footer-brand {
-  max-width: 280px;
-}
-
-.footer-brand-name {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer-logo {
   font-size: 1.1rem;
+  font-weight: 700;
   color: var(--text);
-  margin-bottom: 14px;
+  letter-spacing: -0.02em;
 }
 
-.footer-brand-name .nav-logo {
-  width: 30px;
-  height: 30px;
+.footer-logo span {
+  color: var(--accent);
 }
 
-.footer-brand-name .nav-logo svg {
-  width: 16px;
-  height: 16px;
+.footer-tagline {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  max-width: 240px;
+  line-height: 1.5;
 }
 
-.footer-brand p {
-  font-size: 0.88rem;
-  color: var(--text-muted);
-  line-height: 1.65;
+.footer-nav {
+  display: flex;
+  gap: 48px;
+  flex-wrap: wrap;
 }
 
 .footer-col h4 {
-  font-size: 0.82rem;
-  font-weight: 700;
+  font-size: 0.75rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text);
-  margin-bottom: 18px;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 14px;
 }
 
 .footer-col ul {
@@ -1214,800 +789,428 @@ p {
 }
 
 .footer-col a {
-  font-size: 0.88rem;
-  color: var(--text-muted);
-  transition: color 0.2s;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  transition: color 0.15s;
 }
 
 .footer-col a:hover {
-  color: var(--primary);
+  color: var(--text);
+  text-decoration: none;
 }
 
 .footer-bottom {
+  padding-top: 24px;
+  border-top: 1px solid var(--border-subtle);
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding-top: 28px;
-  border-top: 1px solid var(--border-light);
+  align-items: center;
   flex-wrap: wrap;
   gap: 16px;
 }
 
-.footer-copy {
-  font-size: 0.82rem;
-  color: var(--text-light);
+.footer-legal {
+  font-size: 0.8rem;
+  color: var(--text-dim);
 }
 
-.footer-protocol {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.82rem;
-  font-weight: 600;
+.footer-license {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+/* ===== DIVIDER ===== */
+.divider {
+  width: 40px;
+  height: 2px;
+  background: var(--accent);
+  margin: 20px 0;
+}
+
+/* ===== COPY BUTTON ===== */
+.code-wrap {
+  position: relative;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
   color: var(--text-muted);
-  padding: 6px 14px;
-  background: var(--primary-bg);
-  border-radius: 100px;
-  transition: all 0.2s;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  line-height: 1.5;
 }
 
-.footer-protocol:hover {
-  color: var(--primary);
-  background: rgba(91, 77, 199, 0.12);
+.copy-btn:hover {
+  background: var(--border);
+  color: var(--text);
 }
 
-.footer-protocol svg {
-  width: 14px;
-  height: 14px;
-  fill: none;
-  stroke: var(--primary);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.copy-btn.copied {
+  color: var(--green);
+  border-color: var(--green);
 }
-
-/* ===== ANIMATIONS ===== */
-.reveal {
-  opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.reveal-delay-1 { transition-delay: 0.1s; }
-.reveal-delay-2 { transition-delay: 0.2s; }
-.reveal-delay-3 { transition-delay: 0.3s; }
-.reveal-delay-4 { transition-delay: 0.4s; }
-.reveal-delay-5 { transition-delay: 0.5s; }
 
 /* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-  .hero-inner {
-    grid-template-columns: 1fr;
-    gap: 48px;
-  }
-
-  .hero-visual {
-    order: -1;
-  }
-
-  .vault-graphic {
-    max-width: 340px;
-  }
-
-  .vault-center {
-    width: 140px;
-    height: 140px;
-  }
-
-  .vault-icon {
-    width: 56px;
-    height: 56px;
-  }
-
-  .hero-content {
-    text-align: center;
-    max-width: 580px;
-    margin: 0 auto;
-  }
-
-  .hero-text {
-    margin: 0 auto 36px;
-  }
-
-  .hero-actions {
-    justify-content: center;
-  }
-
-  .hero-proof {
-    justify-content: center;
-  }
-
-  .features-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .trust-grid {
-    grid-template-columns: 1fr;
-    gap: 48px;
-  }
-
-  .trust-visual {
-    order: -1;
-  }
-
-  .trust-code-block {
-    max-width: 520px;
-    margin: 0 auto;
-  }
-
-  .footer-top {
-    grid-template-columns: 1fr 1fr;
-    gap: 36px;
-  }
-
-  .footer-brand {
-    grid-column: span 2;
-  }
-}
-
-@media (max-width: 768px) {
-  .section {
-    padding: 72px 0;
-  }
-
-  .nav-links, .nav-cta {
-    display: none;
-  }
-
-  .hamburger {
-    display: flex;
-  }
-
-  .hero {
-    padding-top: calc(var(--nav-height) + 48px);
-    padding-bottom: 72px;
-  }
-
-  .vault-float-card {
-    display: none;
-  }
-
-  .features-grid {
+@media (max-width: 900px) {
+  .how-cols {
     grid-template-columns: 1fr;
     gap: 16px;
   }
 
-  .feature-card {
-    padding: 28px 24px;
+  .use-cards {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
-  .steps {
+  .pricing-grid {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  .open-source-inner {
     grid-template-columns: 1fr;
     gap: 40px;
   }
 
-  .steps::before {
-    display: none;
-  }
-
-  .pricing-cards {
-    grid-template-columns: 1fr;
-    max-width: 400px;
-  }
-
-  .pricing-card {
-    padding: 32px 28px;
-  }
-
-  .faq-question {
-    padding: 18px 22px;
-    font-size: 0.95rem;
-  }
-
-  .faq-answer-inner {
-    padding: 0 22px 20px;
-  }
-
   .footer-top {
-    grid-template-columns: 1fr;
-    gap: 32px;
-  }
-
-  .footer-brand {
-    grid-column: auto;
-    max-width: none;
-  }
-
-  .footer-bottom {
     flex-direction: column;
-    text-align: center;
   }
 
-  .trust-code-block {
-    padding: 22px;
-  }
-
-  .trust-code pre {
-    font-size: 0.72rem;
+  .footer-nav {
+    gap: 32px;
   }
 }
 
-@media (max-width: 480px) {
-  .hero h1 {
-    font-size: 2rem;
-  }
-
-  .hero-proof {
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-  }
-
-  .hero-proof-divider {
+@media (max-width: 640px) {
+  .nav-links {
     display: none;
+  }
+
+  .nav-cta {
+    display: none;
+  }
+
+  .nav-mobile-toggle {
+    display: flex;
+  }
+
+  .hero {
+    padding: 64px 0 56px;
   }
 
   .hero-actions {
     flex-direction: column;
-    width: 100%;
+    align-items: stretch;
   }
 
   .hero-actions .btn {
-    width: 100%;
+    justify-content: center;
   }
 
-  .pricing-amount {
-    font-size: 2.2rem;
+  section {
+    padding: 56px 0;
   }
 
-  .vault-graphic {
-    max-width: 280px;
-  }
-
-  .vault-center {
-    width: 110px;
-    height: 110px;
-  }
-
-  .vault-icon {
-    width: 44px;
-    height: 44px;
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 </style>
 </head>
 <body>
 
-<!-- ===== NAVIGATION ===== -->
-<nav class="nav" id="nav">
+<!-- NAV -->
+<nav>
   <div class="nav-inner">
-    <a href="#" class="nav-brand">
-      <div class="nav-logo">
-        <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1.5"/></svg>
-      </div>
-      Provara
-    </a>
-
+    <a href="/" class="nav-logo">Provara<span>.</span></a>
     <ul class="nav-links">
-      <li><a href="#features">Features</a></li>
-      <li><a href="./how-it-works/">How It Works</a></li>
-      <li><a href="./use-cases/">Use Cases</a></li>
-      <li><a href="./pricing/">Pricing</a></li>
-      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="https://provara.dev/docs/" target="_blank" rel="noopener">Docs</a></li>
+      <li><a href="https://github.com/provara-protocol/provara" target="_blank" rel="noopener">GitHub</a></li>
     </ul>
-
     <div class="nav-cta">
-      <a href="./signup/" class="btn btn-primary btn-sm">Join Waitlist</a>
+      <a href="/signup" class="btn btn-primary">Get started free</a>
     </div>
-
-    <button class="hamburger" id="hamburger" aria-label="Open menu">
-      <span></span>
-      <span></span>
-      <span></span>
+    <button class="nav-mobile-toggle" aria-label="Open menu">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+        <rect x="2" y="4" width="16" height="1.5" rx="1"/>
+        <rect x="2" y="9.25" width="16" height="1.5" rx="1"/>
+        <rect x="2" y="14.5" width="16" height="1.5" rx="1"/>
+      </svg>
     </button>
   </div>
 </nav>
 
-<!-- Mobile Menu -->
-<div class="mobile-menu" id="mobile-menu">
-  <a href="#features" class="mobile-link">Features</a>
-  <a href="./how-it-works/" class="mobile-link">How It Works</a>
-  <a href="./use-cases/" class="mobile-link">Use Cases</a>
-  <a href="./pricing/" class="mobile-link">Pricing</a>
-  <a href="#faq" class="mobile-link">FAQ</a>
-  <a href="./signup/" class="btn btn-primary" style="margin-top: 12px;">Join Waitlist</a>
-</div>
-
-<!-- ===== HERO ===== -->
+<!-- HERO -->
 <section class="hero">
   <div class="container">
-    <div class="hero-inner">
-      <div class="hero-content reveal">
-        <div class="hero-badge">
-          <span class="hero-badge-dot"></span>
-          Desktop App Coming Soon
-        </div>
-        <h1>Your Family's Legacy,<br><span>Secured Forever</span></h1>
-        <p class="hero-text">
-          Protect and organize everything that matters most in one tamper-proof vault. Documents, memories, emergency info, and digital legacy &mdash; cryptographically sealed, privately stored, and designed to last generations.
+    <div class="hero-badge">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0zm4.879-2.773 4.264 2.559a.25.25 0 0 1 0 .428l-4.264 2.559A.25.25 0 0 1 6 10.559V5.442a.25.25 0 0 1 .379-.215z"/></svg>
+      Open protocol &bull; Managed hosted vault
+    </div>
+    <h1>Tamper-evident audit trails<br>for <em>AI systems</em></h1>
+    <p class="hero-sub">
+      Cryptographically-signed, hash-chained event logs. Every AI decision gets a receipt you can verify independently.
+    </p>
+    <div class="hero-actions">
+      <a href="/signup" class="btn btn-primary btn-lg">Get started free</a>
+      <a href="https://github.com/provara-protocol/provara" class="btn btn-secondary btn-lg" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-header">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+        <span class="terminal-title">bash — provara-demo</span>
+      </div>
+      <div class="terminal-body">
+        <span class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">pip install provara-protocol</span></span>
+        <span class="t-line"><span class="t-comment">Collecting provara-protocol...</span></span>
+        <span class="t-line"><span class="t-success">Successfully installed provara-protocol-1.4.0</span></span>
+        <span class="t-line">&nbsp;</span>
+        <span class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">psmc</span> <span class="t-flag">--vault</span> <span class="t-string">~/.provara/my-agent</span> <span class="t-cmd">append</span> <span class="t-continuation">\</span></span>
+        <span class="t-line">    <span class="t-flag">--type</span> decision <span class="t-continuation">\</span></span>
+        <span class="t-line">    <span class="t-flag">--data</span> <span class="t-string">'{"model":"claude-3","output":"approved","confidence":0.94}'</span> <span class="t-continuation">\</span></span>
+        <span class="t-line">    <span class="t-flag">--tags</span> production compliance</span>
+        <span class="t-line"><span class="t-success">Appended event #143 — sha256:a3f8c2...e91b</span></span>
+        <span class="t-line">&nbsp;</span>
+        <span class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">psmc</span> <span class="t-flag">--vault</span> <span class="t-string">~/.provara/my-agent</span> <span class="t-cmd">verify</span></span>
+        <span class="t-line"><span class="t-success">Chain integrity: CLEAN (143 events, 0 gaps)</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works" id="how-it-works">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-label">How it works</p>
+      <h2 class="section-title">No trust required. Just math.</h2>
+      <p class="section-sub">Three operations. Cryptographically linked. Independently verifiable.</p>
+    </div>
+
+    <div class="how-cols">
+      <div class="how-col">
+        <span class="how-icon">&#x1F510;</span>
+        <h3>Sign</h3>
+        <p>
+          Every event is signed with <code>Ed25519</code>. The private key never leaves your system.
+          The signature is stored alongside the event payload in the vault.
         </p>
-        <div class="hero-actions">
-          <a href="./signup/" class="btn btn-primary">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" transform="scale(0.75)"/><polyline points="22,6 12,13 2,6" transform="scale(0.75)"/></svg>
-            Join the Waitlist
-          </a>
-          <a href="./how-it-works/" class="btn btn-secondary">See How It Works</a>
-        </div>
-        <div class="hero-proof">
-          <div class="hero-proof-item">
-            <span class="hero-proof-value">Ed25519</span>
-            <span class="hero-proof-label">Signatures</span>
-          </div>
-          <div class="hero-proof-divider"></div>
-          <div class="hero-proof-item">
-            <span class="hero-proof-value">SHA-256</span>
-            <span class="hero-proof-label">Integrity</span>
-          </div>
-          <div class="hero-proof-divider"></div>
-          <div class="hero-proof-item">
-            <span class="hero-proof-value">50 Year</span>
-            <span class="hero-proof-label">Design Horizon</span>
-          </div>
-        </div>
       </div>
-
-      <div class="hero-visual reveal reveal-delay-2">
-        <div class="vault-graphic">
-          <!-- Orbiting rings -->
-          <div class="vault-ring vault-ring-1"><div class="vault-ring-dot"></div></div>
-          <div class="vault-ring vault-ring-2"><div class="vault-ring-dot"></div></div>
-          <div class="vault-ring vault-ring-3"><div class="vault-ring-dot"></div></div>
-
-          <!-- Center vault icon -->
-          <div class="vault-center">
-            <div class="vault-icon">
-              <svg viewBox="0 0 64 64">
-                <rect x="12" y="26" width="40" height="30" rx="4"/>
-                <path d="M20 26v-8a12 12 0 0 1 24 0v8"/>
-                <circle cx="32" cy="41" r="4"/>
-                <line x1="32" y1="45" x2="32" y2="50"/>
-              </svg>
-            </div>
-          </div>
-
-          <!-- Floating cards -->
-          <div class="vault-float-card">
-            <div class="vault-float-icon" style="background: var(--primary-bg);">
-              <svg stroke="#5b4dc7"><path d="M9 12h12M9 6h12M9 18h6"/></svg>
-            </div>
-            Documents
-          </div>
-          <div class="vault-float-card">
-            <div class="vault-float-icon" style="background: rgba(16,185,129,0.1);">
-              <svg stroke="#10b981"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            </div>
-            Memories
-          </div>
-          <div class="vault-float-card">
-            <div class="vault-float-icon" style="background: rgba(217,153,34,0.1);">
-              <svg stroke="#d99922"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
-            Protected
-          </div>
-        </div>
+      <div class="how-col">
+        <span class="how-icon">&#x26D3;&#xFE0F;</span>
+        <h3>Chain</h3>
+        <p>
+          Each event includes a <code>SHA-256</code> hash of the previous event.
+          Modify a single event and the chain breaks — every subsequent hash becomes invalid.
+        </p>
+      </div>
+      <div class="how-col">
+        <span class="how-icon">&#x2705;</span>
+        <h3>Verify</h3>
+        <p>
+          Anyone with the public key can independently verify the entire chain.
+          No central authority. No Provara servers required for verification.
+        </p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===== FEATURES ===== -->
-<section class="features section" id="features">
+<!-- USE CASES -->
+<section class="use-cases" id="use-cases">
   <div class="container">
-    <div class="section-header reveal">
-      <span class="section-label">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 12 2" transform="scale(0.7) translate(4,4)"/></svg>
-        Features
-      </span>
-      <h2 class="section-title">Everything Your Family Needs,<br>Nothing They Don't</h2>
-      <p class="section-subtitle">Built with intention. Every feature exists to protect what matters most to your family, with no unnecessary complexity.</p>
+    <div class="section-header">
+      <p class="section-label">Use cases</p>
+      <h2 class="section-title">Built for what regulators and auditors actually ask for.</h2>
     </div>
 
-    <div class="features-grid">
-      <div class="feature-card reveal">
-        <div class="feature-icon feature-icon-purple">
-          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-        </div>
-        <h3>Tamper-Proof Storage</h3>
-        <p>Every record is cryptographically signed and verified. If even a single byte changes, you'll know. Your family's truth stays true.</p>
+    <div class="use-cards">
+      <div class="use-card">
+        <span class="use-card-tag">Regulatory</span>
+        <h3>EU AI Act compliance</h3>
+        <p>
+          Article 12 requires automatic logging for high-risk AI systems — records that are accurate, traceable, and durable.
+          Provara produces exactly what the regulation requires. Not a workaround. The actual thing.
+        </p>
       </div>
-
-      <div class="feature-card reveal reveal-delay-1">
-        <div class="feature-icon feature-icon-green">
-          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        </div>
-        <h3>Family Sharing</h3>
-        <p>Invite family members and choose exactly what to share. Grandparents, parents, children &mdash; everyone gets the access they need.</p>
+      <div class="use-card">
+        <span class="use-card-tag">Audit</span>
+        <h3>SOC 2 evidence</h3>
+        <p>
+          Auditors want logs they can verify. Not screenshots. Not JSON you could have edited after the fact.
+          Cryptographic receipts with provable integrity — signed at write time, verifiable at any time.
+        </p>
       </div>
-
-      <div class="feature-card reveal reveal-delay-2">
-        <div class="feature-icon feature-icon-rose">
-          <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.5"/></svg>
-        </div>
-        <h3>Emergency Preparedness</h3>
-        <p>Medical records, emergency contacts, insurance policies, and critical instructions &mdash; organized and accessible when it matters most.</p>
-      </div>
-
-      <div class="feature-card reveal reveal-delay-1">
-        <div class="feature-icon feature-icon-amber">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        </div>
-        <h3>Document Organization</h3>
-        <p>Birth certificates, wills, medical records, photos, recipes, stories &mdash; everything in one place, beautifully organized and instantly searchable.</p>
-      </div>
-
-      <div class="feature-card reveal reveal-delay-2">
-        <div class="feature-icon feature-icon-blue">
-          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><line x1="6" y1="11" x2="6" y2="11.01"/><line x1="18" y1="11" x2="18" y2="11.01"/></svg>
-        </div>
-        <h3>Offline &amp; Private</h3>
-        <p>Your vault lives on your devices, not someone else's cloud. No internet required. No data mining. No third-party access. Ever.</p>
-      </div>
-
-      <div class="feature-card reveal reveal-delay-3">
-        <div class="feature-icon feature-icon-teal">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <h3>Built to Last</h3>
-        <p>Designed with a 50-year horizon. Pure JSON format, open-source protocol, no subscriptions to lapse, no company to go bankrupt. Your grandchildren can read this.</p>
+      <div class="use-card">
+        <span class="use-card-tag">Engineering</span>
+        <h3>AI agent accountability</h3>
+        <p>
+          Multi-agent workflows, LLM pipelines, autonomous decision systems.
+          Every decision logged, signed, and replayable. Know exactly what ran, when, and what it decided.
+        </p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===== HOW IT WORKS ===== -->
-<section class="how-it-works section" id="how-it-works">
+<!-- PRICING -->
+<section class="pricing" id="pricing">
   <div class="container">
-    <div class="section-header reveal">
-      <span class="section-label">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5"/><path d="M7 4v3l2 1"/></svg>
-        How It Works
-      </span>
-      <h2 class="section-title">Up and Running in Minutes</h2>
-      <p class="section-subtitle">Three simple steps to protect your family's most important information. No technical expertise required.</p>
+    <div class="section-header">
+      <p class="section-label">Pricing</p>
+      <h2 class="section-title">Start free. Scale when you need it.</h2>
+      <p class="section-sub">The CLI and protocol are open source. Managed hosting is a paid service.</p>
     </div>
 
-    <div class="steps">
-      <div class="step reveal">
-        <div class="step-number">1</div>
-        <div class="step-visual">
-          <svg viewBox="0 0 64 64">
-            <rect x="14" y="8" width="36" height="48" rx="4" stroke-width="1.5"/>
-            <circle cx="32" cy="28" r="8" stroke-width="1.5"/>
-            <path d="M20 50c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke-width="1.5"/>
-            <path d="M28 28l3 3 6-6" stroke-width="2" stroke="#10b981"/>
-          </svg>
-        </div>
-        <h3>Create Your Vault</h3>
-        <p>Set up your family's secure vault in minutes. Generate your cryptographic keys and choose your security preferences.</p>
-      </div>
-
-      <div class="step reveal reveal-delay-2">
-        <div class="step-number">2</div>
-        <div class="step-visual">
-          <svg viewBox="0 0 64 64">
-            <rect x="8" y="14" width="20" height="26" rx="3" stroke-width="1.5"/>
-            <rect x="36" y="14" width="20" height="26" rx="3" stroke-width="1.5"/>
-            <rect x="22" y="30" width="20" height="26" rx="3" stroke-width="1.5"/>
-            <line x1="14" y1="20" x2="22" y2="20" stroke-width="1.5"/>
-            <line x1="14" y1="24" x2="20" y2="24" stroke-width="1.5"/>
-            <line x1="42" y1="20" x2="50" y2="20" stroke-width="1.5"/>
-            <line x1="42" y1="24" x2="48" y2="24" stroke-width="1.5"/>
-            <path d="M29 37l3 3 5-5" stroke-width="2" stroke="#10b981"/>
-          </svg>
-        </div>
-        <h3>Add What Matters</h3>
-        <p>Documents, memories, emergency contacts, medical records, photos &mdash; everything gets cryptographically sealed and organized.</p>
-      </div>
-
-      <div class="step reveal reveal-delay-4">
-        <div class="step-number">3</div>
-        <div class="step-visual">
-          <svg viewBox="0 0 64 64">
-            <circle cx="22" cy="24" r="8" stroke-width="1.5"/>
-            <circle cx="42" cy="24" r="8" stroke-width="1.5"/>
-            <circle cx="32" cy="44" r="8" stroke-width="1.5"/>
-            <line x1="28" y1="28" x2="28" y2="38" stroke-width="1.5" stroke-dasharray="3 3"/>
-            <line x1="36" y1="28" x2="36" y2="38" stroke-width="1.5" stroke-dasharray="3 3"/>
-            <path d="M32 14l-2 2 2 2 2-2-2-2z" fill="none" stroke="#10b981" stroke-width="1.5"/>
-            <circle cx="32" cy="15" r="2" stroke="#10b981" stroke-width="1.5"/>
-          </svg>
-        </div>
-        <h3>Share &amp; Protect</h3>
-        <p>Invite family members, set permissions for each person, and rest easy knowing your legacy is safe and accessible.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== TRUST / SECURITY ===== -->
-<section class="trust section" id="security">
-  <div class="container">
-    <div class="trust-grid">
-      <div class="trust-content reveal">
-        <span class="section-label">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1l-6 3v4c0 4.4 2.6 8.5 6 10 3.4-1.5 6-5.6 6-10V4L7 1z" transform="scale(0.9) translate(1,1)"/></svg>
-          Security &amp; Trust
-        </span>
-        <h2>Don't Trust Us.<br>Verify.</h2>
-        <p>Provara Family Vault is built on the open-source Provara Protocol. Every claim we make about security is mathematically provable, publicly auditable, and independently verifiable.</p>
-
-        <div class="trust-items">
-          <div class="trust-item">
-            <div class="trust-item-icon">
-              <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/><polyline points="9 12 11 14 15 10"/></svg>
-            </div>
-            <div>
-              <h4>Ed25519 Digital Signatures</h4>
-              <p>Every record is signed with military-grade elliptic curve cryptography. Tampering is mathematically impossible without your keys.</p>
-            </div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-header">
+          <span class="pricing-tier">Free</span>
+          <div class="pricing-price">
+            <span class="pricing-amount">$0</span>
+            <span class="pricing-period">/ month</span>
           </div>
-
-          <div class="trust-item">
-            <div class="trust-item-icon">
-              <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </div>
-            <div>
-              <h4>SHA-256 Integrity Hashing</h4>
-              <p>Content is hashed and chained. Change a single character anywhere, and the entire chain breaks. Your records stay authentic.</p>
-            </div>
-          </div>
-
-          <div class="trust-item">
-            <div class="trust-item-icon">
-              <svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
-            </div>
-            <div>
-              <h4>Key-Based Access</h4>
-              <p>You hold the keys &mdash; literally. No passwords stored on servers, no master keys we can use. If we disappear, your vault remains yours.</p>
-            </div>
-          </div>
-
-          <div class="trust-item">
-            <div class="trust-item-icon">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            </div>
-            <div>
-              <h4>No Cloud Dependency</h4>
-              <p>Your data never touches our servers. No cloud required. Works fully offline on your own devices, your own terms.</p>
-            </div>
-          </div>
+          <p class="pricing-desc">Everything you need to get started and evaluate the protocol.</p>
         </div>
-
-        <a href="https://provara.dev" target="_blank" rel="noopener" class="trust-badge-link">
-          <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          Built on Provara Protocol &mdash; Open Source (Apache 2.0)
-        </a>
-      </div>
-
-      <div class="trust-visual reveal reveal-delay-2">
-        <div class="trust-code-block">
-          <div class="trust-code-header">
-            <span class="trust-code-dot" style="background:#ff5f57;"></span>
-            <span class="trust-code-dot" style="background:#febc2e;"></span>
-            <span class="trust-code-dot" style="background:#28c840;"></span>
-            <span>vault-record.json</span>
-          </div>
-          <div class="trust-code"><pre><span class="brace">{</span>
-  <span class="key">"@context"</span>: <span class="str">"provara/v1"</span>,
-  <span class="key">"type"</span>: <span class="str">"family-record"</span>,
-  <span class="key">"created"</span>: <span class="str">"2026-02-12T10:30:00Z"</span>,
-  <span class="key">"author"</span>: <span class="str">"vault:family/sarah"</span>,
-
-  <span class="comment">// Cryptographic verification</span>
-  <span class="key">"signature"</span>: <span class="brace">{</span>
-    <span class="key">"algorithm"</span>: <span class="str">"Ed25519"</span>,
-    <span class="key">"publicKey"</span>: <span class="str">"MCow...QA=="</span>,
-    <span class="key">"value"</span>: <span class="str">"a8f3c9..."</span>
-  <span class="brace">}</span>,
-  <span class="key">"integrity"</span>: <span class="brace">{</span>
-    <span class="key">"hash"</span>: <span class="str">"SHA-256"</span>,
-    <span class="key">"value"</span>: <span class="str">"e3b0c4..."</span>,
-    <span class="key">"parent"</span>: <span class="str">"7d2f1a..."</span>
-  <span class="brace">}</span>
-<span class="brace">}</span></pre></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== PRICING ===== -->
-<section class="pricing section" id="pricing">
-  <div class="container">
-    <div class="section-header reveal">
-      <span class="section-label">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="10" height="10" rx="1" transform="scale(0.9) translate(2,1)"/></svg>
-        Pricing
-      </span>
-      <h2 class="section-title">Simple, Honest Pricing</h2>
-      <p class="section-subtitle">No hidden fees, no surprise renewals. Choose the plan that fits your family.</p>
-    </div>
-
-    <div class="pricing-cards">
-      <!-- Personal -->
-      <div class="pricing-card reveal">
-        <div class="pricing-tier">Personal</div>
-        <div class="pricing-price">
-          <span class="pricing-amount">$49</span>
-          <span class="pricing-period">one-time</span>
-        </div>
-        <p class="pricing-desc">For individuals and couples who want peace of mind.</p>
         <ul class="pricing-features">
-          <li>
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-            1 personal vault
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-            Unlimited records &amp; documents
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-            Cryptographic verification
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-            Offline-first &mdash; no cloud needed
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-            Lifetime updates
-          </li>
+          <li>1 vault</li>
+          <li>100 events / month</li>
+          <li>CLI access</li>
+          <li>Open source protocol</li>
+          <li>Local key management</li>
         </ul>
-        <div class="pricing-coming">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="7"/><polyline points="8 4 8 8 11 9"/></svg>
-          Coming Soon
-        </div>
+        <a href="/signup" class="pricing-cta">Get started</a>
       </div>
 
-      <!-- Family -->
-      <div class="pricing-card featured reveal reveal-delay-1">
-        <div class="pricing-card-badge">Most Popular</div>
-        <div class="pricing-tier">Family</div>
-        <div class="pricing-price">
-          <span class="pricing-amount">$5</span>
-          <span class="pricing-period">/month</span>
+      <div class="pricing-card featured">
+        <div class="pricing-header">
+          <span class="pricing-tier">Developer</span>
+          <div class="pricing-price">
+            <span class="pricing-amount">$29</span>
+            <span class="pricing-period">/ month</span>
+          </div>
+          <p class="pricing-desc">For engineers building production AI systems that need verified audit logs.</p>
         </div>
-        <p class="pricing-desc">For families who want to protect and share their legacy together.</p>
         <ul class="pricing-features">
-          <li>
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-            Shared family vault
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-            Up to 5 family members
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-            Unlimited records &amp; documents
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-            Key inheritance &amp; emergency access
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-            Priority support
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-            Everything in Personal
-          </li>
+          <li>5 vaults</li>
+          <li>Unlimited events</li>
+          <li>REST API access</li>
+          <li>Managed hosted vault</li>
+          <li>Retention: 2 years</li>
         </ul>
-        <div class="pricing-coming">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="7"/><polyline points="8 4 8 8 11 9"/></svg>
-          Coming Soon
-        </div>
+        <a href="/signup" class="pricing-cta">Get started</a>
       </div>
-    </div>
 
-    <div class="pricing-bottom reveal">
-      <p>Be the first to know when Provara Family Vault launches. Join the waitlist and help shape the product.</p>
-      <a href="mailto:hello@huntinformationsystems.com?subject=Provara%20Family%20Vault%20Waitlist&body=I'd%20like%20to%20join%20the%20Provara%20Family%20Vault%20waitlist.%0A%0AName:%20%0APlan%20interest:%20Personal%20/%20Family" class="btn btn-primary">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" transform="scale(0.75)"/><polyline points="22,6 12,13 2,6" transform="scale(0.75)"/></svg>
-        Join the Waitlist
-      </a>
+      <div class="pricing-card">
+        <div class="pricing-header">
+          <span class="pricing-tier">Team</span>
+          <div class="pricing-price">
+            <span class="pricing-amount">$99</span>
+            <span class="pricing-period">/ month</span>
+          </div>
+          <p class="pricing-desc">For teams shipping compliance-critical AI with shared access and SLA requirements.</p>
+        </div>
+        <ul class="pricing-features">
+          <li>Unlimited vaults</li>
+          <li>Team access &amp; permissions</li>
+          <li>API key management</li>
+          <li>99.9% uptime SLA</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="/pricing" class="pricing-cta">Get started</a>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ===== FAQ ===== -->
-<section class="faq section" id="faq">
+<!-- OPEN SOURCE -->
+<section class="open-source" id="open-source">
   <div class="container">
-    <div class="section-header reveal">
-      <span class="section-label">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="6"/><path d="M5.2 5.2a2 2 0 0 1 3.6 1c0 1.3-2 2-2 2"/><circle cx="7" cy="11" r="0.3"/></svg>
-        FAQ
-      </span>
-      <h2 class="section-title">Common Questions</h2>
-      <p class="section-subtitle">Everything you need to know about Provara Family Vault and how it protects your family.</p>
-    </div>
-
-    <div class="faq-list">
-      <div class="faq-item reveal">
-        <button class="faq-question" aria-expanded="false">
-          Is my data stored in the cloud?
-          <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-        </button>
-        <div class="faq-answer">
-          <div class="faq-answer-inner">
-            No. Your vault lives entirely on your devices. Provara is offline-first by design &mdash; your documents, memories, and records never leave your hardware unless you explicitly choose to back them up. No cloud servers, no data mining, no third-party access.
+    <div class="open-source-inner">
+      <div class="os-text">
+        <p class="section-label">Open source</p>
+        <h2 class="section-title">The protocol is open.<br>The hosted vault is a service.</h2>
+        <div class="divider"></div>
+        <p class="section-sub">
+          The full Provara protocol — key management, event signing, chain verification, NDJSON vault format —
+          is Apache 2.0 licensed. Run it yourself, fork it, audit it. The managed hosted vault is a paid product
+          layered on top.
+        </p>
+        <p class="section-sub" style="margin-top:12px;">
+          Self-hosting is a first-class use case. Provara the protocol will always be free.
+        </p>
+        <div style="margin-top:28px;">
+          <div class="github-stars">
+            <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25z"/></svg>
+            github.com/provara-protocol/provara
+          </div>
+          <div class="os-links">
+            <a href="https://github.com/provara-protocol/provara" class="os-link" target="_blank" rel="noopener">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+              GitHub
+            </a>
+            <a href="https://pypi.org/project/provara-protocol/" class="os-link" target="_blank" rel="noopener">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M7.996 0A8 8 0 0 0 0 8a8 8 0 0 0 8 8 8 8 0 0 0 8-8 8 8 0 0 0-8-8zm3.533 6.478a.5.5 0 0 1-.5.5H4.97a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5H11.03a.5.5 0 0 1 .5.5v2zm0 5.044a.5.5 0 0 1-.5.5H4.97a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5H11.03a.5.5 0 0 1 .5.5v2z"/></svg>
+              PyPI
+            </a>
+            <a href="https://provara.dev/docs/" class="os-link" target="_blank" rel="noopener">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h8.75a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4h-8a.5.5 0 0 0-.5.5v8a.5.5 0 0 0 .5.5h8v-1.5a.75.75 0 0 1 1.5 0v2.25a.75.75 0 0 1-.75.75H2.5A1.5 1.5 0 0 1 1 13.5z"/><path d="M16 8.5a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0 0 1.5h7.5A.75.75 0 0 0 16 8.5zm-.22 4.28a.75.75 0 0 0 0-1.06l-2-2a.75.75 0 0 0-1.06 1.06l1.47 1.47-1.47 1.47a.75.75 0 1 0 1.06 1.06l2-2z"/></svg>
+              Documentation
+            </a>
           </div>
         </div>
       </div>
 
-      <div class="faq-item reveal reveal-delay-1">
-        <button class="faq-question" aria-expanded="false">
-          What happens if I lose my device?
-          <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-        </button>
-        <div class="faq-answer">
-          <div class="faq-answer-inner">
-            You can back up your vault to a USB drive, NAS, or encrypted cloud storage. Your cryptographic keys unlock it anywhere. The vault format is portable and self-contained &mdash; just move the file and open it on any device with Provara.
+      <div class="os-code">
+        <div>
+          <p class="os-code .code-label" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:#6e7681;font-family:var(--font-mono);margin-bottom:8px;">Install</p>
+          <div class="code-wrap">
+            <div class="code-block">
+              <span style="color:#14b8a6;">$</span> <span style="color:#e6edf3;">pip install provara-protocol</span>
+            </div>
+            <button class="copy-btn" data-copy="pip install provara-protocol">copy</button>
           </div>
         </div>
-      </div>
-
-      <div class="faq-item reveal reveal-delay-1">
-        <button class="faq-question" aria-expanded="false">
-          Can my family access it if something happens to me?
-          <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-        </button>
-        <div class="faq-answer">
-          <div class="faq-answer-inner">
-            Yes. Provara supports key inheritance and emergency access. You can designate trusted family members who can unlock the vault under conditions you define. This is one of the core design principles &mdash; your vault is meant to be passed down across generations.
+        <div>
+          <p style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:#6e7681;font-family:var(--font-mono);margin-bottom:8px;">Verify any vault</p>
+          <div class="code-wrap">
+            <div class="code-block">
+              <span style="color:#14b8a6;">$</span> <span style="color:#79c0ff;">psmc</span> <span style="color:#a5d6ff;">--vault ~/.provara/my-agent</span> <span style="color:#e6edf3;">verify</span>
+            </div>
+            <button class="copy-btn" data-copy="psmc --vault ~/.provara/my-agent verify">copy</button>
           </div>
         </div>
-      </div>
+        <div>
+          <p style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:#6e7681;font-family:var(--font-mono);margin-bottom:8px;">Quick start</p>
+          <div class="code-block" style="background:#010409;border:1px solid #30363d;border-radius:8px;padding:16px 20px;font-family:var(--font-mono);font-size:0.82rem;line-height:1.8;">
+<span style="color:#6e7681;"># Initialize a new vault</span>
+<span style="color:#14b8a6;">$</span> <span style="color:#79c0ff;">psmc</span> <span style="color:#a5d6ff;">--vault ~/.provara/my-agent</span> init
+<span style="color:#3fb950;">Vault initialized. Public key written to ~/.provara/my-agent.pub</span>
 
-      <div class="faq-item reveal reveal-delay-2">
-        <button class="faq-question" aria-expanded="false">
-          What file formats are supported?
-          <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-        </button>
-        <div class="faq-answer">
-          <div class="faq-answer-inner">
-            Any. Documents, photos, videos, text files, PDFs &mdash; everything gets cryptographically sealed into your vault. Provara treats your content as opaque data: it stores it faithfully, signs it, and ensures nobody can tamper with it, regardless of format.
-          </div>
-        </div>
-      </div>
-
-      <div class="faq-item reveal reveal-delay-2">
-        <button class="faq-question" aria-expanded="false">
-          Is this based on blockchain?
-          <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-        </button>
-        <div class="faq-answer">
-          <div class="faq-answer-inner">
-            No. Provara uses standard, proven cryptography &mdash; Ed25519 for digital signatures and SHA-256 for integrity hashing &mdash; without any blockchain overhead. No tokens, no mining, no consensus mechanisms. Just straightforward cryptographic verification that has been trusted by security professionals for decades.
-          </div>
-        </div>
-      </div>
-
-      <div class="faq-item reveal reveal-delay-3">
-        <button class="faq-question" aria-expanded="false">
-          What if Hunt Information Systems goes away?
-          <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-        </button>
-        <div class="faq-answer">
-          <div class="faq-answer-inner">
-            The Provara Protocol is fully open source under the Apache 2.0 license, and the vault format is pure JSON. Even without our software, your vault is readable with standard tools &mdash; any JSON parser and standard cryptographic libraries. We designed it this way on purpose: your family's legacy should never depend on any single company's survival.
+<span style="color:#6e7681;"># Log a decision</span>
+<span style="color:#14b8a6;">$</span> <span style="color:#79c0ff;">psmc</span> <span style="color:#a5d6ff;">--vault ~/.provara/my-agent</span> append \
+    <span style="color:#a5d6ff;">--type</span> decision \
+    <span style="color:#a5d6ff;">--data</span> <span style="color:#a5d6ff;">'{"result":"approved"}'</span>
+<span style="color:#3fb950;">Appended event #1 — sha256:8f2a1c...d43e</span>
           </div>
         </div>
       </div>
@@ -2015,173 +1218,60 @@ p {
   </div>
 </section>
 
-<!-- ===== FOOTER ===== -->
-<footer class="footer">
+<!-- FOOTER -->
+<footer>
   <div class="container">
-    <div class="footer-top">
-      <div class="footer-brand">
-        <div class="footer-brand-name">
-          <div class="nav-logo">
-            <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1.5"/></svg>
-          </div>
-          Provara Family Vault
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="footer-logo">Provara<span>.</span></div>
+          <p class="footer-tagline">Tamper-evident audit trails for AI systems.</p>
         </div>
-        <p>Secure, tamper-proof family memory vault. Protect and organize your family's most important information &mdash; designed to last generations.</p>
+        <nav class="footer-nav">
+          <div class="footer-col">
+            <h4>Product</h4>
+            <ul>
+              <li><a href="#how-it-works">How it works</a></li>
+              <li><a href="#pricing">Pricing</a></li>
+              <li><a href="/signup">Get started</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Open source</h4>
+            <ul>
+              <li><a href="https://github.com/provara-protocol/provara" target="_blank" rel="noopener">GitHub</a></li>
+              <li><a href="https://pypi.org/project/provara-protocol/" target="_blank" rel="noopener">PyPI</a></li>
+              <li><a href="https://provara.dev/docs/" target="_blank" rel="noopener">Documentation</a></li>
+              <li><a href="https://provara.dev" target="_blank" rel="noopener">Protocol site</a></li>
+            </ul>
+          </div>
+        </nav>
       </div>
-
-      <div class="footer-col">
-        <h4>Product</h4>
-        <ul>
-          <li><a href="#features">Features</a></li>
-          <li><a href="./how-it-works/">How It Works</a></li>
-          <li><a href="./use-cases/">Use Cases</a></li>
-          <li><a href="./pricing/">Pricing</a></li>
-        </ul>
+      <div class="footer-bottom">
+        <p class="footer-legal">&copy; 2026 Provara Protocol. All rights reserved.</p>
+        <p class="footer-license">Apache 2.0 License</p>
       </div>
-
-      <div class="footer-col">
-        <h4>Resources</h4>
-        <ul>
-          <li><a href="https://provara.dev" target="_blank" rel="noopener">Provara Protocol</a></li>
-          <li><a href="#faq">FAQ</a></li>
-          <li><a href="mailto:hello@huntinformationsystems.com">Contact</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h4>Company</h4>
-        <ul>
-          <li><a href="https://huntinformationsystems.com" target="_blank" rel="noopener">Hunt Information Systems</a></li>
-          <li><a href="mailto:hello@huntinformationsystems.com">hello@huntinformationsystems.com</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="footer-bottom">
-      <span class="footer-copy">&copy; 2026 Hunt Information Systems. All rights reserved.</span>
-      <a href="https://provara.dev" target="_blank" rel="noopener" class="footer-protocol">
-        <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        Powered by Provara Protocol
-      </a>
     </div>
   </div>
 </footer>
 
-<!-- ===== SCRIPTS ===== -->
 <script>
-(function() {
-  'use strict';
-
-  // === Navigation scroll effect ===
-  var nav = document.getElementById('nav');
-  var scrollThreshold = 20;
-
-  function handleNavScroll() {
-    if (window.scrollY > scrollThreshold) {
-      nav.classList.add('scrolled');
-    } else {
-      nav.classList.remove('scrolled');
-    }
-  }
-
-  window.addEventListener('scroll', handleNavScroll, { passive: true });
-  handleNavScroll();
-
-  // === Mobile menu ===
-  var hamburger = document.getElementById('hamburger');
-  var mobileMenu = document.getElementById('mobile-menu');
-  var mobileLinks = mobileMenu.querySelectorAll('a');
-
-  function toggleMenu() {
-    hamburger.classList.toggle('active');
-    mobileMenu.classList.toggle('active');
-    document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
-  }
-
-  hamburger.addEventListener('click', toggleMenu);
-
-  mobileLinks.forEach(function(link) {
-    link.addEventListener('click', function() {
-      hamburger.classList.remove('active');
-      mobileMenu.classList.remove('active');
-      document.body.style.overflow = '';
-    });
+// Copy button — progressive enhancement
+document.querySelectorAll('.copy-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var text = btn.getAttribute('data-copy');
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(function() {
+      var orig = btn.textContent;
+      btn.textContent = 'copied';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = orig;
+        btn.classList.remove('copied');
+      }, 1800);
+    }).catch(function() {});
   });
-
-  // === FAQ Accordion ===
-  var faqItems = document.querySelectorAll('.faq-item');
-
-  faqItems.forEach(function(item) {
-    var question = item.querySelector('.faq-question');
-    var answer = item.querySelector('.faq-answer');
-
-    question.addEventListener('click', function() {
-      var isActive = item.classList.contains('active');
-
-      // Close all other items
-      faqItems.forEach(function(otherItem) {
-        if (otherItem !== item) {
-          otherItem.classList.remove('active');
-          otherItem.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
-          otherItem.querySelector('.faq-answer').style.maxHeight = '0';
-        }
-      });
-
-      // Toggle current item
-      if (isActive) {
-        item.classList.remove('active');
-        question.setAttribute('aria-expanded', 'false');
-        answer.style.maxHeight = '0';
-      } else {
-        item.classList.add('active');
-        question.setAttribute('aria-expanded', 'true');
-        answer.style.maxHeight = answer.scrollHeight + 'px';
-      }
-    });
-  });
-
-  // === Scroll reveal animation ===
-  var revealElements = document.querySelectorAll('.reveal');
-
-  function checkReveal() {
-    var windowHeight = window.innerHeight;
-    var triggerOffset = 60;
-
-    revealElements.forEach(function(el) {
-      var rect = el.getBoundingClientRect();
-      if (rect.top < windowHeight - triggerOffset) {
-        el.classList.add('visible');
-      }
-    });
-  }
-
-  window.addEventListener('scroll', checkReveal, { passive: true });
-  window.addEventListener('resize', checkReveal, { passive: true });
-
-  // Initial check (with slight delay for page load)
-  setTimeout(checkReveal, 100);
-
-  // === Smooth scroll for anchor links ===
-  document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
-    anchor.addEventListener('click', function(e) {
-      var targetId = this.getAttribute('href');
-      if (targetId === '#') return;
-
-      var target = document.querySelector(targetId);
-      if (target) {
-        e.preventDefault();
-        var navHeight = nav.offsetHeight;
-        var targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navHeight - 16;
-
-        window.scrollTo({
-          top: targetPosition,
-          behavior: 'smooth'
-        });
-      }
-    });
-  });
-
-})();
+});
 </script>
 
 </body>

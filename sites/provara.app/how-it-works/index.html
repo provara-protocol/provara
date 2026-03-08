@@ -3,69 +3,332 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>How It Works — Provara Family Vault</title>
-<meta name="description" content="Learn how Provara uses cryptographic signatures and append-only event logs to protect your family's digital legacy.">
-<meta name="theme-color" content="#5b4dc7">
+<title>How It Works — Provara</title>
+<meta name="description" content="How Provara uses Ed25519 signing and hash chaining to create a tamper-evident event log.">
+<meta name="theme-color" content="#14b8a6">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
 <style>
-/* Reusing core styles */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --primary: #5b4dc7;
-  --primary-light: #7c6fd4;
-  --primary-dark: #4a3da6;
-  --primary-bg: #f0edf9;
-  --secondary: #10b981;
-  --secondary-dark: #0d9668;
-  --text: #1e1b33;
-  --text-muted: #5c5775;
-  --text-light: #8a849d;
-  --bg: #fafaf9;
-  --bg-white: #ffffff;
-  --bg-warm: #f5f3f0;
-  --border: #e8e5e0;
-  --border-light: #f0ede8;
-  --shadow-sm: 0 1px 3px rgba(91, 77, 199, 0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 16px rgba(91, 77, 199, 0.08), 0 2px 6px rgba(0,0,0,0.04);
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
+  --teal: #14b8a6;
+  --teal-dim: #0f9488;
+  --teal-bg: rgba(20, 184, 166, 0.08);
+  --teal-border: rgba(20, 184, 166, 0.25);
+  --bg: #0d1117;
+  --bg-card: #161b22;
+  --bg-card-2: #1c2128;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --text-dim: #6e7681;
   --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --max-width: 1140px;
-  --nav-height: 72px;
+  --mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+  --max-width: 1100px;
+  --nav-height: 64px;
+  --radius: 8px;
+  --radius-lg: 12px;
 }
-body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.65; font-size: 16px; }
-.container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
-.section { padding: 100px 0; }
-h1, h2, h3 { line-height: 1.25; font-weight: 700; color: var(--text); }
-h1 { font-size: 3rem; margin-bottom: 1.5rem; }
-h2 { font-size: 2.25rem; margin-bottom: 1.25rem; }
-p { color: var(--text-muted); margin-bottom: 1.5rem; }
-.nav { height: var(--nav-height); background: rgba(250, 250, 249, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-light); position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
-.nav-inner { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; height: 100%; display: flex; align-items: center; justify-content: space-between; }
-.nav-brand { font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; }
-.nav-logo { width: 32px; height: 32px; background: var(--primary); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
-.nav-links { display: flex; gap: 32px; list-style: none; }
-.nav-links a { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); text-decoration: none; }
-.nav-links a:hover { color: var(--primary); }
-.btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 28px; border-radius: var(--radius-md); font-weight: 600; text-decoration: none; transition: all 0.2s; }
-.btn-primary { background: var(--secondary); color: #fff; }
 
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
-.step-card { background: var(--bg-white); border: 1px solid var(--border-light); border-radius: var(--radius-xl); padding: 48px; margin-bottom: 32px; box-shadow: var(--shadow-sm); }
-.step-num { width: 40px; height: 40px; background: var(--primary-bg); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 24px; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 16px;
+}
 
-footer { background: var(--bg-white); padding: 64px 0 32px; border-top: 1px solid var(--border-light); margin-top: 80px; }
-.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
-.footer-col h4 { margin-bottom: 20px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
-.footer-col ul { list-style: none; }
-.footer-col li { margin-bottom: 12px; }
-.footer-col a { color: var(--text-muted); font-size: 0.9rem; text-decoration: none; }
-.footer-bottom { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-light); }
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 24px;
+}
 
+/* NAV */
+.nav {
+  height: var(--nav-height);
+  background: rgba(13, 17, 23, 0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+}
+.nav-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.nav-brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+.nav-brand span { color: var(--teal); }
+.nav-links {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  align-items: center;
+}
+.nav-links a {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  transition: color 0.15s, background 0.15s;
+}
+.nav-links a:hover { color: var(--text); background: var(--bg-card); }
+.nav-links a.active { color: var(--teal); }
+.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  background: var(--teal);
+  color: #0d1117;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.nav-cta:hover { background: var(--teal-dim); }
+
+/* HERO */
+.hero {
+  padding: calc(var(--nav-height) + 80px) 0 80px;
+  border-bottom: 1px solid var(--border);
+}
+.hero h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+.hero-sub {
+  font-size: 1.125rem;
+  color: var(--text-muted);
+  max-width: 580px;
+  line-height: 1.65;
+}
+
+/* SECTIONS */
+.section {
+  padding: 72px 0;
+  border-bottom: 1px solid var(--border);
+}
+.section:last-of-type { border-bottom: none; }
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 16px;
+}
+.section h2 {
+  font-size: 1.625rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.section p {
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  max-width: 640px;
+}
+.section p:last-child { margin-bottom: 0; }
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+/* CODE BLOCKS */
+.code-block {
+  background: #010409;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+.code-block-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+.code-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+.code-dot-red { background: #ff5f57; }
+.code-dot-yellow { background: #febc2e; }
+.code-dot-green { background: #28c840; }
+.code-block-filename {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+.code-block pre {
+  padding: 20px 24px;
+  overflow-x: auto;
+  color: #e6edf3;
+  white-space: pre;
+}
+.c-key { color: #79c0ff; }
+.c-str { color: #a5d6ff; }
+.c-num { color: #f2cc60; }
+.c-hash { color: #8b949e; }
+.c-teal { color: #56d364; }
+.c-comment { color: #6e7681; font-style: italic; }
+.c-fail { color: #ff7b72; }
+.c-warn { color: #f2cc60; }
+
+/* STEPS LIST */
+.steps-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+.steps-list li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}
+.step-num-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--teal-bg);
+  border: 1px solid var(--teal-border);
+  color: var(--teal);
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* CALLOUT */
+.callout {
+  background: var(--teal-bg);
+  border: 1px solid var(--teal-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-top: 24px;
+}
+.callout p {
+  color: var(--text);
+  font-size: 0.9375rem;
+  max-width: 100%;
+  margin: 0;
+}
+
+/* CTA SECTION */
+.cta-section {
+  padding: 80px 0;
+  text-align: center;
+}
+.cta-section h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.cta-section p {
+  color: var(--text-muted);
+  margin-bottom: 32px;
+}
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 32px;
+  background: var(--teal);
+  color: #0d1117;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition: background 0.15s;
+}
+.cta-btn:hover { background: var(--teal-dim); }
+
+/* FOOTER */
+footer {
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  padding: 48px 0 32px;
+}
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.footer-brand {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+  text-decoration: none;
+}
+.footer-brand span { color: var(--teal); }
+.footer-links {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+  flex-wrap: wrap;
+}
+.footer-links a {
+  font-size: 0.875rem;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.footer-links a:hover { color: var(--text-muted); }
+.footer-copy {
+  width: 100%;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+/* MOBILE */
 @media (max-width: 768px) {
-  .grid { grid-template-columns: 1fr; gap: 32px; }
-  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .two-col { grid-template-columns: 1fr; gap: 32px; }
+  .nav-links { display: none; }
+  .hero { padding: calc(var(--nav-height) + 48px) 0 48px; }
+  .section { padding: 48px 0; }
 }
 </style>
 </head>
@@ -73,128 +336,232 @@ footer { background: var(--bg-white); padding: 64px 0 32px; border-top: 1px soli
 
 <nav class="nav">
   <div class="nav-inner">
-    <a href="/" class="nav-brand">
-      <div class="nav-logo">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      </div>
-      Provara
-    </a>
+    <a href="/" class="nav-brand">Provara</a>
     <ul class="nav-links">
-      <li><a href="/#features">Features</a></li>
-      <li><a href="/how-it-works/">How It Works</a></li>
-      <li><a href="/use-cases/">Use Cases</a></li>
+      <li><a href="/how-it-works/" class="active">How it works</a></li>
       <li><a href="/pricing/">Pricing</a></li>
+      <li><a href="https://provara.dev/docs/" target="_blank" rel="noopener">Docs</a></li>
+      <li><a href="https://github.com/provara-protocol/provara" target="_blank" rel="noopener">GitHub</a></li>
     </ul>
-    <a href="/signup/" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.85rem;">Join Waitlist</a>
+    <a href="/signup/" class="nav-cta">Get started free</a>
   </div>
 </nav>
 
-<section class="section" style="padding-top: 140px;">
+<section class="hero">
   <div class="container">
-    <div style="max-width: 800px;">
-      <h1>How Provara Works</h1>
-      <p style="font-size: 1.25rem;">Provara isn't just another cloud storage app. It's a cryptographic memory protocol designed to protect your family's legacy for the next 50 years and beyond.</p>
-    </div>
+    <h1>How Provara works</h1>
+    <p class="hero-sub">Three components. One guarantee: any modification to the chain is detectable.</p>
+  </div>
+</section>
 
-    <div class="grid" style="margin-top: 80px;">
+<!-- SECTION 1: The Event -->
+<section class="section">
+  <div class="container">
+    <div class="two-col">
       <div>
-        <div class="step-num">01</div>
-        <h2>Cryptographic Identity</h2>
-        <p>When you set up Provara, you generate a unique pair of cryptographic keys. These keys live only on your devices—never on our servers. These keys are your digital signature, allowing you to prove that every record in your vault was created by you and hasn't been modified since.</p>
-        <p>Unlike passwords, these keys cannot be "reset" by a third party. You are in total control of your identity.</p>
+        <div class="section-label">01 — The event</div>
+        <h2>What a Provara event looks like</h2>
+        <p>Every piece of data you append to a vault becomes an event. Each event has a sequence number, a timestamp, your data payload, and two cryptographic fields that make tampering detectable: <code style="font-family:var(--mono);font-size:0.875rem;color:var(--teal)">prev_hash</code> and <code style="font-family:var(--mono);font-size:0.875rem;color:var(--teal)">signature</code>.</p>
+        <p>The <code style="font-family:var(--mono);font-size:0.875rem;color:var(--teal)">seq</code> field establishes ordering. The <code style="font-family:var(--mono);font-size:0.875rem;color:var(--teal)">data</code> field is yours — any JSON payload. The cryptographic fields are computed by Provara and cannot be forged without your private key.</p>
       </div>
-      <div class="step-card" style="display: flex; align-items: center; justify-content: center; background: #1a1730; color: #fff;">
-        <pre style="font-family: monospace; font-size: 0.85rem; color: #6ee7b7;">
-{
-  "actor": "bp1_alice_7f2a",
-  "key_type": "Ed25519",
-  "public_key": "MCowBQYDK2Vw...",
-  "status": "ACTIVE"
-}
-        </pre>
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-dot code-dot-red"></div>
+          <div class="code-dot code-dot-yellow"></div>
+          <div class="code-dot code-dot-green"></div>
+          <span class="code-block-filename">event.json</span>
+        </div>
+        <pre>{
+  <span class="c-key">"seq"</span>: <span class="c-num">42</span>,
+  <span class="c-key">"type"</span>: <span class="c-str">"decision"</span>,
+  <span class="c-key">"timestamp"</span>: <span class="c-str">"2026-03-07T14:22:10Z"</span>,
+  <span class="c-key">"data"</span>: {
+    <span class="c-key">"model"</span>: <span class="c-str">"claude-3-5-sonnet"</span>,
+    <span class="c-key">"output"</span>: <span class="c-str">"approved"</span>,
+    <span class="c-key">"confidence"</span>: <span class="c-num">0.94</span>
+  },
+  <span class="c-key">"tags"</span>: [<span class="c-str">"production"</span>, <span class="c-str">"compliance"</span>],
+  <span class="c-key">"prev_hash"</span>: <span class="c-hash">"3e3b7f88c637..."</span>,
+  <span class="c-key">"signature"</span>: <span class="c-hash">"ed25519:a1b2c3d4..."</span>
+}</pre>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="grid" style="margin-top: 100px;">
-      <div class="step-card" style="background: var(--primary-bg); display: flex; flex-direction: column; gap: 12px;">
-        <div style="height: 20px; width: 80%; background: #fff; border-radius: 4px;"></div>
-        <div style="height: 20px; width: 60%; background: #fff; border-radius: 4px;"></div>
-        <div style="height: 2px; width: 100%; background: var(--primary); margin: 10px 0;"></div>
-        <div style="height: 20px; width: 90%; background: #fff; border-radius: 4px;"></div>
-        <div style="height: 20px; width: 70%; background: #fff; border-radius: 4px;"></div>
+<!-- SECTION 2: Ed25519 Signing -->
+<section class="section">
+  <div class="container">
+    <div class="two-col">
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-dot code-dot-red"></div>
+          <div class="code-dot code-dot-yellow"></div>
+          <div class="code-dot code-dot-green"></div>
+          <span class="code-block-filename">signing.py</span>
+        </div>
+        <pre><span class="c-comment"># Ed25519 private key — never leaves your system</span>
+private_key = Ed25519PrivateKey.generate()
+
+<span class="c-comment"># Event content is serialized canonically</span>
+<span class="c-comment"># then signed before writing to the vault</span>
+event_bytes = canonical_json(event)
+signature = private_key.sign(event_bytes)
+
+<span class="c-comment"># The public key verifies — the private key forges.</span>
+<span class="c-comment"># We store neither. You hold both.</span></pre>
       </div>
       <div>
-        <div class="step-num">02</div>
-        <h2>The Causal Chain</h2>
-        <p>Every time you add a document, memory, or record, Provara creates an "Event". Each new event contains a cryptographic hash of the event that came before it. This creates a "Causal Chain".</p>
-        <p>If someone tries to change a record from five years ago, the hash of that record will change. This breaks the link to every subsequent record, making the tampering instantly visible. This is how we guarantee the integrity of your legacy.</p>
+        <div class="section-label">02 — Ed25519 signing</div>
+        <h2>Every event is signed</h2>
+        <p>When you append an event, Provara signs it with your Ed25519 private key. The signature covers the entire event content — sequence number, timestamp, data, tags, and <code style="font-family:var(--mono);font-size:0.875rem;color:var(--teal)">prev_hash</code>.</p>
+        <p>To forge an event, an attacker needs your private key. That key never leaves your system — Provara only ever sees the public key, which verifies but cannot sign.</p>
+        <div class="callout">
+          <p>Ed25519 is a modern elliptic curve signature scheme. It is fast, compact, and used by SSH, Signal, and TLS 1.3. The signatures are 64 bytes. The math has been audited extensively.</p>
+        </div>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="grid" style="margin-top: 100px;">
+<!-- SECTION 3: Hash chaining -->
+<section class="section">
+  <div class="container">
+    <div class="two-col">
       <div>
-        <div class="step-num">03</div>
-        <h2>Offline-First Storage</h2>
-        <p>Your vault is a self-contained folder that lives on your own hardware—your computer, your phone, or your private NAS. Provara works perfectly without an internet connection.</p>
-        <p>If you choose to sync your vault across devices, Provara uses end-to-end encryption. Your data is encrypted with your keys before it ever leaves your device, so even if the sync server is compromised, your memories remain private.</p>
+        <div class="section-label">03 — Hash chaining</div>
+        <h2>Each event is linked to the last</h2>
+        <p>Every event includes a SHA-256 hash of the previous event in its <code style="font-family:var(--mono);font-size:0.875rem;color:var(--teal)">prev_hash</code> field. This creates a chain. The first event hashes a genesis value; every event after hashes its predecessor.</p>
+        <p>To modify event N without detection, you would need to:</p>
+        <ul class="steps-list">
+          <li><div class="step-num-badge">1</div><span>Re-sign event N — requires the private key</span></li>
+          <li><div class="step-num-badge">2</div><span>Recompute the hash of event N</span></li>
+          <li><div class="step-num-badge">3</div><span>Update event N+1's <code style="font-family:var(--mono);font-size:0.85rem;color:var(--teal)">prev_hash</code> to match</span></li>
+          <li><div class="step-num-badge">4</div><span>Re-sign event N+1</span></li>
+          <li><div class="step-num-badge">5</div><span>Repeat for all subsequent events</span></li>
+        </ul>
+        <div class="callout" style="margin-top:24px;">
+          <p>Miss any step: verification fails immediately. The chain is as strong as its weakest link — and every link requires the private key to reforge.</p>
+        </div>
       </div>
-      <div class="step-card" style="text-align: center;">
-        <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>
-        <p style="font-weight: 600; margin-top: 16px;">Sovereign Control</p>
-      </div>
-    </div>
+      <div>
+        <div class="code-block">
+          <div class="code-block-header">
+            <div class="code-dot code-dot-red"></div>
+            <div class="code-dot code-dot-yellow"></div>
+            <div class="code-dot code-dot-green"></div>
+            <span class="code-block-filename">chain.py</span>
+          </div>
+          <pre><span class="c-comment"># Each event hashes the one before it</span>
+def compute_hash(event: dict) -> str:
+    canonical = canonical_json(event)
+    return sha256(canonical).hexdigest()
 
-    <div style="margin-top: 120px; text-align: center; background: var(--bg-warm); padding: 80px; border-radius: var(--radius-xl);">
-      <h2>Designed for the 50-Year Horizon</h2>
-      <p style="max-width: 700px; margin: 0 auto 32px;">Technology changes fast, but your family's memories shouldn't be trapped in a format that will be obsolete in a decade. Provara uses boring, industry-standard formats (JSON, SHA-256, Ed25519) that are designed to be readable for at least half a century.</p>
-      <a href="https://provara.dev" class="btn btn-primary">Read the Protocol Spec</a>
+def append_event(vault, event_data):
+    prev = vault.last_event()
+    event = {
+        <span class="c-str">"seq"</span>: prev[<span class="c-str">"seq"</span>] + <span class="c-num">1</span>,
+        <span class="c-str">"data"</span>: event_data,
+        <span class="c-str">"prev_hash"</span>: compute_hash(prev),
+        <span class="c-comment"># ...</span>
+    }
+    event[<span class="c-str">"signature"</span>] = sign(event)
+    vault.write(event)
+
+<span class="c-comment"># To tamper with seq=5, you must re-sign</span>
+<span class="c-comment"># seq=5, 6, 7 ... N. Every. Single. One.</span></pre>
+        </div>
+      </div>
     </div>
+  </div>
+</section>
+
+<!-- SECTION 4: Verification -->
+<section class="section">
+  <div class="container">
+    <div class="two-col">
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-dot code-dot-red"></div>
+          <div class="code-dot code-dot-yellow"></div>
+          <div class="code-dot code-dot-green"></div>
+          <span class="code-block-filename">terminal</span>
+        </div>
+        <pre><span class="c-comment">$ psmc --vault ~/.provara/my-vault verify</span>
+
+<span class="c-teal">Chain integrity: CLEAN (142 events, 0 gaps)</span>
+
+
+<span class="c-comment">$ psmc --vault ~/.provara/my-vault verify</span>
+<span class="c-comment"># (after tampering)</span>
+
+<span class="c-fail">Chain integrity: FAIL</span>
+<span class="c-fail">event seq=12 — hash mismatch</span>
+<span class="c-warn">  Expected: 3e3b7f88c637...</span>
+<span class="c-warn">  Got:      d41d8cd98f00...</span></pre>
+      </div>
+      <div>
+        <div class="section-label">04 — Verification</div>
+        <h2>Run it yourself, any time</h2>
+        <p>The <code style="font-family:var(--mono);font-size:0.875rem;color:var(--teal)">psmc verify</code> command walks the entire chain. It re-checks every signature against the public key and re-hashes every event to confirm the links hold.</p>
+        <p>A clean vault outputs a single line. A tampered vault tells you exactly which event failed and what the expected vs. observed hash was.</p>
+        <p>Verification is deterministic and requires no network access. You can run it offline, in CI, or in a legal proceeding. The vault proves itself.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 5: Hosted vault -->
+<section class="section">
+  <div class="container">
+    <div class="two-col">
+      <div>
+        <div class="section-label">05 — The hosted vault</div>
+        <h2>What provara.app adds</h2>
+        <p>The protocol is open and self-hostable. Provara.app is a managed layer on top: a hosted vault endpoint, a REST API for appending and querying events, and a dashboard for browsing your chain.</p>
+        <p>You keep the private key, or use Provara-managed keys with hardware-backed isolation. We store the vault. You verify whenever you want — using the same open-source CLI as self-hosted deployments.</p>
+        <p>No lock-in. The vault format is NDJSON. Download it at any time and run it locally.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;">
+          <div style="font-size:0.8rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;">REST API</div>
+          <div style="font-family:var(--mono);font-size:0.82rem;color:var(--text-muted);">POST /v1/vaults/{id}/events</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;">
+          <div style="font-size:0.8rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;">Portable format</div>
+          <div style="font-family:var(--mono);font-size:0.82rem;color:var(--text-muted);">NDJSON — one event per line. Download anytime.</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;">
+          <div style="font-size:0.8rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;">Independent verification</div>
+          <div style="font-family:var(--mono);font-size:0.82rem;color:var(--text-muted);">psmc verify works against hosted or local vaults.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <h2>Start appending events</h2>
+    <p>Set up a vault in minutes. No infrastructure required.</p>
+    <a href="/signup/" class="cta-btn">Get started free</a>
   </div>
 </section>
 
 <footer>
   <div class="container">
-    <div class="footer-grid">
-      <div class="footer-col">
-        <div class="nav-brand" style="margin-bottom: 16px;">
-          <div class="nav-logo" style="width: 24px; height: 24px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </div>
-          Provara
-        </div>
-        <p style="font-size: 0.85rem;">Sovereign Memory. Verifiable Continuity. Designed for 50-year readability.</p>
-      </div>
-      <div class="footer-col">
-        <h4>Product</h4>
-        <ul>
-          <li><a href="/#features">Features</a></li>
-          <li><a href="/how-it-works/">How It Works</a></li>
-          <li><a href="/pricing/">Pricing</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Trust</h4>
-        <ul>
-          <li><a href="https://provara.dev">Protocol Spec</a></li>
-          <li><a href="/security/">Security</a></li>
-          <li><a href="/privacy/">Privacy</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Company</h4>
-        <ul>
-          <li><a href="https://huntinformationsystems.com">Hunt Information Systems</a></li>
-          <li><a href="mailto:hello@provara.app">Contact</a></li>
-        </ul>
-      </div>
+    <div class="footer-inner">
+      <a href="/" class="footer-brand">Provara</a>
+      <ul class="footer-links">
+        <li><a href="/how-it-works/">How it works</a></li>
+        <li><a href="/pricing/">Pricing</a></li>
+        <li><a href="https://provara.dev/docs/" target="_blank" rel="noopener">Docs</a></li>
+        <li><a href="https://github.com/provara-protocol/provara" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="/use-cases/">Use cases</a></li>
+      </ul>
     </div>
-    <div class="footer-bottom">
-      <span>&copy; 2026 Hunt Information Systems LLC. All rights reserved.</span>
-      <span>Built with Provara Protocol v1.0</span>
-    </div>
+    <div class="footer-copy">&copy; 2026 Hunt Information Systems LLC. All rights reserved.</div>
   </div>
 </footer>
 
