@@ -8,10 +8,12 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
+import uuid as _uuid_mod
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -25,6 +27,18 @@ from provara.sync_v0 import verify_causal_chain
 VAULT_STORAGE_ROOT = Path(os.getenv("PROVARA_VAULT_ROOT", "/app/data/vaults"))
 VAULT_STORAGE_ROOT.mkdir(parents=True, exist_ok=True)
 
+# API key auth — set PROVARA_API_KEY in env; if unset, auth is disabled (dev only)
+_API_KEY = os.getenv("PROVARA_API_KEY", "")
+
+# CORS — comma-separated origins in PROVARA_ALLOWED_ORIGINS, or "*" for dev
+_raw_origins = os.getenv("PROVARA_ALLOWED_ORIGINS", "")
+_ALLOWED_ORIGINS: list[str] = [o.strip() for o in _raw_origins.split(",") if o.strip()] or ["*"]
+
+_UUID_RE = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+    re.IGNORECASE,
+)
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("provara-saas")
 
@@ -36,9 +50,9 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Tighten this for production
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=_ALLOWED_ORIGINS,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 # --- Models ---
@@ -55,8 +69,25 @@ class AppendEventRequest(BaseModel):
     namespace: str = "managed"
 
 # --- Internal Helpers ---
+def _require_api_key(x_api_key: str = Header(default="")) -> None:
+    """FastAPI dependency — enforce API key when PROVARA_API_KEY is configured."""
+    if _API_KEY and x_api_key != _API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+
+
+def _validate_vault_id(vault_id: str) -> str:
+    """Reject non-UUID vault IDs to prevent path traversal."""
+    if not _UUID_RE.match(vault_id):
+        raise HTTPException(status_code=400, detail="Invalid vault_id format")
+    return vault_id
+
+
 def _get_vault_path(vault_id: str) -> Path:
+    _validate_vault_id(vault_id)
     path = VAULT_STORAGE_ROOT / vault_id
+    # Confirm resolved path stays inside VAULT_STORAGE_ROOT
+    if not path.resolve().is_relative_to(VAULT_STORAGE_ROOT.resolve()):
+        raise HTTPException(status_code=400, detail="Invalid vault_id format")
     if not path.exists():
         raise HTTPException(status_code=404, detail="Vault not found")
     return path
@@ -87,14 +118,12 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "vaults_active": len(list(VAULT_STORAGE_ROOT.iterdir()))}
+    return {"status": "ok"}
 
 @app.post("/api/v1/vaults/create", status_code=status.HTTP_201_CREATED)
-async def create_vault(req: CreateVaultRequest):
+async def create_vault(req: CreateVaultRequest, _: None = Depends(_require_api_key)):
     try:
-        # Each vault gets a dedicated directory
-        import uuid
-        vault_id = str(uuid.uuid4())
+        vault_id = str(_uuid_mod.uuid4())
         vault_path = VAULT_STORAGE_ROOT / vault_id
         vault_path.mkdir()
 
@@ -113,10 +142,10 @@ async def create_vault(req: CreateVaultRequest):
         }
     except Exception as e:
         logger.error(f"Failed to create vault: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Vault creation failed")
 
 @app.post("/api/v1/vaults/{vault_id}/events")
-async def append_event(vault_id: str, req: AppendEventRequest):
+async def append_event(vault_id: str, req: AppendEventRequest, _: None = Depends(_require_api_key)):
     vault_path = _get_vault_path(vault_id)
     
     try:
@@ -163,10 +192,10 @@ async def append_event(vault_id: str, req: AppendEventRequest):
         }
     except Exception as e:
         logger.error(f"Failed to append event: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Event append failed")
 
 @app.get("/api/v1/vaults/{vault_id}/verify")
-async def verify_vault(vault_id: str):
+async def verify_vault(vault_id: str, _: None = Depends(_require_api_key)):
     vault_path = _get_vault_path(vault_id)
     events_file = vault_path / "events" / "events.ndjson"
     
@@ -189,10 +218,11 @@ async def verify_vault(vault_id: str):
             "state_hash": canonical_hash(events)
         }
     except Exception as e:
+        logger.error(f"Verify failed for vault {vault_id}: {e}")
         return {
             "success": False,
             "status": "compromised",
-            "error": str(e)
+            "error": "Chain verification failed"
         }
 
 if __name__ == "__main__":

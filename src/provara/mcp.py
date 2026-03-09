@@ -400,8 +400,8 @@ def generate_digest(vault_path: str, weeks: int = 1) -> str:
     Returns JSON with digest (Markdown string).
     """
     _psmc_required()
-    if weeks <= 0:
-        raise ValueError("weeks must be > 0")
+    if weeks <= 0 or weeks > 52:
+        raise ValueError("weeks must be between 1 and 52")
     vp = _vault_path(vault_path)
     digest = _psmc_generate_digest(vp, weeks=weeks)
     return json.dumps({"digest": digest})
@@ -449,6 +449,8 @@ def query_timeline(
     Returns JSON with events list.
     """
     _psmc_required()
+    if limit is not None and (limit <= 0 or limit > 10_000):
+        raise ValueError("limit must be between 1 and 10000")
     vp = _vault_path(vault_path)
     events = _psmc_query_timeline(
         vp,
