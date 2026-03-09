@@ -49,7 +49,7 @@ provara verify my-vault
 
 | Language | Status | Tests |
 |----------|--------|-------|
-| Python | v1.0.2 (reference) | 528+ |
+| Python | v1.0.3 (reference) | 528+ |
 | Rust | Complete | 20 |
 | TypeScript | Complete | — |
 
@@ -233,8 +233,8 @@ You merge raw observations, then rerun the deterministic reducer to derive fresh
 
 ```
 Protocol            Provara v1.0
-Implementation      1.0.2
-PyPI                provara-protocol 1.0.2
+Implementation      1.0.3
+PyPI                provara-protocol 1.0.3
 Tests Passing       528+
 ```
 

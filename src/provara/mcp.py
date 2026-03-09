@@ -45,6 +45,7 @@ Resources
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -120,17 +121,12 @@ mcp = FastMCP(
 )
 
 
+# --- SaaS Configuration ---
+PROVARA_SAAS_URL = os.getenv("PROVARA_SAAS_URL", "https://provara-managed-vault.fly.dev")
+
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
-
-
-def _vault_path(path_str: str) -> Path:
-    """Resolve and validate a vault path string — raises ValueError if missing."""
-    vp = Path(path_str).expanduser().resolve()
-    if not vp.is_dir():
-        raise ValueError(f"vault_path is not a directory: {vp}")
-    return vp
 
 
 def _psmc_required() -> None:
@@ -142,20 +138,64 @@ def _psmc_required() -> None:
         )
 
 
+def _saas_request(method: str, url: str, **kwargs: Any) -> Any:
+    """Lazy-import requests and execute an HTTP call."""
+    try:
+        import requests as _requests
+    except ImportError as exc:
+        raise RuntimeError(
+            "The 'requests' package is required for SaaS vault operations. "
+            "Install it with: pip install provara-protocol[mcp]"
+        ) from exc
+    return getattr(_requests, method)(url, **kwargs)
+
+
+def _is_saas_vault(path_str: str) -> bool:
+    """Check if the provided 'path' is actually a SaaS UUID."""
+    return path_str.startswith("saas://")
+
+def _saas_id(path_str: str) -> str:
+    """Extract UUID from saas:// URI."""
+    return path_str.replace("saas://", "")
+
+def _vault_path(path_str: str) -> Path:
+    """Resolve and validate a vault path string — raises ValueError if missing."""
+    if _is_saas_vault(path_str):
+        return Path(path_str) # Virtual path for SaaS
+    vp = Path(path_str).expanduser().resolve()
+    if not vp.is_dir():
+        raise ValueError(f"vault_path is not a directory: {vp}")
+    return vp
+
+
 # ---------------------------------------------------------------------------
 # Provara-native tools
 # ---------------------------------------------------------------------------
 
 
 @mcp.tool()
-def init_vault(vault_path: str, actor_name: str = "default") -> str:
-    """Initialize a new Provara vault at the given path.
-
-    Creates the directory structure, generates an Ed25519 keypair, and writes
-    a signed GENESIS event.  Returns JSON with success status and key_id.
+def init_vault(vault_path: str, actor_name: str = "default", use_saas: bool = False) -> str:
+    """Initialize a new Provara vault.
+    
+    If use_saas is True, creates a managed vault on the Provara Cloud.
+    Otherwise, creates a local vault at vault_path.
     """
-    from provara.bootstrap_v0 import bootstrap_backpack
+    if use_saas:
+        try:
+            resp = _saas_request("post", f"{PROVARA_SAAS_URL}/api/v1/vaults/create",
+                                 json={"name": vault_path, "description": f"Created via MCP for {actor_name}"})
+            resp.raise_for_status()
+            data = resp.json()
+            return json.dumps({
+                "success": True,
+                "vault_uri": f"saas://{data['vault_id']}",
+                "actor_id": data['actor_id'],
+                "genesis_hash": data['genesis_hash']
+            })
+        except Exception as e:
+            return json.dumps({"success": False, "error": f"SaaS creation failed: {str(e)}"})
 
+    from provara.bootstrap_v0 import bootstrap_backpack
     vp = Path(vault_path).expanduser().resolve()
     result = bootstrap_backpack(vp, actor=actor_name, quiet=True)
     if result.success:
@@ -171,13 +211,16 @@ def init_vault(vault_path: str, actor_name: str = "default") -> str:
 
 @mcp.tool()
 def verify_vault(vault_path: str) -> str:
-    """Verify the cryptographic integrity of a Provara vault.
+    """Verify the cryptographic integrity of a Provara vault."""
+    if _is_saas_vault(vault_path):
+        try:
+            resp = _saas_request("get", f"{PROVARA_SAAS_URL}/api/v1/vaults/{_saas_id(vault_path)}/verify")
+            resp.raise_for_status()
+            return json.dumps(resp.json())
+        except Exception as e:
+            return json.dumps({"success": False, "error": f"SaaS verification failed: {str(e)}"})
 
-    Checks Ed25519 signatures, SHA-256 chain linkage, Merkle root, and
-    vault structure.  Returns JSON with valid (bool) and optional error.
-    """
     from provara.backpack_integrity import validate_vault_structure
-
     vp = _vault_path(vault_path)
     try:
         validate_vault_structure(vp)
@@ -294,11 +337,6 @@ def forensic_export(vault_path: str, output_path: str) -> str:
     )
 
 
-# ---------------------------------------------------------------------------
-# PSMC-backed tools
-# ---------------------------------------------------------------------------
-
-
 @mcp.tool()
 def append_event(
     vault_path: str,
@@ -307,11 +345,23 @@ def append_event(
     tags: list[str] | None = None,
     emit_provara: bool = False,
 ) -> str:
-    """Append a signed PSMC event to a vault.
+    """Append a signed event to a vault (Local or SaaS)."""
+    if _is_saas_vault(vault_path):
+        try:
+            payload = {
+                "type": event_type,
+                "subject": data.get("subject", "mcp_event"),
+                "predicate": data.get("predicate", "append"),
+                "value": data.get("value", data),
+                "confidence": data.get("confidence", 1.0)
+            }
+            resp = _saas_request("post", f"{PROVARA_SAAS_URL}/api/v1/vaults/{_saas_id(vault_path)}/events",
+                                 json=payload)
+            resp.raise_for_status()
+            return json.dumps(resp.json())
+        except Exception as e:
+            return json.dumps({"success": False, "error": f"SaaS append failed: {str(e)}"})
 
-    Signs the event with the vault's active Ed25519 key and chains it to the
-    previous event.  Returns JSON with event_id, hash, timestamp, state_hash.
-    """
     _psmc_required()
     vp = _vault_path(vault_path)
     try:

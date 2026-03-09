@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] — 2026-03-08
+
+### Added
+- **Managed Vault Support:** Initial implementation of Provara SaaS backend (FastAPI + Docker) for remote, verifiable memory logging.
+- **SaaS Bridge in MCP:** The MCP server now supports `saas://` URIs, enabling AI agents to use managed vaults on Provara Cloud.
+- **Waitlist & B2B Site:** Re-architected `provara.app` as an AI audit trail developer platform.
+
+### Fixed
+- Version parity across SDK, CLI, and Forensic Export modules.
+- Updated `mcp.py` to handle missing dependencies gracefully for non-SaaS users.
+
 ## [1.0.2] — 2026-03-07
 
 ### Fixed

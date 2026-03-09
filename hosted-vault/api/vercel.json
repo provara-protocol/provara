@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "name": "provara-hosted-vault",
+  "builds": [
+    {
+      "src": "src/**/*.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "src/**/*.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/v1/vaults",
+      "dest": "/src/api/vaults.py"
+    },
+    {
+      "src": "/api/v1/vaults/(.*)",
+      "dest": "/src/api/vaults.py"
+    },
+    {
+      "src": "/api/v1/events/(.*)",
+      "dest": "/src/api/events.py"
+    },
+    {
+      "src": "/api/health",
+      "dest": "/src/api/health.py"
+    }
+  ],
+  "env": {
+    "PYTHON_VERSION": "3.11"
+  },
+  "regions": ["iad1"],
+  "public": false
+}

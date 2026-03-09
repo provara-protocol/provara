@@ -605,7 +605,7 @@ def load_events(*args: Any, **kwargs: Any) -> Any:
     return _load_events(*args, **kwargs)
 
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __all__ = [
     "Vault",
     "SovereignReducer",

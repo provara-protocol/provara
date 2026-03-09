@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "provara-protocol"
-version = "1.0.2"
+version = "1.0.3"
 description = "Self-sovereign cryptographic event logs. Ed25519 · SHA-256 · RFC 8785"
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -52,6 +52,7 @@ timestamps = [
 ]
 mcp = [
     "mcp>=1.0",
+    "requests>=2.28",
 ]
 sigstore = [
     "sigstore>=3.0",
