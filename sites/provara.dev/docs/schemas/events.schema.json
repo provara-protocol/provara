@@ -1,0 +1,184 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://provara.dev/schemas/v1/events.schema.json",
+  "title": "Provara Event",
+  "description": "A single cryptographically-signed event in a Provara vault.",
+  "type": "object",
+  "required": ["event_id", "type", "actor", "prev_event_hash", "payload", "sig"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt_[a-f0-9]{24}$",
+      "description": "Content-addressed event ID."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["GENESIS", "OBSERVATION", "ASSERTION", "ATTESTATION", "RETRACTION", "KEY_REVOCATION", "KEY_PROMOTION", "REDUCER_EPOCH"],
+      "description": "Core event type."
+    },
+    "namespace": {
+      "type": "string",
+      "enum": ["canonical", "local", "contested", "archived"],
+      "default": "local"
+    },
+    "actor": {
+      "type": "string",
+      "description": "Human-readable actor identifier or Key ID."
+    },
+    "actor_key_id": {
+      "type": "string",
+      "pattern": "^bp1_[a-f0-9]{16}$",
+      "description": "The Key ID of the signer."
+    },
+    "prev_event_hash": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "string", "pattern": "^evt_[a-f0-9]{24}$" }
+      ],
+      "description": "Causal link to the actor's previous event."
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 wall clock time."
+    },
+    "ts_logical": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Per-actor logical clock (sequence number)."
+    },
+    "payload": {
+      "type": "object",
+      "description": "Type-specific data."
+    },
+    "sig": {
+      "type": "string",
+      "description": "Base64-encoded Ed25519 signature."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "const": "GENESIS" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["uid", "root_key_id", "protocol_version"],
+            "properties": {
+              "uid": { "type": "string" },
+              "root_key_id": { "type": "string", "pattern": "^bp1_[a-f0-9]{16}$" },
+              "protocol_version": { "const": "1.0" },
+              "profile": { "type": "string" },
+              "birth_timestamp": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "enum": ["OBSERVATION", "ASSERTION"] } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["subject", "predicate", "value"],
+            "properties": {
+              "subject": { "type": "string" },
+              "predicate": { "type": "string" },
+              "value": {},
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+              "timestamp": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "ATTESTATION" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["subject", "predicate", "value", "target_event_id"],
+            "properties": {
+              "subject": { "type": "string" },
+              "predicate": { "type": "string" },
+              "value": {},
+              "target_event_id": { "type": "string", "pattern": "^evt_[a-f0-9]{24}$" },
+              "actor_key_id": { "type": "string", "pattern": "^bp1_[a-f0-9]{16}$" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "RETRACTION" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["subject", "predicate"],
+            "properties": {
+              "subject": { "type": "string" },
+              "predicate": { "type": "string" },
+              "reason": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "KEY_REVOCATION" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["revoked_key_id", "trust_boundary_event_id"],
+            "properties": {
+              "revoked_key_id": { "type": "string", "pattern": "^bp1_[a-f0-9]{16}$" },
+              "trust_boundary_event_id": { "type": "string", "pattern": "^evt_[a-f0-9]{24}$" },
+              "reason": { "type": "string" },
+              "revoked_by": { "type": "string", "pattern": "^bp1_[a-f0-9]{16}$" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "KEY_PROMOTION" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["new_key_id", "new_public_key_b64", "algorithm", "roles"],
+            "properties": {
+              "new_key_id": { "type": "string", "pattern": "^bp1_[a-f0-9]{16}$" },
+              "new_public_key_b64": { "type": "string" },
+              "algorithm": { "const": "Ed25519" },
+              "roles": { "type": "array", "items": { "type": "string" } },
+              "promoted_by": { "type": "string", "pattern": "^bp1_[a-f0-9]{16}$" },
+              "replaces_key_id": { "type": "string", "pattern": "^bp1_[a-f0-9]{16}$" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "REDUCER_EPOCH" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["epoch_id", "reducer_hash"],
+            "properties": {
+              "epoch_id": { "type": "string" },
+              "reducer_hash": { "type": "string" },
+              "effective_from_event_id": { "type": "string", "pattern": "^evt_[a-f0-9]{24}$" },
+              "ontology_versions": { "type": "object" }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
