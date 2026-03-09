@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Optional
 
 from .canonical_json import canonical_dumps
+from typing import Any, Generator, Optional
 
 
 # ---------------------------------------------------------------------------
@@ -68,7 +69,7 @@ CREATE INDEX IF NOT EXISTS idx_events_format ON events(source_format);
 # Format detection
 # ---------------------------------------------------------------------------
 
-def _detect_format(ev: dict) -> str:
+def _detect_format(ev: dict[str, Any]) -> str:
     """Detect whether an event is Backpack or PSMC format."""
     if "event_id" in ev and "sig" in ev:
         return "backpack"
@@ -81,7 +82,7 @@ def _detect_format(ev: dict) -> str:
     return "unknown"
 
 
-def _normalize_event(ev: dict) -> dict:
+def _normalize_event(ev: dict[str, Any]) -> dict[str, Any]:
     """Normalize an event from either format into unified schema fields."""
     fmt = _detect_format(ev)
 
@@ -161,7 +162,7 @@ def migrate(
     source: str | Path,
     dest: str | Path,
     verify: bool = True,
-) -> dict:
+) -> dict[str, Any]:
     """Convert NDJSON vault events to a queryable SQLite file.
 
     Auto-detects Backpack vs PSMC format per-event. Handles mixed vaults.
@@ -300,10 +301,10 @@ def query_events(
     until: Optional[str] = None,
     tags: Optional[str] = None,
     limit: int = 1000,
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """Query migrated events with optional filters."""
     clauses = []
-    params: list = []
+    params: list[Any] = []
 
     if event_type:
         clauses.append("type = ?")
@@ -332,7 +333,7 @@ def query_events(
     return [_row_to_dict(r) for r in rows]
 
 
-def summary(conn: sqlite3.Connection) -> dict:
+def summary(conn: sqlite3.Connection) -> dict[str, Any]:
     """Return vault summary: counts by type, actor, format, time range."""
     total = conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
 
@@ -367,7 +368,7 @@ def summary(conn: sqlite3.Connection) -> dict:
 # Internal helpers
 # ---------------------------------------------------------------------------
 
-def _iter_ndjson(path: Path):
+def _iter_ndjson(path: Path) -> Generator[dict[str, Any], None, None]:
     """Yield parsed dicts from NDJSON file, skipping blank/malformed lines."""
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
@@ -440,7 +441,7 @@ def _verify_migrated_chains(conn: sqlite3.Connection) -> list[str]:
     return errors
 
 
-def _row_to_dict(row: sqlite3.Row) -> dict:
+def _row_to_dict(row: sqlite3.Row) -> dict[str, Any]:
     """Convert a sqlite3.Row to a dict with parsed payload."""
     d = dict(row)
     try:

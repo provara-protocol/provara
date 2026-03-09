@@ -137,23 +137,23 @@ def cmd_init(args: argparse.Namespace) -> None:
             "PROTOCOL_PROFILE.txt §13",
         )
 
-def verify_sovereign_events(events: list) -> list:
+def verify_sovereign_events(events: list[dict[str, Any]]) -> list[str]:
     """Validate sovereign events in a mixed event log.
 
     Checks payload_digest integrity and sequence_number ordering.
     Returns a list of error strings (empty = valid).
     """
-    from .sovereign_schema import canonical_json, sha256_hex
+    from .canonical_json import canonical_bytes, sha256_hex
 
-    errors = []
+    errors: list[str] = []
     sovereign_events = [e for e in events if "schema_version" in e]
 
     prev_seq = -1
     for evt in sovereign_events:
         # Check payload digest
         payload = evt.get("payload", {})
-        expected_digest = sha256_hex(canonical_json(payload))
-        actual_digest = evt.get("payload_digest", "")
+        expected_digest = sha256_hex(canonical_bytes(payload))
+        actual_digest = str(evt.get("payload_digest", ""))
         if actual_digest != expected_digest:
             eid = evt.get("event_id", "unknown")
             errors.append(
@@ -164,12 +164,12 @@ def verify_sovereign_events(events: list) -> list:
         # Check sequence
         seq = evt.get("sequence_number")
         if seq is not None:
-            if seq != prev_seq + 1:
+            if int(seq) != prev_seq + 1:
                 eid = evt.get("event_id", "unknown")
                 errors.append(
                     f"Sequence gap on {eid}: expected {prev_seq + 1}, got {seq}"
                 )
-            prev_seq = seq
+            prev_seq = int(seq)
 
     return errors
 
@@ -267,8 +267,8 @@ def cmd_verify(args: argparse.Namespace) -> None:
             sov_errors = verify_sovereign_events(all_events)
             if sov_errors:
                 print(f"\nSOVEREIGN: {len(sov_errors)} error(s) detected:")
-                for err in sov_errors:
-                    print(f"  - {err}")
+                for s_err in sov_errors:
+                    print(f"  - {s_err}")
                 sys.exit(1)
             else:
                 sov_count = sum(1 for e in all_events if "schema_version" in e)
@@ -299,8 +299,8 @@ def cmd_verify(args: argparse.Namespace) -> None:
                 if count == 0:
                     print("  None detected.")
     else:
-        for err in integrity_errors:
-            print(f" - {err}")
+        for i_err in integrity_errors:
+            print(f" - {i_err}")
         _cli_error(
             "Vault integrity verification failed",
             "one or more compliance checks detected a mismatch in required protocol invariants",
@@ -648,7 +648,7 @@ def _append_sovereign(
     args: argparse.Namespace,
     vault: Path,
     kid: str,
-    priv,
+    priv: Any,
 ) -> None:
     """Sovereign schema append path: typed, validated, two-phase signed."""
     from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
@@ -656,6 +656,7 @@ def _append_sovereign(
         PAYLOAD_TYPE_MAP,
         EventType,
         ProvaraEvent,
+        AgentRole,
     )
 
     # Validate payload type
@@ -727,7 +728,9 @@ def _append_sovereign(
                 break
 
     # Agent role
-    agent_role = getattr(args, "agent_role", None) or getattr(args, "actor", None) or "system"
+    role_val = getattr(args, "agent_role", None) or getattr(args, "actor", None) or "system"
+    from typing import cast
+    agent_role = cast(AgentRole, role_val)
 
     # Build unsigned event
     event = ProvaraEvent.from_payload(

@@ -447,6 +447,12 @@ def handle_jsonrpc_request(request: Dict[str, Any]) -> Dict[str, Any]:
     return _jsonrpc_error(request_id, -32601, f"Method not found: {method}")
 
 
+# Redirect stdout to stderr immediately to prevent library imports or
+# init code from contaminating the stdio JSON-RPC stream.
+_PROTOCOL_STDOUT = sys.stdout
+sys.stdout = sys.stderr
+
+
 def run_stdio() -> int:
     for line in sys.stdin:
         msg = line.strip()
@@ -458,8 +464,8 @@ def run_stdio() -> int:
             resp = _jsonrpc_error(None, -32700, "Parse error")
         else:
             resp = handle_jsonrpc_request(req)
-        sys.stdout.write(json.dumps(resp, separators=(",", ":")) + "\n")
-        sys.stdout.flush()
+        _PROTOCOL_STDOUT.write(json.dumps(resp, separators=(",", ":")) + "\n")
+        _PROTOCOL_STDOUT.flush()
     return 0
 
 

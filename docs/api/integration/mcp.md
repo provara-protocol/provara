@@ -28,18 +28,46 @@ python tools/mcp_server/server.py --transport http --port 8765
 # Connect to: http://localhost:8765/sse
 ```
 
+## Managed Vault Support (SaaS)
+
+The MCP server supports managed vaults on Provara Cloud. To initialize a SaaS vault:
+
+```json
+{
+  "tools": {
+    "init_vault": {
+      "vault_path": "my-cloud-vault",
+      "use_saas": true
+    }
+  }
+}
+```
+
+This returns a `saas://<vault_id>` URI that can be used in place of a local filesystem path for all other tools.
+
+### SaaS Configuration
+
+By default, the server connects to `https://provara-managed-vault.fly.dev`. You can override this via environment variable:
+
+```bash
+PROVARA_SAAS_URL=https://your-private-instance.com provara-mcp
+```
+
 ## Available Tools
 
 | Tool | Description |
 |------|-------------|
+| `init_vault` | Create a new vault (Local or SaaS) |
 | `append_event` | Write a signed event to the vault |
-| `verify_chain` | Verify causal chain + signatures |
+| `verify_vault` | Verify Ed25519 signatures + chain |
+| `verify_chain` | PSMC-specific chain integrity |
 | `snapshot_state` | Get current state hash |
 | `query_timeline` | Filter events by type/time |
 | `list_conflicts` | Show contested beliefs |
 | `generate_digest` | Weekly markdown digest |
 | `export_markdown` | Full vault history as markdown |
 | `checkpoint_vault` | Create signed state snapshot |
+| `forensic_export` | Produce self-contained evidence bundle |
 
 ## Example: Agent with Memory
 

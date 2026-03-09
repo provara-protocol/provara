@@ -613,7 +613,7 @@ def verify_pipeline_completeness(
         EventType.SIMULATION_COMPLETE,
         EventType.AUDIT_PASSED,
     }
-    found: set[str] = set()
+    found: set[EventType] = set()
 
     for i in range(proposal_index - 1, -1, -1):
         evt = events[i]

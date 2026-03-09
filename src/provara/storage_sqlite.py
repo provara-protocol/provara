@@ -24,7 +24,7 @@ import time
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import (
     Ed25519PrivateKey,
@@ -84,7 +84,7 @@ class Event:
     event_id: str
     event_type: str
     timestamp: str
-    payload: dict
+    payload: dict[str, Any]
     prev_hash: str
     event_hash: str
     signature: str
@@ -109,7 +109,7 @@ class Vault:
         self.conn.row_factory = sqlite3.Row
         self._init_db()
 
-    def _init_db(self):
+    def _init_db(self) -> None:
         """Initialize schema and pragmas for durability + performance."""
         c = self.conn
         # --- Performance + safety pragmas ---
@@ -139,7 +139,7 @@ class Vault:
     def append(
         self,
         event_type: str,
-        payload: dict,
+        payload: dict[str, Any],
         private_key: Ed25519PrivateKey,
         schema_version: Optional[str] = None,
         payload_type: Optional[str] = None,
@@ -192,9 +192,10 @@ class Vault:
         )
         self.conn.commit()
 
-        seq = self.conn.execute(
+        seq_row = self.conn.execute(
             "SELECT seq FROM events WHERE event_id = ?", (event_id,)
-        ).fetchone()["seq"]
+        ).fetchone()
+        seq = int(seq_row["seq"])
 
         return Event(
             seq=seq,
@@ -230,7 +231,7 @@ class Vault:
         return [self._row_to_event(r) for r in rows]
 
     def count(self) -> int:
-        return self.conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+        return int(self.conn.execute("SELECT COUNT(*) FROM events").fetchone()[0])
 
     def query(self, event_type: str, limit: int = 100) -> list[Event]:
         """Query events by type."""
@@ -330,13 +331,13 @@ class Vault:
             payload_type=row["payload_type"],
         )
 
-    def close(self):
+    def close(self) -> None:
         self.conn.close()
 
-    def __enter__(self):
+    def __enter__(self) -> Vault:
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         self.close()
 
 

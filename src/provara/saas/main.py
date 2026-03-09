@@ -57,11 +57,11 @@ app.add_middleware(
 
 # --- Models ---
 class CreateVaultRequest(BaseModel):
-    name: str = Field(..., example="My Work Vault")
-    description: Optional[str] = Field(None, example="Tracks daily deep work blocks")
+    name: str = Field(..., description="My Work Vault")
+    description: Optional[str] = Field(None, description="Tracks daily deep work blocks")
 
 class AppendEventRequest(BaseModel):
-    type: str = Field("OBSERVATION", example="MILESTONE")
+    type: str = Field("OBSERVATION", description="MILESTONE")
     subject: str
     predicate: str = "observation"
     value: Any
@@ -104,11 +104,15 @@ def _load_latest_event(vault_path: Path) -> Dict[str, Any]:
             if f.read(1) == b"\n":
                 break
             pointer -= 1
-        return json.loads(f.readline().decode("utf-8"))
+        line = f.readline()
+        if not line:
+            return {}
+        from typing import cast
+        return cast(dict[str, Any], json.loads(line.decode("utf-8")))
 
 # --- Routes ---
-@app.get("/")
-async def root():
+@app.get("/")  # type: ignore[untyped-decorator]
+async def root() -> dict[str, str]:
     return {
         "name": "Provara Managed Vault API",
         "status": "active",
@@ -116,57 +120,62 @@ async def root():
         "message": "Sovereign memory infrastructure is online. Visit /docs for API reference."
     }
 
-@app.get("/health")
-async def health():
+@app.get("/health")  # type: ignore[untyped-decorator]
+async def health() -> dict[str, str]:
     return {"status": "ok"}
 
-@app.post("/api/v1/vaults/create", status_code=status.HTTP_201_CREATED)
-async def create_vault(req: CreateVaultRequest, _: None = Depends(_require_api_key)):
+@app.post("/api/v1/vaults/create", status_code=status.HTTP_201_CREATED)  # type: ignore[untyped-decorator]
+async def create_vault(req: CreateVaultRequest, _: None = Depends(_require_api_key)) -> dict[str, Any]:
     try:
         vault_id = str(_uuid_mod.uuid4())
         vault_path = VAULT_STORAGE_ROOT / vault_id
         vault_path.mkdir()
 
         result = bootstrap_backpack(
-            name=req.name,
-            description=req.description or "Managed Provara Vault",
-            quorum_size=1,
-            target=vault_path,
+            target_path=vault_path,
+            actor=req.name,
+            include_quorum=False,
+            quiet=True
         )
+
+        if not result.success:
+            raise RuntimeError(f"Bootstrap failed: {result.errors}")
 
         return {
             "success": True,
             "vault_id": vault_id,
-            "actor_id": result.actor_id,
-            "genesis_hash": result.genesis_hash,
+            "actor_id": result.root_key_id,
+            "genesis_hash": result.merkle_root,
         }
     except Exception as e:
         logger.error(f"Failed to create vault: {e}")
         raise HTTPException(status_code=500, detail="Vault creation failed")
 
-@app.post("/api/v1/vaults/{vault_id}/events")
-async def append_event(vault_id: str, req: AppendEventRequest, _: None = Depends(_require_api_key)):
+@app.post("/api/v1/vaults/{vault_id}/events")  # type: ignore[untyped-decorator]
+async def append_event(vault_id: str, req: AppendEventRequest, _: None = Depends(_require_api_key)) -> dict[str, Any]:
     vault_path = _get_vault_path(vault_id)
     
     try:
         # 1. Load latest event for chaining
         prev_event = _load_latest_event(vault_path)
-        prev_hash = canonical_hash(prev_event)
+        prev_hash = str(prev_event.get("event_id"))
 
         # 2. Load keys (Production should use a KMS/Vault)
+        from provara.backpack_signing import load_private_key_b64
         keys_file = vault_path / "identity" / "private_keys.json"
         with open(keys_file) as f:
-            keys = json.load(f)
-            # Find the primary actor key
-            actor_id = list(keys.keys())[0]
-            private_key_hex = keys[actor_id]["private_key"]
-            key_id = keys[actor_id]["key_id"]
+            # The bootstrap tool outputs a different format than the previous MVP code expected
+            key_data = json.load(f)
+            root_key = key_data.get("root", {})
+            actor_id = req.name if hasattr(req, 'name') else "managed_actor" # Fallback
+            key_id = root_key.get("key_id")
+            private_key_b64 = root_key.get("private_key_b64")
 
-        keypair = BackpackKeypair.from_hex(private_key_hex)
+        private_key = load_private_key_b64(private_key_b64)
 
         # 3. Construct Event
         import datetime
-        event = {
+        event: dict[str, Any] = {
             "type": req.type,
             "namespace": req.namespace,
             "actor": actor_id,
@@ -175,12 +184,15 @@ async def append_event(vault_id: str, req: AppendEventRequest, _: None = Depends
             "predicate": req.predicate,
             "value": req.value,
             "confidence": req.confidence,
-            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
-            "prev_hash": prev_hash,
+            "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "prev_event_hash": prev_hash,
         }
+        
+        # Add event_id (canonical hash)
+        event["event_id"] = f"evt_{canonical_hash(event)[:24]}"
 
         # 4. Sign and Append
-        signed_event = sign_event(event, keypair)
+        signed_event = sign_event(event, private_key, key_id)
         events_file = vault_path / "events" / "events.ndjson"
         with open(events_file, "a") as f:
             f.write(json.dumps(signed_event) + "\n")
@@ -192,28 +204,32 @@ async def append_event(vault_id: str, req: AppendEventRequest, _: None = Depends
         }
     except Exception as e:
         logger.error(f"Failed to append event: {e}")
-        raise HTTPException(status_code=500, detail="Event append failed")
+        raise HTTPException(status_code=500, detail=f"Event append failed: {str(e)}")
 
-@app.get("/api/v1/vaults/{vault_id}/verify")
-async def verify_vault(vault_id: str, _: None = Depends(_require_api_key)):
+@app.get("/api/v1/vaults/{vault_id}/verify")  # type: ignore[untyped-decorator]
+async def verify_vault(vault_id: str, _: None = Depends(_require_api_key)) -> dict[str, Any]:
     vault_path = _get_vault_path(vault_id)
     events_file = vault_path / "events" / "events.ndjson"
     
-    events = []
+    events: list[dict[str, Any]] = []
     with open(events_file) as f:
         for line in f:
-            events.append(json.loads(line))
+            if line.strip():
+                events.append(json.loads(line))
 
     try:
-        # Load actor id from manifest
-        with open(vault_path / "manifest.json") as f:
-            manifest = json.load(f)
-            primary_actor = manifest["actors"][0]["actor_id"]
+        # Load root key id from genesis
+        with open(vault_path / "identity" / "genesis.json") as f:
+            genesis = json.load(f)
+            primary_actor_key = genesis["root_key_id"]
 
-        verify_causal_chain(events, primary_actor)
+        from provara.sync_v0 import verify_all_causal_chains
+        results = verify_all_causal_chains(events)
+        is_valid = all(results.values())
+
         return {
             "success": True,
-            "status": "valid",
+            "status": "valid" if is_valid else "invalid",
             "event_count": len(events),
             "state_hash": canonical_hash(events)
         }
@@ -222,7 +238,7 @@ async def verify_vault(vault_id: str, _: None = Depends(_require_api_key)):
         return {
             "success": False,
             "status": "compromised",
-            "error": "Chain verification failed"
+            "error": f"Chain verification failed: {str(e)}"
         }
 
 if __name__ == "__main__":

@@ -553,60 +553,57 @@ jobs:
 
 ---
 
-## MVP Scope (What's In / What's Out)
+## Implementation Roadmap (Two-Stage Rollout)
 
-### In Scope (v0.1.0)
+### Stage 1: Fly.io FastAPI MVP (v0.1.0) — **LOCKED**
+*Objective: Functional managed vaults for internal testing and early adopters.*
+- [x] Persistent FastAPI backend on Fly.io (`provara-managed-vault.fly.dev`)
+- [x] Initial `saas://` URI support in MCP server
+- [x] Docker-based deployment with persistent volume storage
+- [x] Basic health monitoring and logging
 
-- [x] Vault creation with Ed25519 keypair generation
-- [x] Event append endpoint (signed, hashed, chained)
-- [x] Event query endpoint (last N, filter by type/time)
-- [x] Vault verification endpoint (hash chain + signature check)
-- [x] Vault export (ZIP with events.ndjson + public key)
-- [x] Clerk JWT authentication
-- [x] Supabase Storage for vault files
-- [x] PostgreSQL for indexed queries
-- [x] Stripe subscription billing (3 tiers)
-- [x] Rate limiting per tier
-- [x] Basic usage tracking
+### Stage 2: Vercel/Supabase Hosted Vault (v0.2.0) — **IN PROGRESS**
+*Objective: Scale to 100+ vaults with user auth, billing, and tiered performance.*
+- [x] **Database Schema:** Supabase migrations for `vaults`, `events`, `api_keys`, `usage_tracking`.
+- [x] **Key Generation:** Python service for Ed25519 vault keypair automation.
+- [ ] **Auth:** Clerk JWT verification integration (Currently placeholder).
+- [ ] **Billing:** Stripe webhook handler for subscription sync (Currently skeleton).
+- [ ] **Infrastructure:** Vercel serverless function deployment.
+
+---
+
+## MVP Scope (Finalized v0.1.0)
+
+### In Scope
+- **Vault Management:** Creation, details, listing, and soft-delete via API.
+- **Evidence Logging:** Signed event append with causal hash chaining (Ed25519/SHA-256).
+- **Audit Access:** Query events by type/time and full cryptographic verification.
+- **Portability:** Full vault export as ZIP (NDJSON + Manifest + Public Key).
+- **Billing:** Basic 3-tier structure (Free / Developer / Team) synced with Stripe.
 
 ### Out of Scope (Post-MVP)
+- **HSM Integration:** Hardware-backed key protection.
+- **Multi-user RBAC:** Shared vault access across teams.
+- **Post-Quantum:** Dilithium/Kyber migration path.
+- **Web UI:** Full-featured dashboard (API-first for MVP).
 
-- [ ] Self-hosted key management (BYOK)
-- [ ] Key rotation ceremonies
-- [ ] Webhook notifications (event appended, verification failed)
-- [ ] Multi-region replication
-- [ ] Checkpoint system for fast replay
-- [ ] MCP server integration (hosted mode)
-- [ ] Team collaboration (multi-user vaults)
-- [ ] Audit log export for compliance (EU AI Act, ISO 42001)
-- [ ] Custom event schemas / validation
-- [ ] GraphQL API
-- [ ] WebSocket real-time event streaming
+---
+
+## Technical Debt & Remaining Tasks
+1. **JWT Lockdown:** Implement `clerk-sdk-python` or manual RS256 verification in Vercel functions.
+2. **KMS Strategy:** Move vault private keys from `vault_keys` table to a proper KMS (AWS KMS or Supabase Secrets).
+3. **Usage Enforcement:** Wire `check_usage_quota` into the `/events` append flow.
+4. **Documentation:** Update `provara.dev` with Hosted Vault API reference.
 
 ---
 
 ## Success Metrics
-
 | Metric | Target (Month 1) | Target (Month 3) |
 |--------|------------------|------------------|
 | Vaults created | 50 | 200 |
 | Active vaults (7-day) | 20 | 100 |
-| Events/day | 1,000 | 10,000 |
 | Paying customers | 5 | 25 |
-| MRR | $150 | $2,500 |
 | Verification failures | 0 | 0 |
-
----
-
-## Future Enhancements (v1.0+)
-
-1. **MCP Server Hosting:** Run Provara MCP server on behalf of users, expose as managed service
-2. **Compliance Reports:** Auto-generate EU AI Act Article 12 compliance artifacts
-3. **Multi-Vault Sync:** Bidirectional sync between hosted and self-hosted vaults
-4. **Threshold Signatures:** Require M-of-N approvals for vault operations (enterprise)
-5. **Post-Quantum Keys:** Offer ML-DSA (Dilithium) + Ed25519 dual-signing
-6. **SIEM Integration:** Splunk, Datadog, New Relic exporters
-7. **Retention Policies:** Auto-archive events older than X days to cold storage
 
 ---
 

@@ -24,7 +24,7 @@ def normalize_identities(
     new_events = []
     # Initialize with mapping for None (root)
     # We also keep existing IDs unchanged until they are refactored
-    old_to_new_hash = {None: None}
+    old_to_new_hash: dict[Optional[str], Optional[str]] = {None: None}
     
     for event in events:
         old_id = event.get("event_id")
@@ -64,7 +64,7 @@ def normalize_identities(
     
     return len(new_events)
 
-def _regenerate_vault_metadata(vault_path: Path):
+def _regenerate_vault_metadata(vault_path: Path) -> None:
     manifest = build_manifest(vault_path, set(MANIFEST_EXCLUDE))
     leaves = manifest_leaves(manifest)
     root_hex = merkle_root_hex(leaves)

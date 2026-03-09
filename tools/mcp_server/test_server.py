@@ -78,6 +78,30 @@ def _sse_request(port, session_id, method, params=None, request_id=None):
     return endpoint
 
 
+def _stdio_read_json(proc, timeout=10.0):
+    """Read next valid JSON-RPC message from proc.stdout, ignoring noise."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        line = proc.stdout.readline()
+        if not line:
+            ret = proc.poll()
+            if ret is not None:
+                raise EOFError(f"Server exited with {ret}")
+            time.sleep(0.05)
+            continue
+        
+        stripped = line.strip()
+        if not stripped:
+            continue
+            
+        try:
+            return json.loads(stripped)
+        except json.JSONDecodeError:
+            # Ignore non-JSON output (warnings, etc.)
+            continue
+    raise TimeoutError("Timed out waiting for JSON response on stdio")
+
+
 class TestMCPServerStdio(unittest.TestCase):
     """Test MCP server via stdio transport."""
 
@@ -97,7 +121,7 @@ class TestMCPServerStdio(unittest.TestCase):
                 break
         
         result = subprocess.run(
-            [sys.executable, str(self.psmc_script), "--vault", str(self.vault_path), "init"],
+            [sys.executable, "-u", str(self.psmc_script), "--vault", str(self.vault_path), "init"],
             capture_output=True,
             text=True
         )
@@ -106,7 +130,7 @@ class TestMCPServerStdio(unittest.TestCase):
             shutil.rmtree(self.vault_path, ignore_errors=True)
             time.sleep(0.2)
             result = subprocess.run(
-                [sys.executable, str(self.psmc_script), "--vault", str(self.vault_path), "init"],
+                [sys.executable, "-u", str(self.psmc_script), "--vault", str(self.vault_path), "init"],
                 capture_output=True,
                 text=True
             )
@@ -120,359 +144,381 @@ class TestMCPServerStdio(unittest.TestCase):
 
     def test_stdio_ping(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "stdio"],
+            [sys.executable, "-u", str(self.server_script), "--transport", "stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        ping = {"jsonrpc": "2.0", "id": 1, "method": "ping"}
-        proc.stdin.write(json.dumps(ping) + "\n")
-        proc.stdin.flush()
-        line = proc.stdout.readline()
-        _stop_proc(proc)
-
-        resp = json.loads(line)
-        self.assertEqual(resp["id"], 1)
-        self.assertEqual(resp["result"], {"ok": True})
+        try:
+            ping = {"jsonrpc": "2.0", "id": 1, "method": "ping"}
+            proc.stdin.write(json.dumps(ping) + "\n")
+            proc.stdin.flush()
+            
+            resp = _stdio_read_json(proc)
+            self.assertEqual(resp["id"], 1)
+            self.assertEqual(resp["result"], {"ok": True})
+        finally:
+            _stop_proc(proc)
 
     def test_stdio_initialize(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "stdio"],
+            [sys.executable, "-u", str(self.server_script), "--transport", "stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        req = {"jsonrpc": "2.0", "id": 1, "method": "initialize"}
-        proc.stdin.write(json.dumps(req) + "\n")
-        proc.stdin.flush()
-        line = proc.stdout.readline()
-        _stop_proc(proc)
-
-        resp = json.loads(line)
-        self.assertEqual(resp["id"], 1)
-        self.assertIn("result", resp)
-        self.assertEqual(resp["result"]["serverInfo"]["name"], "provara-mcp")
-        self.assertIn("capabilities", resp["result"])
+        try:
+            req = {"jsonrpc": "2.0", "id": 1, "method": "initialize"}
+            proc.stdin.write(json.dumps(req) + "\n")
+            proc.stdin.flush()
+            
+            resp = _stdio_read_json(proc)
+            self.assertEqual(resp["id"], 1)
+            self.assertIn("result", resp)
+            self.assertEqual(resp["result"]["serverInfo"]["name"], "provara-mcp")
+            self.assertIn("capabilities", resp["result"])
+        finally:
+            _stop_proc(proc)
 
     def test_stdio_tools_list(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "stdio"],
+            [sys.executable, "-u", str(self.server_script), "--transport", "stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        req = {"jsonrpc": "2.0", "id": 1, "method": "tools/list"}
-        proc.stdin.write(json.dumps(req) + "\n")
-        proc.stdin.flush()
-        line = proc.stdout.readline()
-        _stop_proc(proc)
-
-        resp = json.loads(line)
-        self.assertEqual(resp["id"], 1)
-        self.assertIn("tools", resp["result"])
-        tool_names = [t["name"] for t in resp["result"]["tools"]]
-        self.assertIn("append_event", tool_names)
-        self.assertIn("verify_chain", tool_names)
-        self.assertIn("generate_digest", tool_names)
-        self.assertIn("snapshot_state", tool_names)
+        try:
+            req = {"jsonrpc": "2.0", "id": 1, "method": "tools/list"}
+            proc.stdin.write(json.dumps(req) + "\n")
+            proc.stdin.flush()
+            
+            resp = _stdio_read_json(proc)
+            self.assertEqual(resp["id"], 1)
+            self.assertIn("tools", resp["result"])
+            tool_names = [t["name"] for t in resp["result"]["tools"]]
+            self.assertIn("append_event", tool_names)
+            self.assertIn("verify_chain", tool_names)
+            self.assertIn("generate_digest", tool_names)
+            self.assertIn("snapshot_state", tool_names)
+        finally:
+            _stop_proc(proc)
 
     def test_stdio_append_event(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "stdio"],
+            [sys.executable, "-u", str(self.server_script), "--transport", "stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        resp = _stdio_request(proc, "tools/call", {
-            "name": "append_event",
-            "arguments": {
-                "vault_path": str(self.vault_path),
-                "event_type": "note",
-                "data": {"key": "value", "number": 42}
-            }
-        }, request_id=1)
-        _stop_proc(proc)
+        try:
+            resp = _stdio_request(proc, "tools/call", {
+                "name": "append_event",
+                "arguments": {
+                    "vault_path": str(self.vault_path),
+                    "event_type": "note",
+                    "data": {"key": "value", "number": 42}
+                }
+            }, request_id=1)
 
-        self.assertEqual(resp["id"], 1)
-        self.assertIn("result", resp)
-        content = json.loads(resp["result"]["content"][0]["text"])
-        self.assertIn("event_id", content)
-        self.assertIn("hash", content)
+            self.assertEqual(resp["id"], 1)
+            self.assertIn("result", resp)
+            content = json.loads(resp["result"]["content"][0]["text"])
+            self.assertIn("event_id", content)
+            self.assertIn("hash", content)
+        finally:
+            _stop_proc(proc)
 
     def test_stdio_snapshot_state(self):
         # First append an event
         subprocess.run(
-            [sys.executable, str(self.psmc_script), "--vault", str(self.vault_path),
+            [sys.executable, "-u", str(self.psmc_script), "--vault", str(self.vault_path),
              "append", "--type", "note", "--data", '{"test": true}'],
             check=True,
             capture_output=True
         )
 
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "stdio"],
+            [sys.executable, "-u", str(self.server_script), "--transport", "stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        resp = _stdio_request(proc, "tools/call", {
-            "name": "snapshot_state",
-            "arguments": {"vault_path": str(self.vault_path)}
-        }, request_id=1)
-        _stop_proc(proc)
+        try:
+            resp = _stdio_request(proc, "tools/call", {
+                "name": "snapshot_state",
+                "arguments": {"vault_path": str(self.vault_path)}
+            }, request_id=1)
 
-        self.assertEqual(resp["id"], 1)
-        self.assertIn("result", resp)
-        content = json.loads(resp["result"]["content"][0]["text"])
-        
-        self.assertIn("metadata", content)
-        self.assertIn("state_hash", content["metadata"])
-        self.assertIn("event_count", content["metadata"])
+            self.assertEqual(resp["id"], 1)
+            self.assertIn("result", resp)
+            content = json.loads(resp["result"]["content"][0]["text"])
+            
+            self.assertIn("metadata", content)
+            self.assertIn("state_hash", content["metadata"])
+            self.assertIn("event_count", content["metadata"])
+        finally:
+            _stop_proc(proc)
 
     def test_stdio_verify_chain(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "stdio"],
+            [sys.executable, "-u", str(self.server_script), "--transport", "stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        resp = _stdio_request(proc, "tools/call", {
-            "name": "verify_chain",
-            "arguments": {"vault_path": str(self.vault_path)}
-        }, request_id=1)
-        _stop_proc(proc)
+        try:
+            resp = _stdio_request(proc, "tools/call", {
+                "name": "verify_chain",
+                "arguments": {"vault_path": str(self.vault_path)}
+            }, request_id=1)
 
-        self.assertEqual(resp["id"], 1)
-        self.assertIn("result", resp)
-        content = json.loads(resp["result"]["content"][0]["text"])
-        self.assertIn("valid", content)
-        self.assertTrue(content["valid"])
+            self.assertEqual(resp["id"], 1)
+            self.assertIn("result", resp)
+            content = json.loads(resp["result"]["content"][0]["text"])
+            self.assertIn("valid", content)
+            self.assertTrue(content["valid"])
+        finally:
+            _stop_proc(proc)
 
     def test_stdio_generate_digest(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "stdio"],
+            [sys.executable, "-u", str(self.server_script), "--transport", "stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        resp = _stdio_request(proc, "tools/call", {
-            "name": "generate_digest",
-            "arguments": {"vault_path": str(self.vault_path), "weeks": 1}
-        }, request_id=1)
-        _stop_proc(proc)
+        try:
+            resp = _stdio_request(proc, "tools/call", {
+                "name": "generate_digest",
+                "arguments": {"vault_path": str(self.vault_path), "weeks": 1}
+            }, request_id=1)
 
-        self.assertEqual(resp["id"], 1)
-        self.assertIn("result", resp)
-        content = json.loads(resp["result"]["content"][0]["text"])
-        self.assertIn("digest", content)
+            self.assertEqual(resp["id"], 1)
+            self.assertIn("result", resp)
+            content = json.loads(resp["result"]["content"][0]["text"])
+            self.assertIn("digest", content)
+        finally:
+            _stop_proc(proc)
 
     def test_stdio_full_roundtrip(self):
         """Full roundtrip: append_event → snapshot_state → verify_chain."""
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "stdio"],
+            [sys.executable, "-u", str(self.server_script), "--transport", "stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
+        try:
+            # 1. Append event
+            resp1 = _stdio_request(proc, "tools/call", {
+                "name": "append_event",
+                "arguments": {
+                    "vault_path": str(self.vault_path),
+                    "event_type": "note",
+                    "data": {"step": 1, "test": "full_roundtrip"}
+                }
+            }, request_id=1)
+            self.assertIn("result", resp1)
 
-        # 1. Append event
-        resp1 = _stdio_request(proc, "tools/call", {
-            "name": "append_event",
-            "arguments": {
-                "vault_path": str(self.vault_path),
-                "event_type": "note",
-                "data": {"step": 1, "test": "full_roundtrip"}
-            }
-        }, request_id=1)
-        self.assertIn("result", resp1)
+            # 2. Snapshot state
+            resp2 = _stdio_request(proc, "tools/call", {
+                "name": "snapshot_state",
+                "arguments": {"vault_path": str(self.vault_path)}
+            }, request_id=2)
+            self.assertIn("result", resp2)
+            content2 = json.loads(resp2["result"]["content"][0]["text"])
+            
+            self.assertIn("metadata", content2)
+            self.assertIn("state_hash", content2["metadata"])
 
-        # 2. Snapshot state
-        resp2 = _stdio_request(proc, "tools/call", {
-            "name": "snapshot_state",
-            "arguments": {"vault_path": str(self.vault_path)}
-        }, request_id=2)
-        self.assertIn("result", resp2)
-        content2 = json.loads(resp2["result"]["content"][0]["text"])
-        
-        self.assertIn("metadata", content2)
-        self.assertIn("state_hash", content2["metadata"])
-
-        # 3. Verify chain
-        resp3 = _stdio_request(proc, "tools/call", {
-            "name": "verify_chain",
-            "arguments": {"vault_path": str(self.vault_path)}
-        }, request_id=3)
-        self.assertIn("result", resp3)
-        content3 = json.loads(resp3["result"]["content"][0]["text"])
-        self.assertTrue(content3["valid"])
-
-        _stop_proc(proc)
+            # 3. Verify chain
+            resp3 = _stdio_request(proc, "tools/call", {
+                "name": "verify_chain",
+                "arguments": {"vault_path": str(self.vault_path)}
+            }, request_id=3)
+            self.assertIn("result", resp3)
+            content3 = json.loads(resp3["result"]["content"][0]["text"])
+            self.assertTrue(content3["valid"])
+        finally:
+            _stop_proc(proc)
 
     def test_stdio_query_timeline(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "stdio"],
+            [sys.executable, "-u", str(self.server_script), "--transport", "stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        resp = _stdio_request(proc, "tools/call", {
-            "name": "query_timeline",
-            "arguments": {"vault_path": str(self.vault_path)}
-        }, request_id=1)
-        _stop_proc(proc)
+        try:
+            resp = _stdio_request(proc, "tools/call", {
+                "name": "query_timeline",
+                "arguments": {"vault_path": str(self.vault_path)}
+            }, request_id=1)
 
-        self.assertEqual(resp["id"], 1)
-        self.assertIn("result", resp)
-        data = json.loads(resp["result"]["content"][0]["text"])
-        self.assertIn("events", data)
-        self.assertIsInstance(data["events"], list)
+            self.assertEqual(resp["id"], 1)
+            self.assertIn("result", resp)
+            data = json.loads(resp["result"]["content"][0]["text"])
+            self.assertIn("events", data)
+            self.assertIsInstance(data["events"], list)
+        finally:
+            _stop_proc(proc)
 
     def test_stdio_list_conflicts(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "stdio"],
+            [sys.executable, "-u", str(self.server_script), "--transport", "stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        resp = _stdio_request(proc, "tools/call", {
-            "name": "list_conflicts",
-            "arguments": {"vault_path": str(self.vault_path)}
-        }, request_id=1)
-        _stop_proc(proc)
+        try:
+            resp = _stdio_request(proc, "tools/call", {
+                "name": "list_conflicts",
+                "arguments": {"vault_path": str(self.vault_path)}
+            }, request_id=1)
 
-        self.assertEqual(resp["id"], 1)
-        self.assertIn("result", resp)
-        conflicts = json.loads(resp["result"]["content"][0]["text"])
-        self.assertIsInstance(conflicts, dict)
+            self.assertEqual(resp["id"], 1)
+            self.assertIn("result", resp)
+            conflicts = json.loads(resp["result"]["content"][0]["text"])
+            self.assertIsInstance(conflicts, dict)
+        finally:
+            _stop_proc(proc)
 
     def test_stdio_export_markdown(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "stdio"],
+            [sys.executable, "-u", str(self.server_script), "--transport", "stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        resp = _stdio_request(proc, "tools/call", {
-            "name": "export_markdown",
-            "arguments": {"vault_path": str(self.vault_path)}
-        }, request_id=1)
-        _stop_proc(proc)
+        try:
+            resp = _stdio_request(proc, "tools/call", {
+                "name": "export_markdown",
+                "arguments": {"vault_path": str(self.vault_path)}
+            }, request_id=1)
 
-        self.assertEqual(resp["id"], 1)
-        self.assertIn("result", resp)
-        data = json.loads(resp["result"]["content"][0]["text"])
-        self.assertIn("markdown", data)
+            self.assertEqual(resp["id"], 1)
+            self.assertIn("result", resp)
+            data = json.loads(resp["result"]["content"][0]["text"])
+            self.assertIn("markdown", data)
+        finally:
+            _stop_proc(proc)
 
     def test_stdio_checkpoint_vault(self):
         # PSMC init creates the vault but create_checkpoint needs merkle_root.txt (optional now)
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "stdio"],
+            [sys.executable, "-u", str(self.server_script), "--transport", "stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        resp = _stdio_request(proc, "tools/call", {
-            "name": "checkpoint_vault",
-            "arguments": {"vault_path": str(self.vault_path)}
-        }, request_id=1)
-        _stop_proc(proc)
+        try:
+            resp = _stdio_request(proc, "tools/call", {
+                "name": "checkpoint_vault",
+                "arguments": {"vault_path": str(self.vault_path)}
+            }, request_id=1)
 
-        self.assertEqual(resp["id"], 1)
-        self.assertIn("result", resp)
-        data = json.loads(resp["result"]["content"][0]["text"])
-        self.assertIn("path", data)
-        self.assertIn("event_count", data)
+            self.assertEqual(resp["id"], 1)
+            self.assertIn("result", resp)
+            data = json.loads(resp["result"]["content"][0]["text"])
+            self.assertIn("path", data)
+            self.assertIn("event_count", data)
+        finally:
+            _stop_proc(proc)
 
     def test_stdio_error_invalid_vault(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "stdio"],
+            [sys.executable, "-u", str(self.server_script), "--transport", "stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        req = {
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "tools/call",
-            "params": {
-                "name": "snapshot_state",
-                "arguments": {"vault_path": "/nonexistent/path"}
+        try:
+            req = {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "tools/call",
+                "params": {
+                    "name": "snapshot_state",
+                    "arguments": {"vault_path": "/nonexistent/path"}
+                }
             }
-        }
-        proc.stdin.write(json.dumps(req) + "\n")
-        proc.stdin.flush()
-        line = proc.stdout.readline()
-        _stop_proc(proc)
-
-        resp = json.loads(line)
-        self.assertEqual(resp["id"], 1)
-        self.assertIn("error", resp)
+            proc.stdin.write(json.dumps(req) + "\n")
+            proc.stdin.flush()
+            
+            resp = _stdio_read_json(proc)
+            self.assertEqual(resp["id"], 1)
+            self.assertIn("error", resp)
+        finally:
+            _stop_proc(proc)
 
     def test_stdio_error_missing_params(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "stdio"],
+            [sys.executable, "-u", str(self.server_script), "--transport", "stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        req = {
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "tools/call",
-            "params": {
-                "name": "append_event",
-                "arguments": {"vault_path": str(self.vault_path)}
-                # Missing event_type and data
+        try:
+            req = {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "tools/call",
+                "params": {
+                    "name": "append_event",
+                    "arguments": {"vault_path": str(self.vault_path)}
+                    # Missing event_type and data
+                }
             }
-        }
-        proc.stdin.write(json.dumps(req) + "\n")
-        proc.stdin.flush()
-        line = proc.stdout.readline()
-        _stop_proc(proc)
-
-        resp = json.loads(line)
-        self.assertEqual(resp["id"], 1)
-        self.assertIn("error", resp)
+            proc.stdin.write(json.dumps(req) + "\n")
+            proc.stdin.flush()
+            
+            resp = _stdio_read_json(proc)
+            self.assertEqual(resp["id"], 1)
+            self.assertIn("error", resp)
+        finally:
+            _stop_proc(proc)
 
     def test_stdio_error_unknown_tool(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "stdio"],
+            [sys.executable, "-u", str(self.server_script), "--transport", "stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        req = {
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "tools/call",
-            "params": {
-                "name": "nonexistent_tool",
-                "arguments": {}
+        try:
+            req = {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "tools/call",
+                "params": {
+                    "name": "nonexistent_tool",
+                    "arguments": {}
+                }
             }
-        }
-        proc.stdin.write(json.dumps(req) + "\n")
-        proc.stdin.flush()
-        line = proc.stdout.readline()
-        _stop_proc(proc)
-
-        resp = json.loads(line)
-        self.assertEqual(resp["id"], 1)
-        self.assertIn("error", resp)
-        self.assertEqual(resp["error"]["code"], -32601)
+            proc.stdin.write(json.dumps(req) + "\n")
+            proc.stdin.flush()
+            
+            resp = _stdio_read_json(proc)
+            self.assertEqual(resp["id"], 1)
+            self.assertIn("error", resp)
+            self.assertEqual(resp["error"]["code"], -32601)
+        finally:
+            _stop_proc(proc)
 
 
 class TestMCPServerSSE(unittest.TestCase):
@@ -548,7 +594,7 @@ class TestMCPServerSSE(unittest.TestCase):
     def test_sse_ping(self):
         port = 8767
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "http", "--port", str(port)],
+            [sys.executable, "-u", str(self.server_script), "--transport", "http", "--port", str(port)],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
@@ -589,7 +635,7 @@ class TestMCPServerSSE(unittest.TestCase):
 
     def test_sse_append_event(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "http", "--port", str(self.port)],
+            [sys.executable, "-u", str(self.server_script), "--transport", "http", "--port", str(self.port)],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
@@ -641,14 +687,14 @@ class TestMCPServerSSE(unittest.TestCase):
 
     def test_sse_snapshot_state(self):
         subprocess.run(
-            [sys.executable, str(self.psmc_script), "--vault", str(self.vault_path),
+            [sys.executable, "-u", str(self.psmc_script), "--vault", str(self.vault_path),
              "append", "--type", "note", "--data", '{"test": true}'],
             check=True,
             capture_output=True
         )
 
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "http", "--port", str(self.port)],
+            [sys.executable, "-u", str(self.server_script), "--transport", "http", "--port", str(self.port)],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
@@ -697,7 +743,7 @@ class TestMCPServerSSE(unittest.TestCase):
 
     def test_sse_verify_chain(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "http", "--port", str(self.port)],
+            [sys.executable, "-u", str(self.server_script), "--transport", "http", "--port", str(self.port)],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
@@ -744,7 +790,7 @@ class TestMCPServerSSE(unittest.TestCase):
 
     def test_sse_generate_digest(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "http", "--port", str(self.port)],
+            [sys.executable, "-u", str(self.server_script), "--transport", "http", "--port", str(self.port)],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
@@ -792,7 +838,7 @@ class TestMCPServerSSE(unittest.TestCase):
     def test_sse_full_roundtrip(self):
         """Full roundtrip via SSE: append_event → snapshot_state → verify_chain."""
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "http", "--port", str(self.port)],
+            [sys.executable, "-u", str(self.server_script), "--transport", "http", "--port", str(self.port)],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
@@ -894,7 +940,7 @@ class TestMCPServerSSE(unittest.TestCase):
 
     def test_sse_health_endpoint(self):
         proc = subprocess.Popen(
-            [sys.executable, str(self.server_script), "--transport", "http", "--port", str(self.port)],
+            [sys.executable, "-u", str(self.server_script), "--transport", "http", "--port", str(self.port)],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
