@@ -15,24 +15,36 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 # Provara Protocol Imports
 from provara.bootstrap_v0 import bootstrap_backpack
-from provara.backpack_signing import sign_event, BackpackKeypair
+from provara.backpack_signing import sign_event
 from provara.canonical_json import canonical_hash
-from provara.sync_v0 import verify_causal_chain
 
 # --- Configuration ---
 VAULT_STORAGE_ROOT = Path(os.getenv("PROVARA_VAULT_ROOT", "/app/data/vaults"))
 VAULT_STORAGE_ROOT.mkdir(parents=True, exist_ok=True)
 
-# API key auth — set PROVARA_API_KEY in env; if unset, auth is disabled (dev only)
+# API key auth — required in production.
+PROVARA_ENV = os.getenv("PROVARA_ENV", "development").strip().lower()
+IS_PRODUCTION = PROVARA_ENV in {"production", "prod"}
 _API_KEY = os.getenv("PROVARA_API_KEY", "")
+if IS_PRODUCTION and not _API_KEY:
+    raise RuntimeError("PROVARA_API_KEY must be set when PROVARA_ENV=production")
 
 # CORS — comma-separated origins in PROVARA_ALLOWED_ORIGINS, or "*" for dev
 _raw_origins = os.getenv("PROVARA_ALLOWED_ORIGINS", "")
 _ALLOWED_ORIGINS: list[str] = [o.strip() for o in _raw_origins.split(",") if o.strip()] or ["*"]
+if IS_PRODUCTION and "*" in _ALLOWED_ORIGINS:
+    raise RuntimeError("Wildcard CORS is not allowed when PROVARA_ENV=production")
+
+_raw_hosts = os.getenv("PROVARA_ALLOWED_HOSTS", "")
+_ALLOWED_HOSTS: list[str] = [h.strip() for h in _raw_hosts.split(",") if h.strip()] or ["*"]
+if IS_PRODUCTION and "*" in _ALLOWED_HOSTS:
+    raise RuntimeError("Wildcard hosts are not allowed when PROVARA_ENV=production")
 
 _UUID_RE = re.compile(
     r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
@@ -54,6 +66,20 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Authorization", "Content-Type"],
 )
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=_ALLOWED_HOSTS)
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):  # type: ignore[override]
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["X-Robots-Tag"] = "noindex, nofollow"
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 # --- Models ---
 class CreateVaultRequest(BaseModel):
@@ -65,8 +91,16 @@ class AppendEventRequest(BaseModel):
     subject: str
     predicate: str = "observation"
     value: Any
-    confidence: float = 1.0
+    confidence: float = Field(1.0, ge=0.0, le=1.0)
     namespace: str = "managed"
+
+    @field_validator("type", "subject", "predicate", "namespace")
+    @classmethod
+    def _must_not_be_blank(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("must not be empty")
+        return normalized
 
 # --- Internal Helpers ---
 def _require_api_key(x_api_key: str = Header(default="")) -> None:
@@ -98,6 +132,8 @@ def _load_latest_event(vault_path: Path) -> Dict[str, Any]:
         # Seek to end and find last line
         f.seek(0, os.SEEK_END)
         end = f.tell()
+        if end == 0:
+            return {}
         pointer = end - 2
         while pointer > 0:
             f.seek(pointer)
@@ -141,6 +177,16 @@ async def create_vault(req: CreateVaultRequest, _: None = Depends(_require_api_k
         if not result.success:
             raise RuntimeError(f"Bootstrap failed: {result.errors}")
 
+        # Managed mode persists signing material server-side for future appends.
+        keys_file = vault_path / "identity" / "private_keys.json"
+        key_data = {
+            "root": {
+                "key_id": result.root_key_id,
+                "private_key_b64": result.root_private_key_b64,
+            }
+        }
+        keys_file.write_text(json.dumps(key_data, indent=2) + "\n", encoding="utf-8")
+
         return {
             "success": True,
             "vault_id": vault_id,
@@ -158,7 +204,8 @@ async def append_event(vault_id: str, req: AppendEventRequest, _: None = Depends
     try:
         # 1. Load latest event for chaining
         prev_event = _load_latest_event(vault_path)
-        prev_hash = str(prev_event.get("event_id"))
+        prev_hash_raw = prev_event.get("event_id")
+        prev_hash = str(prev_hash_raw) if prev_hash_raw else None
 
         # 2. Load keys (Production should use a KMS/Vault)
         from provara.backpack_signing import load_private_key_b64
@@ -167,10 +214,12 @@ async def append_event(vault_id: str, req: AppendEventRequest, _: None = Depends
             # The bootstrap tool outputs a different format than the previous MVP code expected
             key_data = json.load(f)
             root_key = key_data.get("root", {})
-            actor_id = req.name if hasattr(req, 'name') else "managed_actor" # Fallback
+            actor_id = str(prev_event.get("actor") or "managed_actor")
             key_id = root_key.get("key_id")
             private_key_b64 = root_key.get("private_key_b64")
 
+        if not key_id or not private_key_b64:
+            raise RuntimeError("Vault key material is missing")
         private_key = load_private_key_b64(private_key_b64)
 
         # 3. Construct Event
@@ -204,7 +253,7 @@ async def append_event(vault_id: str, req: AppendEventRequest, _: None = Depends
         }
     except Exception as e:
         logger.error(f"Failed to append event: {e}")
-        raise HTTPException(status_code=500, detail=f"Event append failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Event append failed")
 
 @app.get("/api/v1/vaults/{vault_id}/verify")  # type: ignore[untyped-decorator]
 async def verify_vault(vault_id: str, _: None = Depends(_require_api_key)) -> dict[str, Any]:
@@ -218,11 +267,6 @@ async def verify_vault(vault_id: str, _: None = Depends(_require_api_key)) -> di
                 events.append(json.loads(line))
 
     try:
-        # Load root key id from genesis
-        with open(vault_path / "identity" / "genesis.json") as f:
-            genesis = json.load(f)
-            primary_actor_key = genesis["root_key_id"]
-
         from provara.sync_v0 import verify_all_causal_chains
         results = verify_all_causal_chains(events)
         is_valid = all(results.values())
