@@ -2,370 +2,374 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://provara.dev/docs/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/API_MIGRATION/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/BACKPACK_PROTOCOL_v1.0/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/CHAIN_VALIDATION/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/COMPARISON/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/CONFORMANCE_KIT/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/CRYPTO_SHREDDING/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/DATA_RESIDENCY/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/DOCKER_MCP/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/ERROR_CODES/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/EXTENSION_REGISTRY/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/GDPR_COMPLIANCE/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/GOVERNANCE_ALIGNMENT/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/HARDWARE_KEY_SUPPORT/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/IANA_CONSIDERATIONS/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/KEY_COMPROMISE_RECOVERY/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/KEY_ROTATION_CEREMONY/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/MCP_MIGRATION/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/MULTI_VAULT_TOPOLOGY/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/OFFLINE_SYNC_PROTOCOL/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/OPEN_DECISIONS/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/PLAYGROUND_ARCHITECTURE/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/PLAYGROUND_FLOW_DIAGRAMS/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/PLUGIN_API/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/POST_QUANTUM_MIGRATION/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/QUICKSTART/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/REDACTION_SPEC/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/RFC3161_TIMESTAMPING/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/SCITT_MAPPING/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/SIGSTORE_ANCHORING/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/SPEC_DECISIONS/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/TEST_COUNT_RECONCILIATION_2026-02-18/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/TEST_MATRIX/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/THREAT_MODEL/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/THRESHOLD_SIGNATURES/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/VAULT_ARCHIVAL/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/VISUAL_IDENTITY_SYSTEM/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/VISUAL_QA_CHECKLIST/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/ZK_PROOF_HOOKS/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/contributing/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/draft-hunt-provara-protocol-00/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/getting-started/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/protocol-spec/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/agents/CLAW_PROFILE/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/agents/CODEX_PROFILE/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/agents/GEMINI_PROFILE/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api/getting-started/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api/integration/mcp/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api/integration/psmc/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api/modules/backpack_integrity/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api/modules/backpack_signing/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api/modules/bootstrap_v0/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api/modules/canonical_json/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api/modules/checkpoint_v0/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api/modules/cli/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api/modules/manifest_generator/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api/modules/perception_v0/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api/modules/reducer_v0/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api/modules/rekey_backpack/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api/modules/sync_v0/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api-reference/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api-reference/modules/cli/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api-reference/modules/privacy/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api-reference/modules/provara/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api-reference/modules/scitt/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api-reference/modules/sync_v0/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api-reference/modules/timestamp/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/api-reference/modules/wallet/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/audit/2026-03-02-master-vault-audit/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/cookbook/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/cookbook/ai_agent_memory/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/cookbook/audit_log_saas/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/cookbook/legal_discovery/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/cookbook/supply_chain/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/plans/2026-02-15-design-principles/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/plans/2026-02-22-provara-dev-redesign/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/plans/2026-03-02-intelligence-terminal-design/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/plans/2026-03-02-intelligence-terminal-plan/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/plans/2026-03-02-market-data-importers-plan/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/plans/2026-03-02-psmc-dual-format-design/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/plans/2026-03-02-psmc-dual-format-plan/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/plans/2026-03-05-sovereign-schema-integration-design/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/plans/2026-03-05-sovereign-schema-integration/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/prompts/anonymous-promotion-brainstorm/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
+    </url>
+    <url>
+         <loc>https://provara.dev/docs/releases/2026-03-07-v1.0.2-social/</loc>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/schemas/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/tutorials/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/tutorials/01_first_vault/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/tutorials/02_multi_actor_dispute/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/tutorials/03_checkpoint_query/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/tutorials/04_mcp_integration/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
     <url>
          <loc>https://provara.dev/docs/tutorials/05_anchor/</loc>
-         <lastmod>2026-03-07</lastmod>
+         <lastmod>2026-03-09</lastmod>
     </url>
 </urlset>
