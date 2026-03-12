@@ -274,7 +274,7 @@ class ProvaraMCPServer:
                     ]
                 }
             }
-        except Exception as e:
+        except (ValueError, SyntaxError, TypeError) as exc:
             logger.error(f"Tool {tool_name} failed: {str(e)}")
             return {
                 "jsonrpc": "2.0",
@@ -432,7 +432,7 @@ def main():
             print(json.dumps(response), flush=True)
         except json.JSONDecodeError as e:
             logger.error(f"Invalid JSON in request: {e}")
-        except Exception as e:
+        except (ValueError, SyntaxError, TypeError) as exc:
             logger.error(f"Error processing request: {e}")
 
 
