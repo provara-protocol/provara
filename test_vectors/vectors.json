@@ -75,6 +75,23 @@
       "expected": "fa577a0bb290df978337de3342ebc17fcd3ad261f9ece7ce41622c36ccc2ed03"
     },
     {
+      "id": "event_id_derivation_float_01",
+      "description": "PV-001: Event ID derivation with float values in payload (cross-impl landmine)",
+      "input": {
+        "type": "OBSERVATION",
+        "actor": "bp1_agent_test",
+        "prev_event_hash": "evt_f641d47f9c7b4846a11c9db8",
+        "payload": {
+          "subject": "model_confidence",
+          "predicate": "score",
+          "value": 0.95,
+          "count": 1.0,
+          "threshold": 3
+        }
+      },
+      "expected": "evt_9d0f59d3d04ab828b3c14948"
+    },
+    {
       "id": "reducer_determinism_01",
       "description": "State hash after a sequence of events",
       "input": [

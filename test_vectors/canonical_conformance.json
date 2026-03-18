@@ -139,6 +139,97 @@
         "n": null
       },
       "expected_hex": "7b2266223a66616c73652c226e223a6e756c6c2c2274223a747275657d"
+    },
+    {
+      "id": "float_int_distinction_01",
+      "description": "PV-001: Float 1.0 vs integer 1 produce different canonical bytes",
+      "input": {
+        "float_val": 1.0,
+        "int_val": 1
+      },
+      "expected_hex": "7b22666c6f61745f76616c223a312e302c22696e745f76616c223a317d"
+    },
+    {
+      "id": "float_zero_variants_01",
+      "description": "PV-001: Positive zero (0.0) vs integer zero (0) distinction",
+      "input": {
+        "float_zero": 0.0,
+        "int_zero": 0
+      },
+      "expected_hex": "7b22666c6f61745f7a65726f223a302e302c22696e745f7a65726f223a307d"
+    },
+    {
+      "id": "number_scientific_01",
+      "description": "PV-001: Numbers that trigger scientific notation in some languages",
+      "input": {
+        "small": 0.00000001,
+        "large": 100000000.0
+      },
+      "expected_hex": "7b226c61726765223a3130303030303030302e302c22736d616c6c223a31652d30387d"
+    },
+    {
+      "id": "js_precision_boundary_01",
+      "description": "PV-001: Integer at JS Number.MAX_SAFE_INTEGER boundary",
+      "input": {
+        "safe": 9007199254740991,
+        "unsafe": 9007199254740993
+      },
+      "expected_hex": "7b2273616665223a393030373139393235343734303939312c22756e73616665223a393030373139393235343734303939337d"
+    },
+    {
+      "id": "nested_float_payload_01",
+      "description": "PV-001: Float values nested in event-like payload structure",
+      "input": {
+        "payload": {
+          "confidence": 0.95,
+          "count": 1.0,
+          "severity": 3
+        },
+        "type": "OBSERVATION"
+      },
+      "expected_hex": "7b227061796c6f6164223a7b22636f6e666964656e6365223a302e39352c22636f756e74223a312e302c227365766572697479223a337d2c2274797065223a224f42534552564154494f4e227d"
+    },
+    {
+      "id": "empty_payload_01",
+      "description": "PV-001: Empty payload object in event structure",
+      "input": {
+        "payload": {},
+        "prev_event_hash": null,
+        "type": "GENESIS"
+      },
+      "expected_hex": "7b227061796c6f6164223a7b7d2c22707265765f6576656e745f68617368223a6e756c6c2c2274797065223a2247454e45534953227d"
+    },
+    {
+      "id": "timestamp_string_01",
+      "description": "PV-001: ISO 8601 timestamps with varying precision",
+      "input": {
+        "ts_millis": "2026-03-18T03:30:00.000Z",
+        "ts_micros": "2026-03-18T03:30:00.000000Z",
+        "ts_bare": "2026-03-18T03:30:00Z"
+      },
+      "expected_hex": "7b2274735f62617265223a22323032362d30332d31385430333a33303a30305a222c2274735f6d6963726f73223a22323032362d30332d31385430333a33303a30302e3030303030305a222c2274735f6d696c6c6973223a22323032362d30332d31385430333a33303a30302e3030305a227d"
+    },
+    {
+      "id": "unicode_payload_01",
+      "description": "PV-001: Unicode values in realistic payload",
+      "input": {
+        "actor": "agent_\u03b1",
+        "message": "\u2714 verified",
+        "tag": "\u6d4b\u8bd5"
+      },
+      "expected_hex": "7b226163746f72223a226167656e745fceb1222c226d657373616765223a22e29c94207665726966696564222c22746167223a22e6b58be8af95227d"
+    },
+    {
+      "id": "deep_mixed_01",
+      "description": "PV-001: Deep nesting with all JSON types",
+      "input": {
+        "a": {
+          "b": {
+            "c": [1, 2.0, "3", null, true, false, {"d": []}]
+          }
+        }
+      },
+      "expected_hex": "7b2261223a7b2262223a7b2263223a5b312c322e302c2233222c6e756c6c2c747275652c66616c73652c7b2264223a5b5d7d5d7d7d7d"
     }
   ]
 }
