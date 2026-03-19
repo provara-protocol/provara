@@ -25,6 +25,8 @@ Usage:
 """
 
 import argparse
+import contextlib
+import fcntl
 import json
 import os
 import sqlite3
@@ -188,6 +190,33 @@ VALID_TYPES = [
 ]
 
 # ---------------------------------------------------------------------------
+# Tag Taxonomy — controlled vocabulary for consistent retrieval
+# ---------------------------------------------------------------------------
+VALID_TAGS = [
+    "infra", "security", "mirofish", "budget", "preference",
+    "kestrel", "provara", "codewraith", "shannon", "defi",
+    "design", "migration", "opsec", "debugging", "workflow",
+    "research", "architecture", "deployment", "agent", "memory",
+]
+
+
+def validate_tags(tags: list[str], strict: bool = False) -> list[str]:
+    """Validate tags against controlled vocabulary.
+
+    In strict mode, rejects unknown tags.
+    In default mode, warns but allows unknown tags.
+    Returns list of warnings (empty = all valid).
+    """
+    warnings = []
+    for tag in tags:
+        if tag not in VALID_TAGS:
+            if strict:
+                warnings.append(f"ERROR: Unknown tag '{tag}'. Valid tags: {', '.join(sorted(VALID_TAGS))}")
+            else:
+                warnings.append(f"WARN: Unknown tag '{tag}' (not in controlled vocabulary)")
+    return warnings
+
+# ---------------------------------------------------------------------------
 # Directory Layout
 # ---------------------------------------------------------------------------
 # vault/
@@ -242,6 +271,23 @@ CREATE INDEX IF NOT EXISTS idx_events_tags ON events(tags);
 CREATE INDEX IF NOT EXISTS idx_events_format ON events(source_format);
 """
 
+_FTS5_SCHEMA = """
+CREATE VIRTUAL TABLE IF NOT EXISTS events_fts USING fts5(
+    event_id UNINDEXED,
+    type,
+    payload,
+    tags,
+    content=events,
+    content_rowid=seq,
+    tokenize='porter unicode61'
+);
+
+CREATE TRIGGER IF NOT EXISTS events_ai AFTER INSERT ON events BEGIN
+    INSERT INTO events_fts(rowid, event_id, type, payload, tags)
+    VALUES (new.seq, new.event_id, new.type, new.payload, new.tags);
+END;
+"""
+
 
 def _init_vault_sqlite(vault: Path) -> sqlite3.Connection:
     """Create and initialize vault.sqlite with unified schema."""
@@ -251,6 +297,7 @@ def _init_vault_sqlite(vault: Path) -> sqlite3.Connection:
     conn.execute("PRAGMA synchronous=NORMAL;")
     conn.execute("PRAGMA busy_timeout=5000;")
     conn.executescript(_SQLITE_SCHEMA)
+    conn.executescript(_FTS5_SCHEMA)
     conn.commit()
     return conn
 
@@ -492,14 +539,8 @@ def get_last_hash(vault: Path) -> str:
     return entry["hash"]
 
 
-def count_events(vault: Path) -> int:
-    conn = _open_vault_sqlite(vault)
-    if conn is not None:
-        try:
-            return conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
-        finally:
-            conn.close()
-    # Fallback to ndjson scanning
+def _count_ndjson_events(vault: Path) -> int:
+    """Count events from the append-only NDJSON log."""
     events_file = vault_path(vault, "events", "events.ndjson")
     count = 0
     with open(events_file, "r", encoding="utf-8") as f:
@@ -509,62 +550,110 @@ def count_events(vault: Path) -> int:
     return count
 
 
+def _next_append_position(vault: Path) -> tuple[int, str]:
+    """Derive the next seq and prev_hash from NDJSON/chain, not SQLite cache."""
+    events_count = _count_ndjson_events(vault)
+    chain_file = vault_path(vault, "chain", "chain.ndjson")
+    chain_count = 0
+    last_hash = GENESIS_PREV
+
+    with open(chain_file, "r", encoding="utf-8") as f:
+        for line in f:
+            stripped = line.strip()
+            if stripped:
+                chain_count += 1
+                last_hash = json.loads(stripped)["hash"]
+
+    if events_count != chain_count:
+        raise ValueError(
+            f"Vault append precondition failed: events.ndjson count ({events_count}) "
+            f"!= chain.ndjson count ({chain_count})"
+        )
+
+    return events_count, last_hash
+
+
+@contextlib.contextmanager
+def _append_lock(vault: Path):
+    """Serialize append operations across processes."""
+    lock_path = vault_path(vault, "state", "append.lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(lock_path, "a+", encoding="utf-8") as lock_file:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+
+def count_events(vault: Path) -> int:
+    conn = _open_vault_sqlite(vault)
+    if conn is not None:
+        try:
+            return conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+        finally:
+            conn.close()
+    # Fallback to ndjson scanning
+    return _count_ndjson_events(vault)
+
+
 def append_event(vault: Path, event_type: str, data: dict, tags: list[str] | None = None, emit_provara: bool = False) -> dict:
     """Create, sign, and append a new event."""
-    prev_hash = get_last_hash(vault)
-    seq = count_events(vault)
+    with _append_lock(vault):
+        seq, prev_hash = _next_append_position(vault)
 
-    event = {
-        "id": str(uuid.uuid4()),
-        "seq": seq,
-        "type": event_type,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "prev_hash": prev_hash,
-        "data": data,
-    }
-    if tags:
-        event["tags"] = tags
+        event = {
+            "id": str(uuid.uuid4()),
+            "seq": seq,
+            "type": event_type,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "prev_hash": prev_hash,
+            "data": data,
+        }
+        if tags:
+            event["tags"] = tags
 
-    # Validate
-    errors = validate_event(event)
-    if errors:
-        print(f"Validation failed: {errors}", file=sys.stderr)
-        sys.exit(1)
+        # Validate
+        errors = validate_event(event)
+        if errors:
+            print(f"Validation failed: {errors}", file=sys.stderr)
+            sys.exit(1)
 
-    # Compute hash over canonical form (uses Provara's canonical_hash)
-    event_hash = compute_event_hash(event)
-    event["hash"] = event_hash
+        # Compute hash over canonical form (uses Provara's canonical_hash)
+        event_hash = compute_event_hash(event)
+        event["hash"] = event_hash
 
-    # Sign the hash
-    private_key = load_private_key(vault)
-    signature = sign_data(private_key, event_hash)
+        # Sign the hash
+        private_key = load_private_key(vault)
+        signature = sign_data(private_key, event_hash)
 
-    # Build chain entry
-    chain_entry = {
-        "seq": seq,
-        "hash": event_hash,
-        "prev_hash": prev_hash,
-        "sig": signature,
-        "key_fp": key_fingerprint(private_key.public_key()),
-    }
+        # Build chain entry
+        chain_entry = {
+            "seq": seq,
+            "hash": event_hash,
+            "prev_hash": prev_hash,
+            "sig": signature,
+            "key_fp": key_fingerprint(private_key.public_key()),
+        }
 
-    # Append atomically (write + flush + fsync)
-    events_file = vault_path(vault, "events", "events.ndjson")
-    chain_file = vault_path(vault, "chain", "chain.ndjson")
+        # Append atomically (write + flush + fsync)
+        events_file = vault_path(vault, "events", "events.ndjson")
+        chain_file = vault_path(vault, "chain", "chain.ndjson")
 
-    _append_line(events_file, canonical_dumps(event))
-    _append_line(chain_file, canonical_dumps(chain_entry))
+        _append_line(events_file, canonical_dumps(event))
+        _append_line(chain_file, canonical_dumps(chain_entry))
 
-    # Also emit Provara-native event if requested
-    if emit_provara:
-        emit_provara_event(vault, event)
-        # Run reducer to update state
-        run_provara_reducer(vault)
+        # Also emit Provara-native event if requested
+        if emit_provara:
+            emit_provara_event(vault, event)
+            # Run reducer to update state
+            run_provara_reducer(vault)
 
-    # Dual-write to SQLite
-    _sqlite_insert_event(vault, event)
+        # Dual-write to SQLite
+        _sqlite_insert_event(vault, event)
 
-    return event
+        return event
 
 
 def _append_line(filepath: Path, line: str) -> None:
@@ -1042,9 +1131,10 @@ def sync_vaults(local_vault: Path, remote_vault: Path) -> dict:
             # Should not happen if vaults are healthy
             pass
 
-    # Write back
-    _write_ndjson(local_events_file, all_events)
-    _write_ndjson(local_chain_file, all_chain)
+    # Write back under one vault lock so sync cannot race appenders.
+    with _append_lock(local_vault):
+        _write_ndjson(local_events_file, all_events)
+        _write_ndjson(local_chain_file, all_chain)
 
     # Rebuild sqlite index after sync
     index_vault(local_vault)
@@ -1053,10 +1143,14 @@ def sync_vaults(local_vault: Path, remote_vault: Path) -> dict:
 
 
 def _write_ndjson(filepath: Path, entries: list[dict]) -> None:
-    """Write list of dicts to NDJSON file."""
-    with open(filepath, "w", encoding="utf-8") as f:
+    """Atomically rewrite an NDJSON file."""
+    tmp_path = filepath.with_name(f"{filepath.name}.tmp")
+    with open(tmp_path, "w", encoding="utf-8") as f:
         for entry in entries:
             f.write(canonical_dumps(entry) + "\n")
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp_path, filepath)
 
 
 def query_timeline(
@@ -1124,6 +1218,74 @@ def query_timeline(
     return events
 
 
+def search_vault(
+    vault: Path,
+    query: str,
+    limit: int = 20,
+) -> List[Dict[str, Any]]:
+    """Full-text search across vault payloads and tags using FTS5."""
+    conn = _open_vault_sqlite(vault)
+    if conn is None:
+        print("WARN: No SQLite index found. Run 'psmc index' first.", file=sys.stderr)
+        return []
+
+    try:
+        # Ensure FTS5 table exists
+        try:
+            conn.executescript(_FTS5_SCHEMA)
+        except sqlite3.OperationalError:
+            pass  # already exists
+
+        # Check if FTS table has content
+        fts_count = conn.execute(
+            "SELECT COUNT(*) FROM events_fts"
+        ).fetchone()[0]
+
+        if fts_count == 0:
+            # Populate FTS from existing events
+            conn.execute(
+                "INSERT INTO events_fts(rowid, event_id, type, payload, tags) "
+                "SELECT seq, event_id, type, payload, tags FROM events"
+            )
+            conn.commit()
+
+        rows = conn.execute(
+            "SELECT e.ts_logical, e.timestamp, e.type, e.payload, e.tags, "
+            "       e.event_id, rank "
+            "FROM events_fts fts "
+            "JOIN events e ON e.seq = fts.rowid "
+            "WHERE events_fts MATCH ? "
+            "ORDER BY rank "
+            "LIMIT ?",
+            (query, limit),
+        ).fetchall()
+
+        results = []
+        for row in rows:
+            data = {}
+            try:
+                data = json.loads(row[3] or "{}")
+            except (json.JSONDecodeError, TypeError):
+                pass
+            tags = []
+            try:
+                tags = json.loads(row[4] or "[]")
+            except (json.JSONDecodeError, TypeError):
+                pass
+            results.append({
+                "seq": row[0],
+                "timestamp": row[1],
+                "type": row[2],
+                "data": data,
+                "tags": tags,
+                "id": row[5],
+                "rank": row[6],
+            })
+        return results
+    finally:
+        conn.close()
+
+
 def list_conflicts(vault: Path) -> Dict[str, Any]:
     """List all contested beliefs in the vault."""
     state = compute_vault_state(vault)
@@ -1168,6 +1330,18 @@ def index_vault(vault: Path) -> dict:
             inserted += 1
         except sqlite3.IntegrityError:
             pass
+    # Rebuild FTS5 index
+    try:
+        conn.executescript(_FTS5_SCHEMA)
+        # Repopulate FTS from all events
+        conn.execute("DELETE FROM events_fts")
+        conn.execute(
+            "INSERT INTO events_fts(rowid, event_id, type, payload, tags) "
+            "SELECT seq, event_id, type, payload, tags FROM events"
+        )
+    except sqlite3.OperationalError as e:
+        print(f"WARN: FTS5 rebuild skipped: {e}", file=sys.stderr)
+
     conn.commit()
     conn.close()
     return {"count": inserted, "skipped": skipped}
@@ -1192,6 +1366,7 @@ def main():
     p_append.add_argument("--type", required=True, choices=VALID_TYPES, help="Event type")
     p_append.add_argument("--data", required=True, help="JSON object for event data")
     p_append.add_argument("--tags", nargs="*", help="Optional tags")
+    p_append.add_argument("--strict", action="store_true", help="Reject unknown tags (enforce taxonomy)")
     p_append.add_argument("--provara", action="store_true", help="Also emit Provara-native event")
 
     # verify
@@ -1238,6 +1413,14 @@ def main():
     p_query.add_argument("--tags", help="Filter by tag substring")
     p_query.add_argument("--limit", type=int, help="Max events to return")
 
+    # search (FTS5)
+    p_search = sub.add_parser("search", help="Full-text search across vault content")
+    p_search.add_argument("query", help="Search query (supports FTS5 syntax: AND, OR, NOT, phrases)")
+    p_search.add_argument("--limit", type=int, default=20, help="Max results (default: 20)")
+
+    # tags
+    sub.add_parser("tags", help="List valid tags from the controlled vocabulary")
+
     args = parser.parse_args()
     vault = Path(args.vault).resolve()
 
@@ -1250,6 +1433,13 @@ def main():
         except json.JSONDecodeError as e:
             print(f"ERROR: Invalid JSON: {e}", file=sys.stderr)
             sys.exit(1)
+        # Tag validation
+        if args.tags:
+            tag_warnings = validate_tags(args.tags, strict=args.strict)
+            for w in tag_warnings:
+                print(w, file=sys.stderr)
+            if args.strict and any(w.startswith("ERROR:") for w in tag_warnings):
+                sys.exit(1)
         event = append_event(vault, args.type, data, args.tags, emit_provara=args.provara)
         print(f"Appended seq={event['seq']} type={event['type']} hash={event['hash'][:16]}...")
 
@@ -1318,6 +1508,33 @@ def main():
                 data_preview = data_preview[:77] + "..."
             print(f"[{seq:>4}] {ts}  {etype:<12}  {data_preview}")
         print(f"\n{len(results)} events found.")
+
+    elif args.command == "search":
+        results = search_vault(vault, args.query, limit=args.limit)
+        if not results:
+            print("No results found.")
+        else:
+            for e in results:
+                ts = (e.get("timestamp", "?") or "?")[:19]
+                etype = e.get("type", "?")
+                seq = e.get("seq", "?")
+                data = e.get("data", {})
+                # Show summary from data
+                summary = _summarize_data(data) if isinstance(data, dict) else str(data)
+                if len(summary) > 80:
+                    summary = summary[:77] + "..."
+                tags_str = ""
+                if e.get("tags"):
+                    tags_str = f"  [{', '.join(e['tags'])}]"
+                print(f"[{seq:>4}] {ts}  {etype:<12}  {summary}{tags_str}")
+            print(f"\n{len(results)} results found.")
+
+    elif args.command == "tags":
+        print("Valid tags (controlled vocabulary):")
+        for tag in sorted(VALID_TAGS):
+            print(f"  - {tag}")
+        print(f"\nTotal: {len(VALID_TAGS)} tags")
+        print("Use --strict on append to enforce this vocabulary.")
 
     else:
         parser.print_help()
